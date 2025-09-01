@@ -57,6 +57,23 @@
   
   /* Header */
   --ldc-header-height: 48px;
+  
+  /* Colori terrain migliorati per mappa più vivace */
+  --terrain-grass-base: #32cd32;
+  --terrain-grass-detail: #228b22;
+  --terrain-grass-flower: #ffff99;
+  --terrain-forest-base: #1a5d1a;
+  --terrain-forest-undergrowth: #0d4a0d;
+  --terrain-forest-tree: #228b22;
+  --terrain-mountain-base: #708090;
+  --terrain-mountain-rock: #556b6b;
+  --terrain-mountain-snow: #f0f8ff;
+  --terrain-water-surface: #4682b4;
+  --terrain-water-deep: #1e3a8a;
+  --terrain-water-shimmer: #87ceeb;
+  --terrain-road-main: #8b6914;
+  --terrain-road-border: #654321;
+  --terrain-road-foundation: #4a3c1a;
 }
 
 /* Dark theme overrides */
