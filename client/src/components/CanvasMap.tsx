@@ -3,11 +3,9 @@ import { useLocation } from 'wouter';
 import { useGameStore } from '@/hooks/use-game-store';
 import { MapNode } from '@/types/game';
 
-// Import custom sprite assets provided by user
-import treeSpriteUrl from '@assets/image_1756761540584.png';
-import mountainSpriteUrl from '@assets/image_1756761545372.png';
-import grassSpriteUrl from '@assets/image_1756761550096.png';
-import roadSpriteUrl from '@assets/image_1756761554169.png';
+// Import atlas completo e configurazione tiles
+import atlasUrl from '@assets/d9leui9-2433ac69-5fa3-4926-9e19-a8a65212f1ac_1756763887632.png';
+import tilesConfig from '../data/tiles.json';
 
 /**
  * CanvasMap Component - Sistema di mappa retro 8-bit basato su Canvas HTML5
@@ -47,19 +45,9 @@ const CanvasMap: React.FC = () => {
   const [, setLocation] = useLocation();
   const { gameState, showToast } = useGameStore();
   
-  // Stato per gestire il caricamento degli sprite
-  const [spritesLoaded, setSpritesLoaded] = useState(false);
-  const [sprites, setSprites] = useState<{
-    trees: HTMLImageElement | null;
-    mountains: HTMLImageElement | null;
-    grass: HTMLImageElement | null;
-    roads: HTMLImageElement | null;
-  }>({
-    trees: null,
-    mountains: null,
-    grass: null,
-    roads: null
-  });
+  // Stato per l'atlas completo
+  const [atlasLoaded, setAtlasLoaded] = useState(false);
+  const [atlasImage, setAtlasImage] = useState<HTMLImageElement | null>(null);
 
   /** Dimensione di ogni tile in pixel - ridotta per forme più smussate */
   const TILE_SIZE = 16;
@@ -70,32 +58,21 @@ const CanvasMap: React.FC = () => {
   /** Altezza griglia mappa (numero di tile verticali) - bilanciata per dettaglio e visibilità */
   const MAP_HEIGHT = 36;
 
-  // Carica gli sprite al mount del componente
+  // Carica l'atlas al mount del componente
   useEffect(() => {
-    const loadSprites = async () => {
+    const loadAtlas = async () => {
       try {
-        const [treesImg, mountainsImg, grassImg, roadsImg] = await Promise.all([
-          loadImage(treeSpriteUrl),
-          loadImage(mountainSpriteUrl),
-          loadImage(grassSpriteUrl),
-          loadImage(roadSpriteUrl)
-        ]);
-        
-        setSprites({
-          trees: treesImg,
-          mountains: mountainsImg,
-          grass: grassImg,
-          roads: roadsImg
-        });
-        setSpritesLoaded(true);
+        const atlas = await loadImage(atlasUrl);
+        setAtlasImage(atlas);
+        setAtlasLoaded(true);
       } catch (error) {
-        console.error('Errore nel caricamento degli sprite:', error);
+        console.error('Errore nel caricamento dell\'atlas:', error);
         // Fallback al sistema di disegno programmatico
-        setSpritesLoaded(false);
+        setAtlasLoaded(false);
       }
     };
     
-    loadSprites();
+    loadAtlas();
   }, []);
 
   // Helper function per caricare immagini
@@ -275,76 +252,72 @@ const CanvasMap: React.FC = () => {
    * @param size Dimensione del tile in pixel
    */
   const drawTileResponsive = (ctx: CanvasRenderingContext2D, tile: MapTile, x: number, y: number, size: number) => {
-    // Se gli sprite sono caricati, usali
-    if (spritesLoaded && sprites.trees && sprites.mountains && sprites.grass && sprites.roads) {
-      drawTileFromSprite(ctx, tile, x, y, size);
+    // Se l'atlas è caricato, usalo
+    if (atlasLoaded && atlasImage) {
+      drawTileFromAtlas(ctx, tile, x, y, size);
       return;
     }
     
-    // Fallback al disegno programmatico se gli sprite non sono caricati
+    // Fallback al disegno programmatico se l'atlas non è caricato
     drawTileProgrammatic(ctx, tile, x, y, size);
   };
 
   /**
    * Disegna tile usando i nuovi sprite personalizzati
    */
-  const drawTileFromSprite = (ctx: CanvasRenderingContext2D, tile: MapTile, x: number, y: number, size: number) => {
-    let sourceImage: HTMLImageElement;
-    let spriteX = 0, spriteY = 0, spriteWidth = 64, spriteHeight = 64;
-
+  const drawTileFromAtlas = (ctx: CanvasRenderingContext2D, tile: MapTile, x: number, y: number, size: number) => {
+    if (!atlasImage) return;
+    
+    // Seleziona tile appropriati dall'atlas basato sul tipo di terreno
+    let tileOptions: string[] = [];
+    
     switch (tile.type) {
       case 'grass':
-        sourceImage = sprites.grass!;
-        // Usa le 7 varianti di ciuffi d'erba (disposte in 2 righe)
-        const grassVariant = (tile.x + tile.y * 3) % 7;
-        if (grassVariant < 4) {
-          // Prima riga - 4 sprite
-          spriteX = grassVariant * 64;
-          spriteY = 0;
-        } else {
-          // Seconda riga - 3 sprite
-          spriteX = (grassVariant - 4) * 64;
-          spriteY = 64;
-        }
+        tileOptions = tilesConfig.terrain_mapping.grass;
         break;
-        
       case 'forest':
-        sourceImage = sprites.trees!;
-        // Usa le 10 varianti di alberi (disposte in 2 righe da 5)
-        const treeVariant = (tile.x * 3 + tile.y * 5) % 10;
-        spriteX = (treeVariant % 5) * 64;
-        spriteY = Math.floor(treeVariant / 5) * 64;
+        tileOptions = tilesConfig.terrain_mapping.forest;
         break;
-        
       case 'mountain':
-        sourceImage = sprites.mountains!;
-        // Usa le 4 varianti di montagne (2x2)
-        const mountainVariant = (tile.x + tile.y * 2) % 4;
-        spriteX = (mountainVariant % 2) * 128;
-        spriteY = Math.floor(mountainVariant / 2) * 128;
-        spriteWidth = 128;
-        spriteHeight = 128;
+        tileOptions = tilesConfig.terrain_mapping.mountain;
         break;
-        
       case 'lake':
-        // Per ora usa erba come fallback per l'acqua
-        sourceImage = sprites.grass!;
-        spriteX = 0;
-        spriteY = 0;
+        tileOptions = tilesConfig.terrain_mapping.lake;
         break;
-        
-      default:
-        // Default grass
-        sourceImage = sprites.grass!;
-        spriteX = 0;
-        spriteY = 0;
+      case 'road':
+        tileOptions = ['road_dirt_h', 'road_dirt_v', 'path_1'];
+        break;
     }
-
-    // Disegna lo sprite scalato alla dimensione del tile
+    
+    if (tileOptions.length === 0) {
+      drawTileProgrammatic(ctx, tile, x, y, size);
+      return;
+    }
+    
+    // Scegli una variante basata sulla posizione per consistenza
+    const tileIndex = (tile.x + tile.y * 3) % tileOptions.length;
+    const selectedTileId = tileOptions[tileIndex];
+    
+    // Trova il tile nell'atlas
+    let tileData = null;
+    for (const category of Object.values(tilesConfig.categories)) {
+      const foundTile = category.tiles.find(t => t.id === selectedTileId);
+      if (foundTile) {
+        tileData = foundTile;
+        break;
+      }
+    }
+    
+    if (!tileData) {
+      drawTileProgrammatic(ctx, tile, x, y, size);
+      return;
+    }
+    
+    // Disegna il tile dall'atlas
     ctx.drawImage(
-      sourceImage,
-      spriteX, spriteY, spriteWidth, spriteHeight, // Sorgente
-      x, y, size, size // Destinazione scalata
+      atlasImage,
+      tileData.x, tileData.y, tilesConfig.tileSize, tilesConfig.tileSize, // Source
+      x, y, size, size  // Destination
     );
   };
 
@@ -668,7 +641,7 @@ const CanvasMap: React.FC = () => {
     
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [gameState.challenges, spritesLoaded]); // Redraw when challenges change or sprites load
+  }, [gameState.challenges, atlasLoaded]); // Redraw when challenges change or atlas loads
 
   const getNodeClassName = (node: MapNode): string => {
     const baseClass = 'map-node';
