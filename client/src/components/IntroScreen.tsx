@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useGameStore } from '@/hooks/use-game-store';
+import ProfileModal from '@/components/ProfileModal';
 
 const IntroScreen: React.FC = () => {
   const { openModal } = useGameStore();
@@ -74,6 +75,9 @@ const IntroScreen: React.FC = () => {
           <div className="w-2 h-2 bg-pink-400 pixel-pop" style={{ animationDelay: '0.4s' }}></div>
         </div>
       </div>
+
+      {/* Profile modal for setup */}
+      <ProfileModal />
     </div>
   );
 };

@@ -5,8 +5,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Game from "@/pages/Game";
 import NotFound from "@/pages/not-found";
-import ProfileModal from "@/components/ProfileModal";
-import QRModal from "@/components/QRModal";
 
 function Router() {
   return (
@@ -23,9 +21,6 @@ function App() {
       <TooltipProvider>
         <Toaster />
         <Router />
-        {/* Global modals */}
-        <ProfileModal />
-        <QRModal />
       </TooltipProvider>
     </QueryClientProvider>
   );
