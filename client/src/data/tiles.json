@@ -1,0 +1,157 @@
+{
+  "tileSize": 16,
+  "atlasWidth": 880,
+  "atlasHeight": 800,
+  "tilesPerRow": 55,
+  "categories": {
+    "grass": {
+      "description": "Varianti di erba e terreno base",
+      "tiles": [
+        {"id": "grass_plain", "x": 0, "y": 0, "description": "Erba verde base"},
+        {"id": "grass_flowers_1", "x": 16, "y": 0, "description": "Erba con fiori piccoli"},
+        {"id": "grass_flowers_2", "x": 32, "y": 0, "description": "Erba con fiori colorati"},
+        {"id": "grass_dark", "x": 48, "y": 0, "description": "Erba verde scuro"},
+        {"id": "grass_light", "x": 64, "y": 0, "description": "Erba verde chiaro"},
+        {"id": "grass_autumn", "x": 80, "y": 0, "description": "Erba autunnale"},
+        {"id": "grass_winter", "x": 96, "y": 0, "description": "Erba invernale"},
+        {"id": "grass_flowers_3", "x": 112, "y": 0, "description": "Erba con fiori viola"}
+      ]
+    },
+    "trees": {
+      "description": "Alberi di diverse tipologie e stagioni",
+      "tiles": [
+        {"id": "tree_green_1", "x": 0, "y": 48, "description": "Albero verde standard"},
+        {"id": "tree_green_2", "x": 16, "y": 48, "description": "Albero verde variante"},
+        {"id": "tree_autumn_1", "x": 32, "y": 48, "description": "Albero autunnale arancione"},
+        {"id": "tree_autumn_2", "x": 48, "y": 48, "description": "Albero autunnale giallo"},
+        {"id": "tree_winter", "x": 64, "y": 48, "description": "Albero invernale con neve"},
+        {"id": "tree_spring", "x": 80, "y": 48, "description": "Albero primaverile"},
+        {"id": "tree_dark", "x": 96, "y": 48, "description": "Albero verde scuro"},
+        {"id": "tree_pine_1", "x": 112, "y": 48, "description": "Pino sempreverde"},
+        {"id": "tree_pine_2", "x": 128, "y": 48, "description": "Pino grande"},
+        {"id": "tree_palm", "x": 0, "y": 176, "description": "Palma tropicale"}
+      ]
+    },
+    "mountains": {
+      "description": "Montagne e formazioni rocciose",
+      "tiles": [
+        {"id": "mountain_brown_1", "x": 0, "y": 224, "description": "Montagna marrone base"},
+        {"id": "mountain_brown_2", "x": 16, "y": 224, "description": "Montagna marrone alta"},
+        {"id": "mountain_gray_1", "x": 32, "y": 224, "description": "Montagna grigia"},
+        {"id": "mountain_gray_2", "x": 48, "y": 224, "description": "Montagna grigia alta"},
+        {"id": "mountain_snow", "x": 64, "y": 224, "description": "Montagna innevata"},
+        {"id": "rock_small", "x": 80, "y": 224, "description": "Roccia piccola"},
+        {"id": "rock_medium", "x": 96, "y": 224, "description": "Roccia media"},
+        {"id": "cliff_1", "x": 112, "y": 224, "description": "Scogliera 1"},
+        {"id": "cliff_2", "x": 128, "y": 224, "description": "Scogliera 2"}
+      ]
+    },
+    "water": {
+      "description": "Elementi acquatici",
+      "tiles": [
+        {"id": "water_deep", "x": 0, "y": 688, "description": "Acqua profonda"},
+        {"id": "water_medium", "x": 16, "y": 688, "description": "Acqua media"},
+        {"id": "water_shallow", "x": 32, "y": 688, "description": "Acqua bassa"},
+        {"id": "water_wave", "x": 48, "y": 688, "description": "Acqua con onde"},
+        {"id": "water_foam", "x": 64, "y": 688, "description": "Acqua con schiuma"},
+        {"id": "water_ripple", "x": 80, "y": 688, "description": "Acqua con increspature"}
+      ]
+    },
+    "roads": {
+      "description": "Strade e percorsi",
+      "tiles": [
+        {"id": "road_dirt_h", "x": 0, "y": 592, "description": "Strada sterrata orizzontale"},
+        {"id": "road_dirt_v", "x": 16, "y": 592, "description": "Strada sterrata verticale"},
+        {"id": "road_stone_h", "x": 32, "y": 592, "description": "Strada di pietra orizzontale"},
+        {"id": "road_stone_v", "x": 48, "y": 592, "description": "Strada di pietra verticale"},
+        {"id": "path_1", "x": 64, "y": 592, "description": "Sentiero 1"},
+        {"id": "path_2", "x": 80, "y": 592, "description": "Sentiero 2"}
+      ]
+    },
+    "structures": {
+      "description": "Edifici e strutture",
+      "tiles": [
+        {"id": "house_wall", "x": 560, "y": 192, "description": "Muro casa"},
+        {"id": "house_roof", "x": 576, "y": 192, "description": "Tetto casa"},
+        {"id": "door_wood", "x": 592, "y": 192, "description": "Porta di legno"},
+        {"id": "window_1", "x": 608, "y": 192, "description": "Finestra 1"},
+        {"id": "fence_wood", "x": 624, "y": 192, "description": "Staccionata di legno"},
+        {"id": "bridge_wood", "x": 640, "y": 192, "description": "Ponte di legno"}
+      ]
+    },
+    "decorations": {
+      "description": "Elementi decorativi",
+      "tiles": [
+        {"id": "flower_red", "x": 0, "y": 544, "description": "Fiore rosso"},
+        {"id": "flower_blue", "x": 16, "y": 544, "description": "Fiore blu"},
+        {"id": "flower_yellow", "x": 32, "y": 544, "description": "Fiore giallo"},
+        {"id": "mushroom_1", "x": 48, "y": 544, "description": "Fungo piccolo"},
+        {"id": "mushroom_2", "x": 64, "y": 544, "description": "Fungo grande"},
+        {"id": "crystal_1", "x": 80, "y": 544, "description": "Cristallo 1"},
+        {"id": "crystal_2", "x": 96, "y": 544, "description": "Cristallo 2"},
+        {"id": "gem_red", "x": 112, "y": 544, "description": "Gemma rossa"},
+        {"id": "gem_blue", "x": 128, "y": 544, "description": "Gemma blu"},
+        {"id": "gem_green", "x": 144, "y": 544, "description": "Gemma verde"}
+      ]
+    },
+    "special": {
+      "description": "Elementi speciali per il gioco",
+      "tiles": [
+        {"id": "checkpoint", "x": 160, "y": 544, "description": "Punto di controllo"},
+        {"id": "portal_1", "x": 176, "y": 544, "description": "Portale 1"},
+        {"id": "portal_2", "x": 192, "y": 544, "description": "Portale 2"},
+        {"id": "treasure_chest", "x": 208, "y": 544, "description": "Forziere del tesoro"},
+        {"id": "key_gold", "x": 224, "y": 544, "description": "Chiave d'oro"},
+        {"id": "potion_red", "x": 240, "y": 544, "description": "Pozione rossa"},
+        {"id": "potion_blue", "x": 256, "y": 544, "description": "Pozione blu"},
+        {"id": "scroll", "x": 272, "y": 544, "description": "Pergamena"}
+      ]
+    }
+  },
+  "terrain_mapping": {
+    "grass": ["grass_plain", "grass_flowers_1", "grass_flowers_2", "grass_dark", "grass_light"],
+    "forest": ["tree_green_1", "tree_green_2", "tree_autumn_1", "tree_pine_1", "tree_dark"],
+    "mountain": ["mountain_brown_1", "mountain_brown_2", "mountain_gray_1", "rock_small", "cliff_1"],
+    "lake": ["water_deep", "water_medium", "water_shallow", "water_wave"]
+  },
+  "biome_variants": {
+    "spring": {
+      "grass": ["grass_plain", "grass_flowers_1", "grass_flowers_2"],
+      "trees": ["tree_green_1", "tree_spring", "tree_green_2"]
+    },
+    "summer": {
+      "grass": ["grass_plain", "grass_light", "grass_flowers_3"],
+      "trees": ["tree_green_1", "tree_green_2", "tree_dark"]
+    },
+    "autumn": {
+      "grass": ["grass_autumn", "grass_dark"],
+      "trees": ["tree_autumn_1", "tree_autumn_2"]
+    },
+    "winter": {
+      "grass": ["grass_winter"],
+      "trees": ["tree_winter", "tree_pine_1", "tree_pine_2"]
+    }
+  },
+  "challenge_locations": {
+    "networking_forest": {
+      "primary_tiles": ["tree_green_1", "tree_green_2", "tree_pine_1"],
+      "decorative": ["flower_red", "flower_blue", "mushroom_1"],
+      "special": ["checkpoint", "gem_green"]
+    },
+    "retro_puzzle": {
+      "primary_tiles": ["mountain_brown_1", "mountain_gray_1", "rock_small"],
+      "decorative": ["crystal_1", "crystal_2"],
+      "special": ["portal_1", "gem_blue"]
+    },
+    "debug_dungeon": {
+      "primary_tiles": ["mountain_gray_1", "cliff_1", "rock_medium"],
+      "decorative": ["mushroom_2"],
+      "special": ["treasure_chest", "gem_red"]
+    },
+    "social_arena": {
+      "primary_tiles": ["water_deep", "water_medium", "water_shallow"],
+      "decorative": ["flower_yellow", "crystal_2"],
+      "special": ["portal_2", "gem_blue"]
+    }
+  }
+}
