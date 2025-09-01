@@ -133,6 +133,33 @@
     color: var(--ldc-on-background) !important;
   }
 
+  /* Fix NES input text visibility */
+  .nes-input {
+    background-color: white !important;
+    color: black !important;
+    font-family: var(--ldc-font-body) !important;
+    font-size: 14px !important;
+    padding: 12px !important;
+  }
+
+  .nes-input::placeholder {
+    color: #666 !important;
+    opacity: 1 !important;
+  }
+
+  .nes-input:focus {
+    background-color: white !important;
+    color: black !important;
+    outline: none !important;
+    box-shadow: inset 0 0 0 2px var(--ldc-primary) !important;
+  }
+
+  .nes-input.is-error {
+    background-color: #fff5f5 !important;
+    border-color: var(--ldc-error) !important;
+    color: black !important;
+  }
+
   /* Header styling */
   .ldc-header {
     height: var(--ldc-header-height);
