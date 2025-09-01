@@ -172,10 +172,7 @@
 
   /* Map styling */
   .fantasy-map {
-    background: linear-gradient(135deg, 
-      hsl(120, 40%, 85%) 0%, 
-      hsl(60, 30%, 90%) 50%, 
-      hsl(200, 40%, 85%) 100%);
+    background: #87ceeb; /* Sky blue background */
     min-height: calc(100vh - var(--ldc-header-height));
     position: relative;
     overflow: hidden;
@@ -370,7 +367,7 @@
       radial-gradient(circle at 60% 80%, #22c55e 1px, transparent 1px),
       linear-gradient(0deg, #16a34a 0%, #22c55e 50%, #4ade80 100%);
     background-size: 16px 16px, 12px 12px, 100% 100%;
-    opacity: 0.6;
+    opacity: 1;
   }
 
   /* Forest tiles */
@@ -381,7 +378,7 @@
       radial-gradient(circle at 50% 50%, #22c55e 1px, transparent 1px),
       linear-gradient(45deg, #052e16 0%, #166534 50%, #15803d 100%);
     background-size: 20px 20px, 16px 16px, 8px 8px, 100% 100%;
-    opacity: 0.8;
+    opacity: 1;
   }
 
   /* Mountain tiles */
@@ -394,7 +391,7 @@
       linear-gradient(0deg, #9ca3af 0%, #6b7280 50%, #374151 100%);
     background-size: 16px 16px, 16px 16px, 16px 16px, 16px 16px, 100% 100%;
     background-position: 0 0, 0 8px, 8px -8px, -8px 0px, 0 0;
-    opacity: 0.9;
+    opacity: 1;
   }
 
   /* Lake tiles */
@@ -404,7 +401,7 @@
       radial-gradient(circle at 75% 75%, #1d4ed8 1px, transparent 1px),
       linear-gradient(45deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%);
     background-size: 24px 24px, 16px 16px, 100% 100%;
-    opacity: 0.7;
+    opacity: 1;
     animation: water-shimmer 4s ease-in-out infinite;
   }
 

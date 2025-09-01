@@ -25,24 +25,28 @@ const FantasyMap: React.FC = () => {
   // Generate procedural terrain tiles based on map dimensions
   const generateTerrainTiles = (): MapTile[] => {
     const tiles: MapTile[] = [];
-    const mapWidth = 20; // Grid width
-    const mapHeight = 15; // Grid height
+    const mapWidth = 24; // Grid width
+    const mapHeight = 18; // Grid height
     
     for (let x = 0; x < mapWidth; x++) {
       for (let y = 0; y < mapHeight; y++) {
         let tileType: TerrainType = 'grass'; // Default
         
-        // Forest areas (top-left and scattered patches)
-        if ((x < 6 && y < 4) || (x > 15 && y > 10) || (Math.random() > 0.85 && x > 2 && x < 18)) {
+        // Forest areas (top-left quadrant and bottom-left)
+        if ((x < 8 && y < 6) || (x < 6 && y > 12)) {
           tileType = 'forest';
         }
-        // Mountain range (top area)
-        else if (y < 3 && x > 8 && x < 16) {
+        // Mountain range (top-center and top-right)
+        else if (y < 4 && x > 10 && x < 20) {
           tileType = 'mountain';
         }
         // Lake (bottom-right corner)
-        else if (x > 14 && y > 11) {
+        else if (x > 18 && y > 13) {
           tileType = 'lake';
+        }
+        // Add some scattered forest patches deterministically
+        else if ((x + y) % 7 === 0 && x > 5 && x < 18 && y > 8) {
+          tileType = 'forest';
         }
         
         tiles.push({ x, y, type: tileType });
@@ -62,10 +66,10 @@ const FantasyMap: React.FC = () => {
       const next = challenges[i + 1];
       
       // Convert percentage positions to grid coordinates
-      const fromX = Math.round((parseFloat(current.position.left.replace('%', '')) / 100) * 20);
-      const fromY = Math.round((parseFloat(current.position.top.replace('%', '')) / 100) * 15);
-      const toX = Math.round((parseFloat(next.position.left.replace('%', '')) / 100) * 20);
-      const toY = Math.round((parseFloat(next.position.top.replace('%', '')) / 100) * 15);
+      const fromX = Math.round((parseFloat(current.position.left.replace('%', '')) / 100) * 24);
+      const fromY = Math.round((parseFloat(current.position.top.replace('%', '')) / 100) * 18);
+      const toX = Math.round((parseFloat(next.position.left.replace('%', '')) / 100) * 24);
+      const toY = Math.round((parseFloat(next.position.top.replace('%', '')) / 100) * 18);
       
       paths.push({ fromX, fromY, toX, toY });
     }
@@ -156,10 +160,10 @@ const FantasyMap: React.FC = () => {
             key={`${tile.x}-${tile.y}`}
             className={`terrain-tile terrain-${tile.type}`}
             style={{
-              left: `${(tile.x / 20) * 100}%`,
-              top: `${(tile.y / 15) * 100}%`,
-              width: `${100 / 20}%`,
-              height: `${100 / 15}%`,
+              left: `${(tile.x / 24) * 100}%`,
+              top: `${(tile.y / 18) * 100}%`,
+              width: `${100 / 24}%`,
+              height: `${100 / 18}%`,
             }}
             data-testid={`tile-${tile.type}-${index}`}
           />
@@ -169,10 +173,10 @@ const FantasyMap: React.FC = () => {
       {/* Road Paths connecting challenges */}
       <svg className="absolute inset-0 w-full h-full z-[5]" data-testid="road-paths">
         {roadPaths.map((path, index) => {
-          const x1 = (path.fromX / 20) * 100;
-          const y1 = (path.fromY / 15) * 100;
-          const x2 = (path.toX / 20) * 100;
-          const y2 = (path.toY / 15) * 100;
+          const x1 = (path.fromX / 24) * 100;
+          const y1 = (path.fromY / 18) * 100;
+          const x2 = (path.toX / 24) * 100;
+          const y2 = (path.toY / 18) * 100;
           
           return (
             <g key={index}>
