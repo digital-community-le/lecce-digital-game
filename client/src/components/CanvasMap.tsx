@@ -139,125 +139,88 @@ const CanvasMap: React.FC = () => {
 
     switch (tile.type) {
       case 'grass':
-        // Base grass texture con sfumature multiple
-        ctx.fillStyle = '#32cd32';
+        // Base grass verde brillante come nel riferimento
+        ctx.fillStyle = '#7ed321';
         ctx.fillRect(x, y, size, size);
         
-        // Layer di dettagli per grass più realistico
-        ctx.fillStyle = '#228b22';
-        const grassBlade = Math.max(1, Math.floor(size / 8));
-        for (let i = 0; i < 12; i++) {
-          const bladeX = x + ((tile.x * 7 + tile.y * 3 + i * 5) % (size - grassBlade));
-          const bladeY = y + ((tile.y * 11 + tile.x * 13 + i * 3) % (size - grassBlade));
-          ctx.fillRect(bladeX, bladeY, grassBlade, grassBlade * 2);
+        // Pattern pixel semplice e pulito
+        ctx.fillStyle = '#6bb31d';
+        const dotSpacing = Math.max(4, Math.floor(size / 4));
+        for (let i = 0; i < 4; i++) {
+          const dotX = x + ((tile.x * 3 + i * 7) % (size - 2));
+          const dotY = y + ((tile.y * 5 + i * 3) % (size - 2));
+          if ((dotX + dotY) % 6 === 0) {
+            const dotSize = Math.max(1, Math.floor(size / 16));
+            ctx.fillRect(dotX, dotY, dotSize, dotSize);
+          }
         }
         
-        // Piccoli fiori sparsi
-        ctx.fillStyle = '#ffff99';
-        if ((tile.x + tile.y) % 8 === 0) {
-          const flowerX = x + size / 2;
-          const flowerY = y + size / 2;
-          const flowerSize = Math.max(1, Math.floor(size / 12));
-          ctx.fillRect(flowerX, flowerY, flowerSize, flowerSize);
-        }
-        
-        // Texture aggiuntiva con puntini
-        ctx.fillStyle = '#2e8b57';
-        for (let i = 0; i < 6; i++) {
-          const dotX = x + ((tile.x * 17 + i * 7) % size);
-          const dotY = y + ((tile.y * 19 + i * 11) % size);
-          const dotSize = Math.max(1, Math.floor(size / 16));
-          ctx.fillRect(dotX, dotY, dotSize, dotSize);
+        // Variazione tonale per profondità
+        ctx.fillStyle = '#8fef47';
+        if ((tile.x + tile.y) % 5 === 0) {
+          const highlightX = x + ((tile.x * 11) % (size - 3));
+          const highlightY = y + ((tile.y * 13) % (size - 3));
+          const highlightSize = Math.max(2, Math.floor(size / 8));
+          ctx.fillRect(highlightX, highlightY, highlightSize, highlightSize);
         }
         break;
 
       case 'forest':
-        // Base foresta con tonalità più ricche
-        ctx.fillStyle = '#1a5d1a';
+        // Base grass verde come sfondo
+        ctx.fillStyle = '#7ed321';
         ctx.fillRect(x, y, size, size);
         
-        // Sottobosco scuro
-        ctx.fillStyle = '#0d4a0d';
-        for (let i = 0; i < 8; i++) {
-          const bushX = x + ((tile.x * 13 + i * 9) % (size - 4));
-          const bushY = y + ((tile.y * 17 + i * 7) % (size - 4));
-          const bushSize = Math.max(2, Math.floor(size / 6));
-          ctx.fillRect(bushX, bushY, bushSize, bushSize);
+        // Chioma dell'albero - circolare stilizzata
+        ctx.fillStyle = '#2d8a2f';
+        const treeSize = Math.max(8, Math.floor(size * 0.8));
+        const treeCenterX = x + size / 2;
+        const treeCenterY = y + size / 2;
+        
+        // Disegna chioma come quadrato arrotondato
+        ctx.fillRect(treeCenterX - treeSize/2, treeCenterY - treeSize/2, treeSize, treeSize);
+        
+        // Tronco marrone semplice
+        ctx.fillStyle = '#8b4513';
+        const trunkWidth = Math.max(2, Math.floor(treeSize / 4));
+        const trunkHeight = Math.max(3, Math.floor(treeSize / 3));
+        ctx.fillRect(treeCenterX - trunkWidth/2, treeCenterY + treeSize/2 - 2, trunkWidth, trunkHeight);
+        
+        // Dettagli chioma per profondità
+        ctx.fillStyle = '#1f5f21';
+        const detailSize = Math.max(2, Math.floor(treeSize / 6));
+        for (let i = 0; i < 3; i++) {
+          const detailX = treeCenterX - treeSize/4 + (i * detailSize * 2);
+          const detailY = treeCenterY - treeSize/4 + ((i % 2) * detailSize);
+          ctx.fillRect(detailX, detailY, detailSize, detailSize);
         }
         
-        // Alberi stilizzati più dettagliati
-        const treeCount = Math.max(2, Math.floor(size / 6));
-        for (let i = 0; i < treeCount; i++) {
-          const treeX = x + ((tile.x * 11 + i * 7) % (size - 6));
-          const treeY = y + ((tile.y * 13 + i * 5) % (size - 8));
-          const trunkWidth = Math.max(2, Math.floor(size / 10));
-          const trunkHeight = Math.max(3, Math.floor(size / 5));
-          
-          // Tronco marrone
-          ctx.fillStyle = '#8b4513';
-          ctx.fillRect(treeX, treeY + trunkHeight + 2, trunkWidth, trunkHeight);
-          
-          // Chioma verde con più dettaglio
-          ctx.fillStyle = '#228b22';
-          const crownSize = trunkWidth * 3;
-          ctx.fillRect(treeX - crownSize/2, treeY, crownSize, trunkHeight + 2);
-          
-          // Highlight sulla chioma
-          ctx.fillStyle = '#32cd32';
-          ctx.fillRect(treeX - crownSize/4, treeY + 1, crownSize/2, trunkHeight/2);
-        }
-        
-        // Muschio e vegetazione
-        ctx.fillStyle = '#2d5a2d';
-        for (let i = 0; i < 10; i++) {
-          const mossX = x + ((tile.x * 23 + i * 11) % size);
-          const mossY = y + ((tile.y * 29 + i * 13) % size);
-          const mossSize = Math.max(1, Math.floor(size / 20));
-          ctx.fillRect(mossX, mossY, mossSize, mossSize);
-        }
+        // Highlight chioma
+        ctx.fillStyle = '#45a049';
+        ctx.fillRect(treeCenterX - treeSize/4, treeCenterY - treeSize/3, treeSize/3, treeSize/4);
         break;
 
       case 'mountain':
-        // Base montana con gradiente di grigi
-        ctx.fillStyle = '#708090';
+        // Montagne grigie semplici come nel riferimento
+        ctx.fillStyle = '#808080';
         ctx.fillRect(x, y, size, size);
         
-        // Rocce grandi per dare struttura
-        ctx.fillStyle = '#556b6b';
-        const bigRockCount = Math.max(3, Math.floor(size / 8));
-        for (let i = 0; i < bigRockCount; i++) {
-          const rockX = x + ((tile.x * 13 + i * 9) % (size - 4));
-          const rockY = y + ((tile.y * 17 + i * 7) % (size - 4));
-          const rockSize = Math.max(3, Math.floor(size / 4));
-          ctx.fillRect(rockX, rockY, rockSize, rockSize);
-        }
-        
-        // Texture rocciosa dettagliata
-        ctx.fillStyle = '#2f4f4f';
-        const rockCount = Math.max(12, Math.floor(size * size / 16));
+        // Texture pietrosa semplice
+        ctx.fillStyle = '#696969';
+        const rockCount = Math.max(6, Math.floor(size / 4));
         for (let i = 0; i < rockCount; i++) {
-          const rockX = x + ((tile.x * 17 + tile.y * 11 + i * 3) % size);
-          const rockY = y + ((tile.y * 19 + tile.x * 7 + i * 5) % size);
+          const rockX = x + ((tile.x * 7 + i * 11) % (size - 2));
+          const rockY = y + ((tile.y * 11 + i * 7) % (size - 2));
           const rockSize = Math.max(1, Math.floor(size / 12));
           ctx.fillRect(rockX, rockY, rockSize, rockSize);
         }
         
-        // Highlight sulle rocce per effetto 3D
-        ctx.fillStyle = '#9acd32';
-        for (let i = 0; i < 4; i++) {
-          const highlightX = x + ((tile.x * 31 + i * 13) % (size - 2));
-          const highlightY = y + ((tile.y * 37 + i * 17) % (size - 2));
-          const highlightSize = Math.max(1, Math.floor(size / 20));
+        // Highlight semplice per definizione
+        ctx.fillStyle = '#a0a0a0';
+        if ((tile.x + tile.y) % 3 === 0) {
+          const highlightX = x + size / 3;
+          const highlightY = y + size / 4;
+          const highlightSize = Math.max(2, Math.floor(size / 8));
           ctx.fillRect(highlightX, highlightY, highlightSize, highlightSize);
-        }
-        
-        // Neve sui picchi (occasionale)
-        if ((tile.x + tile.y) % 7 === 0) {
-          ctx.fillStyle = '#f0f8ff';
-          const snowX = x + size / 4;
-          const snowY = y + size / 6;
-          const snowSize = Math.max(2, Math.floor(size / 6));
-          ctx.fillRect(snowX, snowY, snowSize, snowSize);
         }
         break;
 
@@ -306,48 +269,29 @@ const CanvasMap: React.FC = () => {
         break;
 
       case 'road':
-        // Strada sterrata dettagliata
-        ctx.fillStyle = '#8b6914';
+        // Sentiero beige/giallo come nel riferimento
+        ctx.fillStyle = '#f4d03f';
         ctx.fillRect(x, y, size, size);
         
-        // Texture strada con solchi
-        ctx.fillStyle = '#654321';
-        const roadLineCount = Math.max(2, Math.floor(size / 8));
-        for (let i = 0; i < roadLineCount; i++) {
-          const lineY = y + (i * size / roadLineCount);
-          const lineHeight = Math.max(1, Math.floor(size / 16));
-          ctx.fillRect(x, lineY, size, lineHeight);
-        }
+        // Bordo leggermente più scuro per definizione
+        ctx.fillStyle = '#e8c547';
+        const borderSize = Math.max(1, Math.floor(size / 16));
+        // Bordo superiore
+        ctx.fillRect(x, y, size, borderSize);
+        // Bordo inferiore  
+        ctx.fillRect(x, y + size - borderSize, size, borderSize);
+        // Bordi laterali
+        ctx.fillRect(x, y, borderSize, size);
+        ctx.fillRect(x + size - borderSize, y, borderSize, size);
         
-        // Solchi delle ruote
-        ctx.fillStyle = '#4a3c1a';
-        const rutWidth = Math.max(2, Math.floor(size / 6));
-        ctx.fillRect(x + size / 4, y, rutWidth, size);
-        ctx.fillRect(x + (3 * size / 4) - rutWidth, y, rutWidth, size);
-        
-        // Sassi e detriti
-        ctx.fillStyle = '#696969';
-        const stoneCount = Math.max(4, Math.floor(size / 4));
-        for (let i = 0; i < stoneCount; i++) {
-          const stoneX = x + ((tile.x * 31 + i * 13) % (size - 2));
-          const stoneY = y + ((tile.y * 37 + i * 11) % (size - 2));
-          const stoneSize = Math.max(1, Math.floor(size / 16));
-          ctx.fillRect(stoneX, stoneY, stoneSize, stoneSize);
-        }
-        
-        // Bordi erbosi
-        ctx.fillStyle = '#228b22';
-        const grassBorderSize = Math.max(1, Math.floor(size / 12));
-        // Bordo sinistro
-        for (let i = 0; i < size / 4; i++) {
-          if ((tile.x + tile.y + i) % 4 === 0) {
-            ctx.fillRect(x, y + i * 4, grassBorderSize, grassBorderSize);
-          }
-        }
-        // Bordo destro
-        for (let i = 0; i < size / 4; i++) {
-          if ((tile.x + tile.y + i) % 5 === 0) {
-            ctx.fillRect(x + size - grassBorderSize, y + i * 4, grassBorderSize, grassBorderSize);
+        // Texture semplice del sentiero
+        ctx.fillStyle = '#dab946';
+        for (let i = 0; i < 3; i++) {
+          const dotX = x + ((tile.x * 7 + i * 11) % (size - 2));
+          const dotY = y + ((tile.y * 5 + i * 13) % (size - 2));
+          const dotSize = Math.max(1, Math.floor(size / 24));
+          if ((dotX + dotY) % 8 === 0) {
+            ctx.fillRect(dotX, dotY, dotSize, dotSize);
           }
         }
         break;
@@ -377,109 +321,16 @@ const CanvasMap: React.FC = () => {
     // Seed deterministico per decorazioni consistenti
     const decorationSeed = (tile.x * 127 + tile.y * 311) % 100;
     
-    // Massi sparsi sui prati (5% probabilità)
-    if (tile.type === 'grass' && decorationSeed < 5) {
-      ctx.fillStyle = '#708090';
-      const boulderSize = Math.max(3, Math.floor(size / 4));
-      const boulderX = x + size / 3;
-      const boulderY = y + size / 3;
-      ctx.fillRect(boulderX, boulderY, boulderSize, boulderSize);
-      // Ombra del masso
-      ctx.fillStyle = '#556b6b';
-      ctx.fillRect(boulderX + 1, boulderY + boulderSize, boulderSize, Math.max(1, boulderSize / 3));
-    }
+    // Decorazioni molto ridotte per mantenere il look pulito come nel riferimento
+    // Solo piccoli dettagli occasionali per non appesantire la mappa
     
-    // Cespugli sui prati (8% probabilità)
-    if (tile.type === 'grass' && decorationSeed >= 20 && decorationSeed < 28) {
-      ctx.fillStyle = '#228b22';
-      const bushSize = Math.max(2, Math.floor(size / 5));
-      const bushX = x + ((tile.x * 17) % (size - bushSize));
-      const bushY = y + ((tile.y * 19) % (size - bushSize));
-      // Cespuglio circolare stilizzato
-      ctx.fillRect(bushX, bushY + bushSize/2, bushSize, bushSize/2);
-      ctx.fillRect(bushX + bushSize/4, bushY, bushSize/2, bushSize);
-      
-      // Bacche rosse occasionali
-      if (decorationSeed % 7 === 0) {
-        ctx.fillStyle = '#dc143c';
-        const berrySize = Math.max(1, Math.floor(size / 20));
-        ctx.fillRect(bushX + bushSize/2, bushY + bushSize/3, berrySize, berrySize);
-      }
-    }
-    
-    // Funghi nelle foreste (12% probabilità)
-    if (tile.type === 'forest' && decorationSeed >= 35 && decorationSeed < 47) {
-      const mushroomX = x + ((tile.x * 23) % (size - 4));
-      const mushroomY = y + ((tile.y * 29) % (size - 4));
-      const mushroomSize = Math.max(2, Math.floor(size / 8));
-      
-      // Gambo
-      ctx.fillStyle = '#f5deb3';
-      ctx.fillRect(mushroomX + mushroomSize/3, mushroomY + mushroomSize, mushroomSize/3, mushroomSize);
-      
-      // Cappello
-      ctx.fillStyle = decorationSeed % 3 === 0 ? '#dc143c' : '#8b4513'; // Rosso o marrone
-      ctx.fillRect(mushroomX, mushroomY, mushroomSize, mushroomSize/2);
-      
-      // Puntini bianchi sui funghi rossi
-      if (decorationSeed % 3 === 0) {
-        ctx.fillStyle = '#ffffff';
-        const spotSize = Math.max(1, Math.floor(size / 32));
-        ctx.fillRect(mushroomX + mushroomSize/4, mushroomY + mushroomSize/4, spotSize, spotSize);
-        ctx.fillRect(mushroomX + (3*mushroomSize)/4, mushroomY + mushroomSize/3, spotSize, spotSize);
-      }
-    }
-    
-    // Cristalli di ghiaccio sulle montagne (7% probabilità)
-    if (tile.type === 'mountain' && decorationSeed >= 50 && decorationSeed < 57) {
-      ctx.fillStyle = '#b0e0e6';
-      const crystalX = x + ((tile.x * 31) % (size - 3));
-      const crystalY = y + ((tile.y * 37) % (size - 3));
-      const crystalSize = Math.max(2, Math.floor(size / 6));
-      
-      // Cristallo a forma di diamante stilizzato
-      ctx.fillRect(crystalX + crystalSize/2, crystalY, crystalSize/2, crystalSize/2);
-      ctx.fillRect(crystalX, crystalY + crystalSize/2, crystalSize, crystalSize/2);
-      ctx.fillRect(crystalX + crystalSize/2, crystalY + crystalSize, crystalSize/2, crystalSize/2);
-      
-      // Riflesso cristallo
-      ctx.fillStyle = '#ffffff';
-      const gleamSize = Math.max(1, Math.floor(crystalSize / 4));
-      ctx.fillRect(crystalX + crystalSize/3, crystalY + crystalSize/3, gleamSize, gleamSize);
-    }
-    
-    // Ninfee sui laghi (10% probabilità)
-    if (tile.type === 'lake' && decorationSeed >= 65 && decorationSeed < 75) {
-      const lilyX = x + ((tile.x * 41) % (size - 4));
-      const lilyY = y + ((tile.y * 43) % (size - 4));
-      const lilySize = Math.max(3, Math.floor(size / 5));
-      
-      // Foglia di ninfea
-      ctx.fillStyle = '#228b22';
-      ctx.fillRect(lilyX, lilyY, lilySize, lilySize);
-      
-      // Taglio nella foglia per realismo
-      ctx.fillStyle = '#4682b4'; // Colore acqua
-      ctx.fillRect(lilyX + lilySize - 1, lilyY, 1, lilySize/2);
-      
-      // Fiore occasionale
-      if (decorationSeed % 5 === 0) {
-        ctx.fillStyle = '#ffb6c1';
-        const flowerSize = Math.max(1, Math.floor(lilySize / 3));
-        ctx.fillRect(lilyX + lilySize/2, lilyY + lilySize/2, flowerSize, flowerSize);
-      }
-    }
-    
-    // Uccelli nel cielo (3% probabilità, solo su tile vuoti)
-    if (decorationSeed >= 85 && decorationSeed < 88 && tile.type === 'grass') {
-      ctx.fillStyle = '#2f4f4f';
-      const birdX = x + ((tile.x * 47) % (size - 2));
-      const birdY = y + ((tile.y * 53) % (size/2)); // Solo nella parte alta del tile
-      const birdSize = Math.max(1, Math.floor(size / 20));
-      
-      // Uccello stilizzato (due piccoli tratti)
-      ctx.fillRect(birdX, birdY, birdSize * 2, birdSize);
-      ctx.fillRect(birdX + birdSize * 3, birdY, birdSize * 2, birdSize);
+    // Cespugli molto occasionali sui prati (solo 2% probabilità)
+    if (tile.type === 'grass' && decorationSeed < 2) {
+      ctx.fillStyle = '#6bb31d';
+      const bushSize = Math.max(2, Math.floor(size / 6));
+      const bushX = x + size / 2;
+      const bushY = y + size / 2;
+      ctx.fillRect(bushX, bushY, bushSize, bushSize);
     }
   };
 
@@ -505,17 +356,9 @@ const CanvasMap: React.FC = () => {
     const borderWidth = roadWidth + 6;
     const edgeWidth = borderWidth + 4;
 
-    // Draw road foundation (darkest - terra battuta)
-    ctx.strokeStyle = '#4a3c1a';
-    ctx.lineWidth = edgeWidth;
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.moveTo(startX, startY);
-    ctx.lineTo(endX, endY);
-    ctx.stroke();
-
-    // Draw road border (medium - bordo strada)
-    ctx.strokeStyle = '#654321';
+    // Sentiero semplice beige/giallo come nel riferimento
+    // Bordo più scuro per definizione
+    ctx.strokeStyle = '#e8c547';
     ctx.lineWidth = borderWidth;
     ctx.lineCap = 'round';
     ctx.beginPath();
@@ -523,42 +366,14 @@ const CanvasMap: React.FC = () => {
     ctx.lineTo(endX, endY);
     ctx.stroke();
 
-    // Draw main road path (lighter - sentiero principale)
-    ctx.strokeStyle = '#8b6914';
+    // Sentiero principale chiaro
+    ctx.strokeStyle = '#f4d03f';
     ctx.lineWidth = roadWidth;
     ctx.lineCap = 'round';
     ctx.beginPath();
     ctx.moveTo(startX, startY);
     ctx.lineTo(endX, endY);
     ctx.stroke();
-
-    // Draw central worn path (lightest - traccia centrale consumata)
-    ctx.strokeStyle = '#a0861a';
-    ctx.lineWidth = Math.max(4, roadWidth / 2);
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.moveTo(startX, startY);
-    ctx.lineTo(endX, endY);
-    ctx.stroke();
-
-    // Add road texture details
-    const roadLength = Math.sqrt((endX - startX) ** 2 + (endY - startY) ** 2);
-    const stepCount = Math.floor(roadLength / 20);
-    
-    for (let i = 0; i < stepCount; i++) {
-      const t = i / stepCount;
-      const currentX = startX + t * (endX - startX);
-      const currentY = startY + t * (endY - startY);
-      
-      // Small rocks and debris on road edges
-      ctx.fillStyle = '#654321';
-      if (Math.random() > 0.7) {
-        const offsetX = (Math.random() - 0.5) * roadWidth;
-        const offsetY = (Math.random() - 0.5) * roadWidth;
-        const debrisSize = Math.max(1, Math.floor(roadWidth / 8));
-        ctx.fillRect(currentX + offsetX, currentY + offsetY, debrisSize, debrisSize);
-      }
-    }
   };
 
   /**
