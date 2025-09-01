@@ -7,7 +7,6 @@ const ProfileModal: React.FC = () => {
   const isOpen = modals.profile?.isOpen || false;
   const modalData = modals.profile?.data;
   
-  console.log('ProfileModal render:', { isOpen, modals, profileModal: modals.profile });
 
   const [displayName, setDisplayName] = useState(gameState.currentUser.displayName || '');
   const [selectedAvatar, setSelectedAvatar] = useState(gameState.currentUser.avatar || AVATAR_PRESETS[0].url);

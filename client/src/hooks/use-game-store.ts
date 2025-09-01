@@ -259,15 +259,10 @@ export function useGameStore() {
   }, []);
 
   const openModal = useCallback((modalId: string, data?: any) => {
-    console.log('openModal called with:', modalId, data);
-    setModals(prev => {
-      const newModals = {
-        ...prev,
-        [modalId]: { id: modalId, isOpen: true, data },
-      };
-      console.log('Setting modals to:', newModals);
-      return newModals;
-    });
+    setModals(prev => ({
+      ...prev,
+      [modalId]: { id: modalId, isOpen: true, data },
+    }));
   }, []);
 
   const closeModal = useCallback((modalId: string) => {

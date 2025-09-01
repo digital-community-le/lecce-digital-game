@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useGameStore } from '@/hooks/use-game-store';
-import ProfileModal from '@/components/ProfileModal';
+import ProfileCreationForm from '@/components/ProfileCreationForm';
 
 const IntroScreen: React.FC = () => {
   const { openModal } = useGameStore();
   const [textRevealed, setTextRevealed] = useState(false);
   const [showButton, setShowButton] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   const storyText = "Un'antica forza dorme sotto le pietre della città. Solo chi saprà unire mente, coraggio e comunità potrà riaccendere il Sigillo. Accetta la chiamata e scrivi la tua leggenda.";
 
@@ -27,9 +28,7 @@ const IntroScreen: React.FC = () => {
 
   const handleStart = (e: React.MouseEvent) => {
     e.preventDefault();
-    console.log('Button clicked, opening modal');
-    openModal('profile');
-    console.log('Modal open call completed');
+    setShowProfileModal(true);
   };
 
   return (
@@ -77,7 +76,14 @@ const IntroScreen: React.FC = () => {
       </div>
 
       {/* Profile modal for setup */}
-      <ProfileModal />
+      {showProfileModal && (
+        <div className="modal-overlay" data-testid="modal-profile-intro">
+          <div className="modal-content nes-container with-title bg-card max-w-md w-full">
+            <p className="title bg-card">Crea il tuo profilo</p>
+            <ProfileCreationForm onComplete={() => setShowProfileModal(false)} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
