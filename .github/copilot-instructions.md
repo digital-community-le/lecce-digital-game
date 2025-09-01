@@ -13,3 +13,35 @@ You are an expert in HTML, TypeScript, CSS and scalable web application developm
 - Use CSS variables for consistent theming
 - Use Tailwind CSS for utility-first styling
 - Use Nes.css e Nes.icons for retro styling
+
+## Accessibility Best Practices
+
+- Ensure all interactive elements are keyboard accessible
+- Use semantic HTML elements
+- Provide alt text for images
+- Ensure sufficient color contrast
+
+## React Best Practices
+
+- Use functional components and hooks
+- Keep components small and focused
+- Use prop types or TypeScript for type checking
+- Manage state effectively with useState and useReducer
+- Optimize performance with React.memo and useCallback
+
+## Nes.css Best Practices
+
+- Use Nes.css classes when availables.
+- Example of dialog with Nes.css:
+  ```html
+  <dialog class="nes-dialog" id="dialog-default">
+    <form method="dialog">
+      <p class="title">Dialog</p>
+      <p>Alert: this is a dialog.</p>
+      <menu class="dialog-menu">
+        <button class="nes-btn">Cancel</button>
+        <button class="nes-btn is-primary">Confirm</button>
+      </menu>
+    </form>
+  </dialog>
+  ```
