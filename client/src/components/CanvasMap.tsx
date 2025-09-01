@@ -62,10 +62,10 @@ const CanvasMap: React.FC = () => {
   const TILE_SIZE = 16;
   /** Dimensione dei tile nei tileset sprite (16x16 pixel) */
   const SPRITE_TILE_SIZE = 16;
-  /** Larghezza griglia mappa (numero di tile orizzontali) - aumentata per maggiore dettaglio */
-  const MAP_WIDTH = 96;
-  /** Altezza griglia mappa (numero di tile verticali) - aumentata per maggiore dettaglio */
-  const MAP_HEIGHT = 72;
+  /** Larghezza griglia mappa (numero di tile orizzontali) - bilanciata per dettaglio e visibilità */
+  const MAP_WIDTH = 48;
+  /** Altezza griglia mappa (numero di tile verticali) - bilanciata per dettaglio e visibilità */
+  const MAP_HEIGHT = 36;
 
   // Carica i tileset al mount del componente
   useEffect(() => {
@@ -127,12 +127,12 @@ const CanvasMap: React.FC = () => {
       };
     });
     
-    // Funzione per verificare se un tile è in zona libera (nodi + strade) - scala raddoppiata
+    // Funzione per verificare se un tile è in zona libera (nodi + strade)
     const isInClearZone = (x: number, y: number): boolean => {
-      // Zone libere intorno ai nodi (raggio 10 tile per la nuova scala)
+      // Zone libere intorno ai nodi (raggio 5 tile per maggiore sicurezza)
       for (const node of nodePositions) {
         const distance = Math.sqrt((x - node.x) ** 2 + (y - node.y) ** 2);
-        if (distance <= 10) return true;
+        if (distance <= 5) return true;
       }
       
       // Zone libere per strade tra nodi consecutivi (corridoio più largo)
@@ -142,7 +142,7 @@ const CanvasMap: React.FC = () => {
         
         // Calcola se il tile è vicino alla linea tra due nodi
         const lineDistance = distanceToLine(x, y, start.x, start.y, end.x, end.y);
-        if (lineDistance <= 6) return true; // Corridoio di 6 tile di larghezza
+        if (lineDistance <= 3) return true; // Corridoio di 3 tile di larghezza
       }
       
       // Aggiungi anche connessione dall'ultimo nodo al primo per completare il circuito
@@ -150,7 +150,7 @@ const CanvasMap: React.FC = () => {
         const start = nodePositions[nodePositions.length - 1];
         const end = nodePositions[0];
         const lineDistance = distanceToLine(x, y, start.x, start.y, end.x, end.y);
-        if (lineDistance <= 6) return true;
+        if (lineDistance <= 3) return true;
       }
       
       return false;
@@ -197,24 +197,24 @@ const CanvasMap: React.FC = () => {
           tileType = 'grass';
         } else {
           // Distribuisci terreni secondo il nuovo stile del riferimento
-          // Mountain clusters (gruppi di montagne triangolari) - scala raddoppiata
-          if ((x < 24 && y < 20) || (x > 64 && x < 92 && y < 24) || (x < 20 && y > 50 && y < 70) || (x > 70 && y > 40 && y < 60)) {
+          // Mountain clusters (gruppi di montagne triangolari)
+          if ((x < 12 && y < 10) || (x > 32 && x < 46 && y < 12) || (x < 10 && y > 25 && y < 35) || (x > 35 && y > 20 && y < 30)) {
             tileType = 'mountain';
           }
-          // River system (fiume serpeggiante verticale) - scala raddoppiata
-          else if (x > 40 && x < 52 && ((y > 10 && y < 30) || (y > 40 && y < 70))) {
+          // River system (fiume serpeggiante verticale)
+          else if (x > 20 && x < 26 && ((y > 5 && y < 15) || (y > 20 && y < 35))) {
             tileType = 'lake';
           }
-          // Scattered individual trees (alberi sparsi come nel riferimento) - scala raddoppiata
-          else if ((x + y * 3) % 12 === 0 && x > 16 && x < 80 && y > 16 && y < 70) {
+          // Scattered individual trees (alberi sparsi come nel riferimento)
+          else if ((x + y * 3) % 12 === 0 && x > 8 && x < 40 && y > 8 && y < 35) {
             tileType = 'forest';
           }
-          // More tree clusters - scala raddoppiata
-          else if ((x * 2 + y) % 15 === 0 && x > 10 && x < 90 && y > 10 && y < 80) {
+          // More tree clusters
+          else if ((x * 2 + y) % 15 === 0 && x > 5 && x < 45 && y > 5 && y < 40) {
             tileType = 'forest';
           }
-          // Additional scattered trees - scala raddoppiata
-          else if ((x * y) % 28 === 0 && x > 20 && x < 70 && y > 20 && y < 60) {
+          // Additional scattered trees
+          else if ((x * y) % 28 === 0 && x > 10 && x < 35 && y > 10 && y < 30) {
             tileType = 'forest';
           }
           // Default: sempre grass
@@ -623,10 +623,10 @@ const CanvasMap: React.FC = () => {
     // Disable image smoothing for pixel-perfect rendering
     ctx.imageSmoothingEnabled = false;
 
-    // Calculate tile size to fill entire screen
+    // Calculate tile size to fill entire screen  
     const tileWidth = containerWidth / MAP_WIDTH;
     const tileHeight = containerHeight / MAP_HEIGHT;
-    const actualTileSize = Math.max(tileWidth, tileHeight); // Use max to fill screen completely
+    const actualTileSize = Math.max(tileWidth, tileHeight, 12); // Use max to fill screen completely, min 12px
 
     // Clear canvas
     ctx.clearRect(0, 0, containerWidth, containerHeight);
