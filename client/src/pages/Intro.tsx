@@ -1,16 +1,24 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'wouter';
 import { useGameStore } from '@/hooks/use-game-store';
 import ProfileCreationForm from '@/components/ProfileCreationForm';
 
-const IntroScreen: React.FC = () => {
-  const { openModal } = useGameStore();
+const IntroPage: React.FC = () => {
+  const [, setLocation] = useLocation();
+  const { gameState } = useGameStore();
   const [textRevealed, setTextRevealed] = useState(false);
   const [showButton, setShowButton] = useState(false);
-  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showProfileForm, setShowProfileForm] = useState(false);
 
   const storyText = "Un'antica forza dorme sotto le pietre della città. Solo chi saprà unire mente, coraggio e comunità potrà riaccendere il Sigillo. Accetta la chiamata e scrivi la tua leggenda.";
 
   useEffect(() => {
+    // Check if user already has a profile
+    if (gameState.currentUser.userId) {
+      setLocation('/game');
+      return;
+    }
+
     // Progressive text reveal with retro timing
     const timer1 = setTimeout(() => {
       setTextRevealed(true);
@@ -24,12 +32,29 @@ const IntroScreen: React.FC = () => {
       clearTimeout(timer1);
       clearTimeout(timer2);
     };
-  }, []);
+  }, [gameState.currentUser.userId, setLocation]);
 
   const handleStart = (e: React.MouseEvent) => {
     e.preventDefault();
-    setShowProfileModal(true);
+    setShowProfileForm(true);
   };
+
+  const handleProfileComplete = () => {
+    setLocation('/game');
+  };
+
+  if (showProfileForm) {
+    return (
+      <div className="intro-screen fixed inset-0 bg-gradient-to-b from-purple-900 to-black flex flex-col items-center justify-center text-white z-10">
+        <div className="w-full max-w-md mx-auto">
+          <div className="modal-content nes-container with-title bg-card">
+            <p className="title bg-card">Crea il tuo profilo</p>
+            <ProfileCreationForm onComplete={handleProfileComplete} />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="intro-screen fixed inset-0 bg-gradient-to-b from-purple-900 to-black flex flex-col items-center justify-center text-white z-10">
@@ -74,18 +99,8 @@ const IntroScreen: React.FC = () => {
           <div className="w-2 h-2 bg-pink-400 pixel-pop" style={{ animationDelay: '0.4s' }}></div>
         </div>
       </div>
-
-      {/* Profile modal for setup */}
-      {showProfileModal && (
-        <div className="modal-overlay" data-testid="modal-profile-intro">
-          <div className="modal-content nes-container with-title bg-card max-w-md w-full">
-            <p className="title bg-card">Crea il tuo profilo</p>
-            <ProfileCreationForm onComplete={() => setShowProfileModal(false)} />
-          </div>
-        </div>
-      )}
     </div>
   );
 };
 
-export default IntroScreen;
+export default IntroPage;

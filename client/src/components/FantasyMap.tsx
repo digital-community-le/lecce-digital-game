@@ -1,9 +1,11 @@
 import React from 'react';
+import { useLocation } from 'wouter';
 import { useGameStore } from '@/hooks/use-game-store';
 import { MapNode } from '@/types/game';
 
 const FantasyMap: React.FC = () => {
-  const { gameState, openChallenge } = useGameStore();
+  const [, setLocation] = useLocation();
+  const { gameState, showToast } = useGameStore();
 
   const getNodeClassName = (node: MapNode): string => {
     const baseClass = 'map-node';
@@ -52,6 +54,28 @@ const FantasyMap: React.FC = () => {
     return { top: '62%', left: '42%' }; // Default position
   };
 
+  const handleChallengeClick = (node: MapNode) => {
+    const challengeIndex = gameState.challenges.findIndex(c => c.id === node.id);
+    
+    // Enforce sequential progression
+    if (node.status === 'locked') {
+      showToast('Questa challenge non è ancora disponibile', 'warning');
+      return;
+    }
+    
+    // Check if previous challenges are completed (sequential requirement)
+    const previousChallengesCompleted = gameState.challenges.slice(0, challengeIndex).every(c => 
+      gameState.gameProgress.completedChallenges.includes(c.id)
+    );
+    
+    if (challengeIndex === 0 || previousChallengesCompleted) {
+      setLocation(`/challenge/${node.id}`);
+    } else {
+      const remainingChallenges = challengeIndex - gameState.gameProgress.completedChallenges.length;
+      showToast(`Devi completare ${remainingChallenges} sfida/e prima di questa`, 'warning');
+    }
+  };
+
   const avatarPosition = getCurrentAvatarPosition();
 
   return (
@@ -82,7 +106,7 @@ const FantasyMap: React.FC = () => {
         >
           <div 
             className={`${getNodeButtonClass(node)} text-center cursor-pointer h-full flex flex-col justify-center`}
-            onClick={() => openChallenge(node.id)}
+            onClick={() => handleChallengeClick(node)}
           >
             <p className="title" style={{ backgroundColor: 'inherit' }}>{node.title}</p>
             <div className="text-lg" data-testid={`emoji-${node.id}`}>{node.emoji}</div>
@@ -99,8 +123,12 @@ const FantasyMap: React.FC = () => {
         style={{ top: avatarPosition.top, left: avatarPosition.left }}
         data-testid="player-avatar"
       >
-        <div className="w-full h-full bg-card border-2 border-black rounded-full flex items-center justify-center text-lg">
-          {gameState.currentUser.avatar}
+        <div className="w-full h-full bg-white border-2 border-black rounded-full flex items-center justify-center overflow-hidden">
+          <img 
+            src={gameState.currentUser.avatar} 
+            alt="Player avatar"
+            className="w-full h-full object-cover pixelated"
+          />
         </div>
       </div>
 

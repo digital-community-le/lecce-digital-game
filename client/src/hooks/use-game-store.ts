@@ -90,10 +90,8 @@ export function useGameStore() {
       
       // Load game progress
       loadGameProgress(profile.userId);
-    } else if (userIdFromUrl) {
-      // Create new user with ID from URL
-      openModal('profile', { userId: userIdFromUrl });
     }
+    // If no profile exists, the IntroPage will handle profile creation
   }, []);
 
   const loadGameProgress = useCallback((userId: string) => {

@@ -1,17 +1,16 @@
 import React, { useEffect } from 'react';
+import { useLocation } from 'wouter';
 import { useGameStore } from '@/hooks/use-game-store';
 import Header from '@/components/Header';
 import FantasyMap from '@/components/FantasyMap';
 import FloatingActionButton from '@/components/FloatingActionButton';
-import ProfileModal from '@/components/ProfileModal';
 import QRModal from '@/components/QRModal';
-import ChallengeModal from '@/components/challenges/ChallengeModal';
 import ScannerView from '@/components/ScannerView';
 import ScanPreviewModal from '@/components/ScanPreviewModal';
 import CompletionModal from '@/components/CompletionModal';
-import IntroScreen from '@/components/IntroScreen';
 
-const Game: React.FC = () => {
+const GameMapPage: React.FC = () => {
+  const [, setLocation] = useLocation();
   const { gameState, toasts, removeToast } = useGameStore();
 
   useEffect(() => {
@@ -20,9 +19,15 @@ const Game: React.FC = () => {
     localStorage.setItem('ldc:theme', gameState.theme);
   }, [gameState.theme]);
 
-  // Show intro screen if no user profile exists
+  // Redirect to intro if no user profile
+  useEffect(() => {
+    if (!gameState.currentUser.userId) {
+      setLocation('/');
+    }
+  }, [gameState.currentUser.userId, setLocation]);
+
   if (!gameState.currentUser.userId) {
-    return <IntroScreen />;
+    return null; // Will redirect
   }
 
   return (
@@ -34,8 +39,7 @@ const Game: React.FC = () => {
       
       <FloatingActionButton />
       
-      {/* Modals */}
-      <ChallengeModal />
+      {/* Modals - Keep these for overlays */}
       <ScannerView />
       <ScanPreviewModal />
       <CompletionModal />
@@ -69,4 +73,4 @@ const Game: React.FC = () => {
   );
 };
 
-export default Game;
+export default GameMapPage;
