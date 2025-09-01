@@ -313,11 +313,25 @@ const CanvasMap: React.FC = () => {
       return;
     }
     
-    // Disegna il tile dall'atlas
+    // Disegna il tile dall'atlas usando le sue dimensioni corrette
+    const spriteWidth = tileData.width || tilesConfig.tileSize;
+    const spriteHeight = tileData.height || tilesConfig.tileSize;
+    
+    // Per sprite più alti (come alberi), allinea al fondo del tile
+    let destY = y;
+    let destHeight = size;
+    
+    if (spriteHeight > tilesConfig.tileSize) {
+      // Sprite alto: allinea alla base e scala proporzionalmente
+      const aspectRatio = spriteHeight / spriteWidth;
+      destHeight = size * aspectRatio;
+      destY = y + size - destHeight; // Allinea al fondo
+    }
+    
     ctx.drawImage(
       atlasImage,
-      tileData.x, tileData.y, tilesConfig.tileSize, tilesConfig.tileSize, // Source
-      x, y, size, size  // Destination
+      tileData.x, tileData.y, spriteWidth, spriteHeight, // Source con dimensioni corrette
+      x, destY, size, destHeight  // Destination con allineamento corretto
     );
   };
 
