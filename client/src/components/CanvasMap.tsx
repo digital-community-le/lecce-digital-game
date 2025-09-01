@@ -74,20 +74,28 @@ const CanvasMap: React.FC = () => {
     
     // Funzione per verificare se un tile è in zona libera (nodi + strade)
     const isInClearZone = (x: number, y: number): boolean => {
-      // Zone libere intorno ai nodi (raggio 4 tile)
+      // Zone libere intorno ai nodi (raggio 5 tile per maggiore sicurezza)
       for (const node of nodePositions) {
         const distance = Math.sqrt((x - node.x) ** 2 + (y - node.y) ** 2);
-        if (distance <= 4) return true;
+        if (distance <= 5) return true;
       }
       
-      // Zone libere per strade tra nodi consecutivi
+      // Zone libere per strade tra nodi consecutivi (corridoio più largo)
       for (let i = 0; i < nodePositions.length - 1; i++) {
         const start = nodePositions[i];
         const end = nodePositions[i + 1];
         
         // Calcola se il tile è vicino alla linea tra due nodi
         const lineDistance = distanceToLine(x, y, start.x, start.y, end.x, end.y);
-        if (lineDistance <= 2) return true; // Corridoio di 2 tile di larghezza
+        if (lineDistance <= 3) return true; // Corridoio di 3 tile di larghezza
+      }
+      
+      // Aggiungi anche connessione dall'ultimo nodo al primo per completare il circuito
+      if (nodePositions.length > 1) {
+        const start = nodePositions[nodePositions.length - 1];
+        const end = nodePositions[0];
+        const lineDistance = distanceToLine(x, y, start.x, start.y, end.x, end.y);
+        if (lineDistance <= 3) return true;
       }
       
       return false;
@@ -129,26 +137,30 @@ const CanvasMap: React.FC = () => {
       for (let y = 0; y < MAP_HEIGHT; y++) {
         let tileType: TerrainType = 'grass'; // Default
         
-        // Forza grass nelle zone libere
+        // PRIORITÀ ASSOLUTA: Forza grass nelle zone libere
         if (isInClearZone(x, y)) {
           tileType = 'grass';
         } else {
-          // Distribuisci altri terreni solo nelle aree rimanenti
-          // Forest areas (ridotte e posizionate meglio)
-          if ((x < 12 && y < 8) || (x < 8 && y > 28)) {
+          // Distribuisci altri terreni solo nelle aree sicuramente libere
+          // Forest areas (angoli lontani dai nodi)
+          if ((x < 8 && y < 6) || (x < 6 && y > 30)) {
             tileType = 'forest';
           }
-          // Mountain range (più concentrato)
-          else if (y < 6 && x > 32 && x < 44) {
+          // Mountain range (angolo in alto a destra, lontano dai nodi)
+          else if (y < 4 && x > 36 && x < 46) {
             tileType = 'mountain';
           }
-          // Lake (più piccolo)
-          else if (x > 40 && y > 30 && x < 47 && y < 35) {
+          // Lake (angolo in basso a destra, molto ridotto)
+          else if (x > 42 && y > 32 && x < 47 && y < 36) {
             tileType = 'lake';
           }
-          // Scattered forest patches (più sparsi)
-          else if ((x + y) % 18 === 0 && x > 8 && x < 40 && y > 12 && y < 32) {
+          // Scattered forest patches (molto ridotti e distanti)
+          else if ((x + y) % 24 === 0 && x > 6 && x < 36 && y > 8 && y < 30 && !isInClearZone(x, y)) {
             tileType = 'forest';
+          }
+          // Default: sempre grass per sicurezza
+          else {
+            tileType = 'grass';
           }
         }
         
