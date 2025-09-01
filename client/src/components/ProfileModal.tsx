@@ -4,10 +4,10 @@ import { AVATAR_PRESETS } from '@/lib/avatars';
 
 const ProfileModal: React.FC = () => {
   const { modals, closeModal, saveProfile, gameState } = useGameStore();
-  const isOpen = modals.profile?.isOpen;
+  const isOpen = modals.profile?.isOpen || false;
   const modalData = modals.profile?.data;
   
-  console.log('ProfileModal render:', { isOpen, hasModal: !!modals.profile });
+  console.log('ProfileModal render:', { isOpen, modals, profileModal: modals.profile });
 
   const [displayName, setDisplayName] = useState(gameState.currentUser.displayName || '');
   const [selectedAvatar, setSelectedAvatar] = useState(gameState.currentUser.avatar || AVATAR_PRESETS[0].url);
