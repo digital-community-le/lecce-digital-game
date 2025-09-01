@@ -120,11 +120,26 @@ export function useGameStore() {
     }
   }, []);
 
+  const showToast = useCallback((message: string, type: Toast['type'] = 'info', duration: number = 3000) => {
+    const toast: Toast = {
+      id: `toast_${Date.now()}`,
+      message,
+      type,
+      duration,
+    };
+
+    setToasts(prev => [...prev, toast]);
+
+    if (duration > 0) {
+      setTimeout(() => {
+        setToasts(prev => prev.filter(t => t.id !== toast.id));
+      }, duration);
+    }
+  }, []);
+
   const saveProfile = useCallback(async (displayName: string, avatar: string, userId?: string) => {
     const finalUserId = userId || `user_${Date.now()}`;
     const now = new Date().toISOString();
-    
-    console.log('saveProfile called with:', { displayName, avatar, finalUserId });
     
     const profile: UserProfile = {
       userId: finalUserId,
@@ -135,21 +150,17 @@ export function useGameStore() {
     };
 
     gameStorage.saveProfile(profile);
-    console.log('Profile saved to storage');
 
     // Update state immediately with basic info
-    setGameState(prev => {
-      console.log('Updating gameState with userId:', finalUserId);
-      return {
-        ...prev,
-        currentUser: {
-          userId: finalUserId,
-          displayName,
-          avatar,
-          qrData: null, // Will be updated below
-        },
-      };
-    });
+    setGameState(prev => ({
+      ...prev,
+      currentUser: {
+        userId: finalUserId,
+        displayName,
+        avatar,
+        qrData: null, // Will be updated below
+      },
+    }));
 
     // Generate QR code asynchronously
     try {
@@ -186,9 +197,7 @@ export function useGameStore() {
       gameStorage.saveProgress(gameProgress);
       loadGameProgress(finalUserId);
 
-      console.log('Profile creation completed successfully');
     } catch (error) {
-      console.error('Error in QR generation:', error);
       showToast('Errore nella creazione del QR code', 'error');
     }
   }, [loadGameProgress, showToast]);
@@ -252,23 +261,6 @@ export function useGameStore() {
   const setTheme = useCallback((theme: Theme) => {
     setGameState(prev => ({ ...prev, theme }));
     document.documentElement.className = `ldc-theme--${theme}`;
-  }, []);
-
-  const showToast = useCallback((message: string, type: Toast['type'] = 'info', duration: number = 3000) => {
-    const toast: Toast = {
-      id: `toast_${Date.now()}`,
-      message,
-      type,
-      duration,
-    };
-
-    setToasts(prev => [...prev, toast]);
-
-    if (duration > 0) {
-      setTimeout(() => {
-        setToasts(prev => prev.filter(t => t.id !== toast.id));
-      }, duration);
-    }
   }, []);
 
   const removeToast = useCallback((toastId: string) => {
