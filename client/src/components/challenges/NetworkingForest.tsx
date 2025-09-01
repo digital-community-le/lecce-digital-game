@@ -5,25 +5,24 @@ import { UserScan } from '@shared/schema';
 
 const NetworkingForest: React.FC = () => {
   const { gameState, updateChallengeProgress, showToast, openModal } = useGameStore();
-  const [scans, setScans] = useState<UserScan[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
 
   const REQUIRED_SCANS = 5;
 
+  // Read scans from persistent storage on every render so UI reflects the latest state
+  const scans = gameState.currentUser.userId
+    ? gameStorage.getScans(gameState.currentUser.userId)
+    : [];
+
+  // Update progress in the global store based on current scans
   useEffect(() => {
     if (gameState.currentUser.userId) {
-      const userScans = gameStorage.getScans(gameState.currentUser.userId);
-      setScans(userScans);
-      setIsLoading(false);
-      
-      // Update progress based on unique scans
-      const uniqueScans = new Set(userScans.map(scan => scan.scannedUserId));
-      const progress = uniqueScans.size;
+      const uniqueScansSet = new Set(scans.map(s => s.scannedUserId));
+      const progress = uniqueScansSet.size;
       const completed = progress >= REQUIRED_SCANS;
-      
       updateChallengeProgress('networking-forest', progress, completed);
     }
-  }, [gameState.currentUser.userId]);
+  // Re-run when scans or userId change
+  }, [gameState.currentUser.userId, scans.length]);
 
   const handleStartScanner = () => {
     openModal('scanner');
@@ -40,16 +39,13 @@ const NetworkingForest: React.FC = () => {
     return acc;
   }, [] as UserScan[]);
 
-  const progressPercentage = (uniqueScans.length / REQUIRED_SCANS) * 100;
+  // Prefer reactive progress from gameState.challenges (updated by updateChallengeProgress)
+  const challenge = gameState.challenges.find(c => c.id === 'networking-forest');
+  const progressCount = typeof challenge?.progress === 'number' ? challenge.progress : uniqueScans.length;
+  const totalRequired = challenge?.total ?? REQUIRED_SCANS;
+  const progressPercentage = (progressCount / totalRequired) * 100;
 
-  if (isLoading) {
-    return (
-      <div className="p-4">
-        <p className="title bg-card">Networking Forest</p>
-        <div className="text-center">Caricamento...</div>
-      </div>
-    );
-  }
+  // scans are loaded synchronously from persistent storage; no loading UI required
 
   return (
     <div>

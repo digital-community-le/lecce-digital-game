@@ -15,6 +15,7 @@
   --ldc-secondary: #442c80;
   --ldc-accent: #c93880;
   --ldc-error: #ff3366;
+  --ldc-success: #16a34a;
 
   --ldc-border: rgba(0, 0, 0, 0.12);
   --ldc-focus: #c93880;
@@ -234,6 +235,50 @@
     max-width: 90vw;
     max-height: 90vh;
     overflow-y: auto;
+  }
+
+  /* Semantic background utilities: ensure matching foreground color for contrast */
+  .bg-card {
+  background-color: var(--card);
+  color: var(--card-foreground) !important;
+  }
+
+  .text-card-foreground {
+    color: var(--card-foreground) !important;
+  }
+
+  .bg-muted {
+  background-color: var(--muted);
+  color: var(--muted-foreground) !important;
+  }
+
+  .bg-background {
+    background-color: var(--background);
+    color: var(--foreground) !important;
+  }
+
+  /* Make hard-coded tailwind utility classes adapt under theme switching so borders/text remain visible */
+  .ldc-theme--dark .border-black,
+  .ldc-theme--high-contrast .border-black {
+    border-color: var(--ldc-border) !important;
+  }
+
+  .ldc-theme--dark .text-black,
+  .ldc-theme--high-contrast .text-black {
+    color: var(--foreground) !important;
+  }
+
+  /* Ensure utility classes that force black text/borders don't produce black-on-black when used inside semantic backgrounds */
+  .bg-card .text-black,
+  .bg-muted .text-black,
+  .bg-background .text-black {
+    color: inherit !important; /* inherit from the semantic background's foreground */
+  }
+
+  .bg-card .border-black,
+  .bg-muted .border-black,
+  .bg-background .border-black {
+    border-color: var(--ldc-border) !important;
   }
 
   /* FAB styling */
