@@ -205,12 +205,9 @@ const CanvasMap: React.FC = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Get container dimensions for responsive sizing
-    const container = canvas.parentElement;
-    if (!container) return;
-
-    const containerWidth = container.clientWidth;
-    const containerHeight = container.clientHeight || window.innerHeight - 48; // Account for header
+    // Get full viewport dimensions
+    const containerWidth = window.innerWidth;
+    const containerHeight = window.innerHeight - 48; // Account for header height
 
     // Set canvas display size (CSS)
     canvas.style.width = `${containerWidth}px`;
@@ -227,10 +224,10 @@ const CanvasMap: React.FC = () => {
     // Disable image smoothing for pixel-perfect rendering
     ctx.imageSmoothingEnabled = false;
 
-    // Calculate tile size based on container
+    // Calculate tile size to fill entire screen
     const tileWidth = containerWidth / MAP_WIDTH;
     const tileHeight = containerHeight / MAP_HEIGHT;
-    const actualTileSize = Math.min(tileWidth, tileHeight);
+    const actualTileSize = Math.max(tileWidth, tileHeight); // Use max to fill screen completely
 
     // Clear canvas
     ctx.clearRect(0, 0, containerWidth, containerHeight);
@@ -336,8 +333,12 @@ const CanvasMap: React.FC = () => {
       {/* Canvas for terrain and roads */}
       <canvas
         ref={canvasRef}
-        className="absolute inset-0 w-full h-full object-cover pixelated"
-        style={{ imageRendering: 'pixelated' }}
+        className="absolute inset-0 pixelated"
+        style={{ 
+          imageRendering: 'pixelated',
+          width: '100vw',
+          height: 'calc(100vh - 48px)'
+        }}
         data-testid="terrain-canvas"
       />
 
