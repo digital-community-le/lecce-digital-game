@@ -4,6 +4,31 @@ import { UserProfile, GameProgress } from '@shared/schema';
 import { gameStorage } from '@/lib/storage';
 import { QRGenerator } from '@/lib/qr';
 
+/**
+ * Hook di gestione stato globale per "Il Sigillo di Lecce"
+ * 
+ * Gestisce tutto lo stato dell'applicazione usando un pattern reattivo
+ * con persistenza automatica in localStorage. Fornisce azioni per:
+ * - Gestione profili utente
+ * - Progresso nelle sfide di gioco
+ * - UI state (modals, toast, temi)
+ * - Sincronizzazione dati opzionale
+ * 
+ * Architettura Local-First:
+ * - Dati salvati automaticamente in localStorage con prefix 'ldc:'
+ * - Sync remoto opzionale tramite API backend
+ * - Funzionamento completo offline
+ */
+
+/** 
+ * Configurazione iniziale delle 4 sfide principali
+ * 
+ * Ogni sfida ha:
+ * - id: Identificatore unico per routing e state
+ * - position: Coordinate percentuali sulla mappa (responsive)
+ * - status: locked/available/completed per gestione progressione
+ * - progress/total: Tracking completamento per UI
+ */
 const INITIAL_CHALLENGES: MapNode[] = [
   {
     id: 'networking-forest',
@@ -43,6 +68,14 @@ const INITIAL_CHALLENGES: MapNode[] = [
   },
 ];
 
+/**
+ * Hook principale per gestione stato di gioco
+ * 
+ * @returns Oggetto con stato corrente e azioni per modificarlo
+ * - gameState: Stato completo dell'applicazione
+ * - azioni: Metodi per aggiornare stato (saveProfile, completeChallenge, etc.)
+ * - UI helpers: showToast, openModal, setTheme per gestione interfaccia
+ */
 export function useGameStore() {
   const [gameState, setGameState] = useState<GameState>({
     currentUser: {

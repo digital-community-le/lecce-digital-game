@@ -41,11 +41,24 @@ const CanvasMap: React.FC = () => {
   const [, setLocation] = useLocation();
   const { gameState, showToast } = useGameStore();
 
-  const TILE_SIZE = 16; // Pixel size for each tile (smaller for smoother shapes)
-  const MAP_WIDTH = 48; // Grid width (more tiles)
-  const MAP_HEIGHT = 36; // Grid height (more tiles)
+  /** Dimensione di ogni tile in pixel - ridotta per forme più smussate */
+  const TILE_SIZE = 16;
+  /** Larghezza griglia mappa (numero di tile orizzontali) */
+  const MAP_WIDTH = 48;
+  /** Altezza griglia mappa (numero di tile verticali) */
+  const MAP_HEIGHT = 36;
 
-  // Generate terrain tiles
+  /**
+   * Genera tile di terreno proceduralmente basati su algoritmo deterministico
+   * 
+   * Algoritmo di distribuzione:
+   * - Forest: Quadranti top-left e bottom-left + patch sparse
+   * - Mountains: Fascia superiore centro-destra
+   * - Lakes: Angolo bottom-right
+   * - Grass: Tutto il resto (default)
+   * 
+   * @returns Array di tile con posizione e tipo di terreno
+   */
   const generateTerrainTiles = (): MapTile[] => {
     const tiles: MapTile[] = [];
     
@@ -77,7 +90,16 @@ const CanvasMap: React.FC = () => {
     return tiles;
   };
 
-  // Generate paths connecting challenge nodes using real pixel positions
+  /**
+   * Genera percorsi che collegano i nodi delle sfide usando coordinate pixel reali
+   * 
+   * Converte le posizioni percentuali dei nodi in coordinate pixel del canvas
+   * per garantire allineamento perfetto su qualsiasi dimensione schermo.
+   * 
+   * @param canvasWidth Larghezza del canvas in pixel
+   * @param canvasHeight Altezza del canvas in pixel
+   * @returns Array di segmenti di strada con coordinate pixel
+   */
   const generatePaths = (canvasWidth: number, canvasHeight: number): PathSegment[] => {
     const paths: PathSegment[] = [];
     const challenges = gameState.challenges;
@@ -98,7 +120,21 @@ const CanvasMap: React.FC = () => {
     return paths;
   };
 
-  // Draw individual tile on canvas (responsive version)
+  /**
+   * Disegna un singolo tile di terreno sul canvas con stile pixel art
+   * 
+   * Ogni tipo di terreno ha un pattern unico:
+   * - Grass: Verde con puntini casuali
+   * - Forest: Verde scuro con alberi stilizzati
+   * - Mountain: Grigio con texture rocciosa
+   * - Lake: Blu con increspature animate
+   * 
+   * @param ctx Contesto 2D del canvas
+   * @param tile Tile da disegnare
+   * @param x Posizione X in pixel
+   * @param y Posizione Y in pixel
+   * @param size Dimensione del tile in pixel
+   */
   const drawTileResponsive = (ctx: CanvasRenderingContext2D, tile: MapTile, x: number, y: number, size: number) => {
 
     switch (tile.type) {
@@ -185,7 +221,16 @@ const CanvasMap: React.FC = () => {
     }
   };
 
-  // Draw road connecting two points using actual pixel coordinates
+  /**
+   * Disegna una strada sterrata che collega due punti usando coordinate pixel
+   * 
+   * La strada viene disegnata con due layer:
+   * 1. Bordo scuro più largo per profondità
+   * 2. Centro marrone per il sentiero
+   * 
+   * @param ctx Contesto 2D del canvas
+   * @param path Segmento di strada da disegnare
+   */
   const drawRoadResponsive = (ctx: CanvasRenderingContext2D, path: PathSegment) => {
     // Path coordinates are already in pixel positions
     const startX = path.fromX + 40; // Offset to center of node (80px node / 2)
@@ -216,7 +261,18 @@ const CanvasMap: React.FC = () => {
     ctx.stroke();
   };
 
-  // Main drawing function with responsive sizing
+  /**
+   * Funzione principale di disegno con ridimensionamento responsive
+   * 
+   * Gestisce tutto il processo di rendering della mappa:
+   * 1. Calcola dimensioni responsive del canvas
+   * 2. Configura il contesto per rendering pixel-perfect
+   * 3. Disegna i tile di terreno
+   * 4. Disegna le strade che collegano le sfide
+   * 
+   * Il canvas si adatta automaticamente alle dimensioni dello schermo
+   * mantenendo le proporzioni e l'allineamento degli elementi.
+   */
   const drawMap = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
