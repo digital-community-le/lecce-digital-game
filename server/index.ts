@@ -61,11 +61,17 @@ app.use((req, res, next) => {
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
   const port = parseInt(process.env.PORT || '5000', 10);
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    log(`serving on port ${port}`);
+  // Prefer an explicit HOST env var. On Windows some environments
+  // don't permit binding to 0.0.0.0, so default to 127.0.0.1 there.
+  const defaultHost = process.platform === 'win32' ? '127.0.0.1' : '0.0.0.0';
+  const host = process.env.HOST || defaultHost;
+
+  const listenOpts: any = { port, host };
+  if (process.platform !== 'win32') {
+    listenOpts.reusePort = true;
+  }
+
+  server.listen(listenOpts, () => {
+    log(`serving on http://${host}:${port}`);
   });
 })();
