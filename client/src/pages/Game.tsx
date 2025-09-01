@@ -35,8 +35,6 @@ const Game: React.FC = () => {
       <FloatingActionButton />
       
       {/* Modals */}
-      <ProfileModal />
-      <QRModal />
       <ChallengeModal />
       <ScannerView />
       <ScanPreviewModal />
