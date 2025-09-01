@@ -49,38 +49,107 @@ const CanvasMap: React.FC = () => {
   const MAP_HEIGHT = 36;
 
   /**
-   * Genera tile di terreno proceduralmente basati su algoritmo deterministico
+   * Genera tile di terreno proceduralmente evitando nodi e strade
    * 
-   * Algoritmo di distribuzione:
-   * - Forest: Quadranti top-left e bottom-left + patch sparse
-   * - Mountains: Fascia superiore centro-destra
-   * - Lakes: Angolo bottom-right
-   * - Grass: Tutto il resto (default)
+   * Algoritmo intelligente:
+   * 1. Calcola posizioni nodi in coordinate tile
+   * 2. Calcola percorsi strade in coordinate tile  
+   * 3. Crea zone libere (grass) intorno a nodi e strade
+   * 4. Distribuisce altri terreni nelle aree rimanenti
    * 
-   * @returns Array di tile con posizione e tipo di terreno
+   * @returns Array di tile con posizione e tipo di terreno ottimizzato
    */
   const generateTerrainTiles = (): MapTile[] => {
     const tiles: MapTile[] = [];
     
+    // Calcola posizioni nodi in coordinate tile dal game state
+    const nodePositions: {x: number, y: number}[] = gameState.challenges.map(challenge => {
+      const topPercent = parseFloat(challenge.position.top.replace('%', ''));
+      const leftPercent = parseFloat(challenge.position.left.replace('%', ''));
+      return {
+        x: Math.floor((leftPercent / 100) * MAP_WIDTH),
+        y: Math.floor((topPercent / 100) * MAP_HEIGHT)
+      };
+    });
+    
+    // Funzione per verificare se un tile è in zona libera (nodi + strade)
+    const isInClearZone = (x: number, y: number): boolean => {
+      // Zone libere intorno ai nodi (raggio 4 tile)
+      for (const node of nodePositions) {
+        const distance = Math.sqrt((x - node.x) ** 2 + (y - node.y) ** 2);
+        if (distance <= 4) return true;
+      }
+      
+      // Zone libere per strade tra nodi consecutivi
+      for (let i = 0; i < nodePositions.length - 1; i++) {
+        const start = nodePositions[i];
+        const end = nodePositions[i + 1];
+        
+        // Calcola se il tile è vicino alla linea tra due nodi
+        const lineDistance = distanceToLine(x, y, start.x, start.y, end.x, end.y);
+        if (lineDistance <= 2) return true; // Corridoio di 2 tile di larghezza
+      }
+      
+      return false;
+    };
+    
+    // Funzione helper per calcolare distanza punto-linea
+    const distanceToLine = (px: number, py: number, x1: number, y1: number, x2: number, y2: number): number => {
+      const A = px - x1;
+      const B = py - y1;
+      const C = x2 - x1;
+      const D = y2 - y1;
+      
+      const dot = A * C + B * D;
+      const lenSq = C * C + D * D;
+      
+      if (lenSq === 0) return Math.sqrt(A * A + B * B);
+      
+      let param = dot / lenSq;
+      
+      let xx, yy;
+      if (param < 0) {
+        xx = x1;
+        yy = y1;
+      } else if (param > 1) {
+        xx = x2;
+        yy = y2;
+      } else {
+        xx = x1 + param * C;
+        yy = y1 + param * D;
+      }
+      
+      const dx = px - xx;
+      const dy = py - yy;
+      return Math.sqrt(dx * dx + dy * dy);
+    };
+    
+    // Genera tiles con logica intelligente
     for (let x = 0; x < MAP_WIDTH; x++) {
       for (let y = 0; y < MAP_HEIGHT; y++) {
         let tileType: TerrainType = 'grass'; // Default
         
-        // Forest areas (top-left quadrant and bottom-left)
-        if ((x < 16 && y < 12) || (x < 12 && y > 24)) {
-          tileType = 'forest';
-        }
-        // Mountain range (top-center and top-right)
-        else if (y < 8 && x > 20 && x < 40) {
-          tileType = 'mountain';
-        }
-        // Lake (bottom-right corner)
-        else if (x > 36 && y > 26) {
-          tileType = 'lake';
-        }
-        // Add some scattered forest patches deterministically
-        else if ((x + y) % 14 === 0 && x > 10 && x < 36 && y > 16) {
-          tileType = 'forest';
+        // Forza grass nelle zone libere
+        if (isInClearZone(x, y)) {
+          tileType = 'grass';
+        } else {
+          // Distribuisci altri terreni solo nelle aree rimanenti
+          // Forest areas (ridotte e posizionate meglio)
+          if ((x < 12 && y < 8) || (x < 8 && y > 28)) {
+            tileType = 'forest';
+          }
+          // Mountain range (più concentrato)
+          else if (y < 6 && x > 32 && x < 44) {
+            tileType = 'mountain';
+          }
+          // Lake (più piccolo)
+          else if (x > 40 && y > 30 && x < 47 && y < 35) {
+            tileType = 'lake';
+          }
+          // Scattered forest patches (più sparsi)
+          else if ((x + y) % 18 === 0 && x > 8 && x < 40 && y > 12 && y < 32) {
+            tileType = 'forest';
+          }
         }
         
         tiles.push({ x, y, type: tileType });
