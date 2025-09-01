@@ -7,62 +7,50 @@
     "grass": {
       "description": "Varianti di erba e terreno base",
       "tiles": [
-        {"id": "grass_plain", "x": 0, "y": 0, "width": 16, "height": 16, "description": "Erba verde base"},
-        {"id": "grass_flowers_1", "x": 16, "y": 0, "width": 16, "height": 16, "description": "Erba con fiori piccoli"},
-        {"id": "grass_flowers_2", "x": 32, "y": 0, "width": 16, "height": 16, "description": "Erba con fiori colorati"},
-        {"id": "grass_dark", "x": 48, "y": 0, "width": 16, "height": 16, "description": "Erba verde scuro"},
-        {"id": "grass_light", "x": 64, "y": 0, "width": 16, "height": 16, "description": "Erba verde chiaro"},
-        {"id": "grass_autumn", "x": 80, "y": 0, "width": 16, "height": 16, "description": "Erba autunnale"},
-        {"id": "grass_winter", "x": 96, "y": 0, "width": 16, "height": 16, "description": "Erba invernale"},
-        {"id": "grass_flowers_3", "x": 112, "y": 0, "width": 16, "height": 16, "description": "Erba con fiori viola"}
+        {"id": "grass_plain", "x": 0, "y": 0, "description": "Erba verde base"},
+        {"id": "grass_flowers_1", "x": 16, "y": 0, "description": "Erba con fiori piccoli"},
+        {"id": "grass_flowers_2", "x": 32, "y": 0, "description": "Erba con fiori colorati"},
+        {"id": "grass_dark", "x": 48, "y": 0, "description": "Erba verde scuro"},
+        {"id": "grass_light", "x": 64, "y": 0, "description": "Erba verde chiaro"},
+        {"id": "grass_pattern_1", "x": 80, "y": 0, "description": "Erba con pattern"},
+        {"id": "grass_pattern_2", "x": 96, "y": 0, "description": "Erba con pattern 2"}
       ]
     },
     "trees": {
       "description": "Alberi di diverse tipologie e stagioni",
       "tiles": [
-        {"id": "tree_green_1", "x": 0, "y": 48, "width": 16, "height": 32, "description": "Albero verde standard"},
-        {"id": "tree_green_2", "x": 16, "y": 48, "width": 16, "height": 32, "description": "Albero verde variante"},
-        {"id": "tree_autumn_1", "x": 32, "y": 48, "width": 16, "height": 32, "description": "Albero autunnale arancione"},
-        {"id": "tree_autumn_2", "x": 48, "y": 48, "width": 16, "height": 32, "description": "Albero autunnale giallo"},
-        {"id": "tree_winter", "x": 64, "y": 48, "width": 16, "height": 32, "description": "Albero invernale con neve"},
-        {"id": "tree_spring", "x": 80, "y": 48, "width": 16, "height": 32, "description": "Albero primaverile"},
-        {"id": "tree_dark", "x": 96, "y": 48, "width": 16, "height": 32, "description": "Albero verde scuro"},
-        {"id": "tree_pine_1", "x": 112, "y": 48, "width": 16, "height": 32, "description": "Pino sempreverde"},
-        {"id": "tree_pine_2", "x": 128, "y": 48, "width": 16, "height": 32, "description": "Pino grande"},
-        {"id": "tree_palm", "x": 0, "y": 176, "width": 16, "height": 32, "description": "Palma tropicale"}
+        {"id": "tree_green_1", "x": 128, "y": 0, "description": "Albero verde standard"},
+        {"id": "tree_green_2", "x": 144, "y": 0, "description": "Albero verde variante"},
+        {"id": "tree_autumn_1", "x": 160, "y": 0, "description": "Albero autunnale arancione"},
+        {"id": "tree_autumn_2", "x": 176, "y": 0, "description": "Albero autunnale giallo"},
+        {"id": "tree_pine_1", "x": 192, "y": 0, "description": "Pino sempreverde"},
+        {"id": "tree_dark", "x": 208, "y": 0, "description": "Albero verde scuro"}
       ]
     },
     "mountains": {
       "description": "Montagne e formazioni rocciose",
       "tiles": [
-        {"id": "mountain_brown_1", "x": 0, "y": 224, "width": 32, "height": 32, "description": "Montagna marrone base"},
-        {"id": "mountain_brown_2", "x": 32, "y": 224, "width": 32, "height": 32, "description": "Montagna marrone alta"},
-        {"id": "mountain_gray_1", "x": 64, "y": 224, "width": 32, "height": 32, "description": "Montagna grigia"},
-        {"id": "mountain_gray_2", "x": 96, "y": 224, "width": 32, "height": 32, "description": "Montagna grigia alta"},
-        {"id": "rock_small", "x": 128, "y": 224, "width": 16, "height": 16, "description": "Roccia piccola"},
-        {"id": "rock_medium", "x": 144, "y": 224, "width": 16, "height": 16, "description": "Roccia media"}
+        {"id": "mountain_brown_1", "x": 0, "y": 224, "description": "Montagna marrone base"},
+        {"id": "mountain_brown_2", "x": 16, "y": 224, "description": "Montagna marrone variante"},
+        {"id": "mountain_gray_1", "x": 32, "y": 224, "description": "Montagna grigia"},
+        {"id": "mountain_gray_2", "x": 48, "y": 224, "description": "Montagna grigia variante"}
       ]
     },
     "water": {
       "description": "Elementi acquatici",
       "tiles": [
-        {"id": "water_deep", "x": 0, "y": 688, "width": 16, "height": 16, "description": "Acqua profonda"},
-        {"id": "water_medium", "x": 16, "y": 688, "width": 16, "height": 16, "description": "Acqua media"},
-        {"id": "water_shallow", "x": 32, "y": 688, "width": 16, "height": 16, "description": "Acqua bassa"},
-        {"id": "water_wave", "x": 48, "y": 688, "width": 16, "height": 16, "description": "Acqua con onde"},
-        {"id": "water_foam", "x": 64, "y": 688, "width": 16, "height": 16, "description": "Acqua con schiuma"},
-        {"id": "water_ripple", "x": 80, "y": 688, "width": 16, "height": 16, "description": "Acqua con increspature"}
+        {"id": "water_deep", "x": 0, "y": 688, "description": "Acqua profonda"},
+        {"id": "water_medium", "x": 16, "y": 688, "description": "Acqua media"},
+        {"id": "water_shallow", "x": 32, "y": 688, "description": "Acqua bassa"},
+        {"id": "water_wave", "x": 48, "y": 688, "description": "Acqua con onde"}
       ]
     },
     "roads": {
       "description": "Strade e percorsi",
       "tiles": [
-        {"id": "road_dirt_h", "x": 0, "y": 592, "width": 16, "height": 16, "description": "Strada sterrata orizzontale"},
-        {"id": "road_dirt_v", "x": 16, "y": 592, "width": 16, "height": 16, "description": "Strada sterrata verticale"},
-        {"id": "road_stone_h", "x": 32, "y": 592, "width": 16, "height": 16, "description": "Strada di pietra orizzontale"},
-        {"id": "road_stone_v", "x": 48, "y": 592, "width": 16, "height": 16, "description": "Strada di pietra verticale"},
-        {"id": "path_1", "x": 64, "y": 592, "width": 16, "height": 16, "description": "Sentiero 1"},
-        {"id": "path_2", "x": 80, "y": 592, "width": 16, "height": 16, "description": "Sentiero 2"}
+        {"id": "road_dirt_h", "x": 224, "y": 592, "description": "Strada sterrata orizzontale"},
+        {"id": "road_dirt_v", "x": 240, "y": 592, "description": "Strada sterrata verticale"},
+        {"id": "path_1", "x": 256, "y": 592, "description": "Sentiero 1"}
       ]
     },
     "structures": {
