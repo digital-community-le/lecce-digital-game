@@ -1,35 +1,27 @@
-// Avatar management system with local preset images
-import developer from '@assets/generated_images/Developer_avatar_pixel_art_a2515cc8.png';
-import femDeveloper from '@assets/generated_images/Female_developer_avatar_pixel_20b982fb.png';
-import designer from '@assets/generated_images/Designer_avatar_pixel_art_50737636.png';
-import femDesigner from '@assets/generated_images/Female_designer_avatar_pixel_a849bc52.png';
-import manager from '@assets/generated_images/Manager_avatar_pixel_art_1555a05c.png';
-import scientist from '@assets/generated_images/Scientist_avatar_pixel_art_eac1695c.png';
-import astronaut from '@assets/generated_images/Astronaut_avatar_pixel_art_ccc99934.png';
-import femAstronaut from '@assets/generated_images/Female_astronaut_avatar_pixel_e4c47009.png';
-import teacher from '@assets/generated_images/Teacher_avatar_pixel_art_c32e4d73.png';
-import femTeacher from '@assets/generated_images/Female_teacher_avatar_pixel_2ede18a1.png';
-import student from '@assets/generated_images/Student_avatar_pixel_art_285fb9d0.png';
-import coder from '@assets/generated_images/Coder_avatar_pixel_art_a9e88700.png';
+// Avatar management system with local preset images - Full body characters
+import maleDeveloper from '@assets/generated_images/Male_developer_full_body_af9636a7.png';
+import femaleDeveloper from '@assets/generated_images/Female_developer_full_body_a80fea95.png';
+import maleDesigner from '@assets/generated_images/Male_designer_full_body_01a6c883.png';
+import femaleDesigner from '@assets/generated_images/Female_designer_full_body_098049d8.png';
+import maleManager from '@assets/generated_images/Male_manager_full_body_8f494ac7.png';
+import femaleManager from '@assets/generated_images/Female_manager_full_body_56be1c7f.png';
+import maleScientist from '@assets/generated_images/Male_scientist_full_body_182cfd30.png';
+import femaleScientist from '@assets/generated_images/Female_scientist_full_body_b1999dcf.png';
 
 export const AVATAR_PRESETS = [
-  { id: 'developer', name: 'Sviluppatore', url: developer },
-  { id: 'fem-developer', name: 'Sviluppatrice', url: femDeveloper },
-  { id: 'designer', name: 'Designer', url: designer },
-  { id: 'fem-designer', name: 'Designer', url: femDesigner },
-  { id: 'manager', name: 'Project Manager', url: manager },
-  { id: 'scientist', name: 'Data Scientist', url: scientist },
-  { id: 'astronaut', name: 'Astronauta', url: astronaut },
-  { id: 'fem-astronaut', name: 'Astronauta', url: femAstronaut },
-  { id: 'teacher', name: 'Insegnante', url: teacher },
-  { id: 'fem-teacher', name: 'Insegnante', url: femTeacher },
-  { id: 'student', name: 'Studente', url: student },
-  { id: 'coder', name: 'Coder', url: coder },
+  { id: 'male-developer', name: 'Sviluppatore', url: maleDeveloper },
+  { id: 'female-developer', name: 'Sviluppatrice', url: femaleDeveloper },
+  { id: 'male-designer', name: 'Designer', url: maleDesigner },
+  { id: 'female-designer', name: 'Designer', url: femaleDesigner },
+  { id: 'male-manager', name: 'Project Manager', url: maleManager },
+  { id: 'female-manager', name: 'Project Manager', url: femaleManager },
+  { id: 'male-scientist', name: 'Data Scientist', url: maleScientist },
+  { id: 'female-scientist', name: 'Data Scientist', url: femaleScientist },
 ];
 
 export const getAvatarById = (id: string): string => {
   const avatar = AVATAR_PRESETS.find(a => a.id === id);
-  return avatar?.url || developer; // Default fallback
+  return avatar?.url || maleDeveloper; // Default fallback
 };
 
 export const getRandomAvatar = (): { id: string; url: string } => {
