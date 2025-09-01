@@ -32,7 +32,7 @@ const IntroScreen: React.FC = () => {
   };
 
   return (
-    <div className="intro-screen fixed inset-0 bg-gradient-to-b from-purple-900 to-black flex flex-col items-center justify-center text-white z-50">
+    <div className="intro-screen fixed inset-0 bg-gradient-to-b from-purple-900 to-black flex flex-col items-center justify-center text-white z-10">
       {/* Title */}
       <div className="text-center mb-8">
         <h1 className="font-retro text-xl md:text-2xl mb-4 text-yellow-400" data-testid="text-game-title">
