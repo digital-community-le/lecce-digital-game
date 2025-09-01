@@ -124,6 +124,8 @@ export function useGameStore() {
     const finalUserId = userId || `user_${Date.now()}`;
     const now = new Date().toISOString();
     
+    console.log('saveProfile called with:', { displayName, avatar, finalUserId });
+    
     const profile: UserProfile = {
       userId: finalUserId,
       displayName,
@@ -133,25 +135,39 @@ export function useGameStore() {
     };
 
     gameStorage.saveProfile(profile);
+    console.log('Profile saved to storage');
 
-    // Generate QR code
-    const qrData = {
-      userId: finalUserId,
-      displayName,
-      avatarUrl: avatar,
-      timestamp: now,
-    };
-
-    try {
-      const qrDataUrl = await QRGenerator.generateQR(qrData);
-      gameStorage.saveQR(finalUserId, qrDataUrl);
-
-      setGameState(prev => ({
+    // Update state immediately with basic info
+    setGameState(prev => {
+      console.log('Updating gameState with userId:', finalUserId);
+      return {
         ...prev,
         currentUser: {
           userId: finalUserId,
           displayName,
           avatar,
+          qrData: null, // Will be updated below
+        },
+      };
+    });
+
+    // Generate QR code asynchronously
+    try {
+      const qrData = {
+        userId: finalUserId,
+        displayName,
+        avatarUrl: avatar,
+        timestamp: now,
+      };
+
+      const qrDataUrl = await QRGenerator.generateQR(qrData);
+      gameStorage.saveQR(finalUserId, qrDataUrl);
+
+      // Update with QR data
+      setGameState(prev => ({
+        ...prev,
+        currentUser: {
+          ...prev.currentUser,
           qrData: qrDataUrl,
         },
       }));
@@ -170,11 +186,12 @@ export function useGameStore() {
       gameStorage.saveProgress(gameProgress);
       loadGameProgress(finalUserId);
 
-      showToast('Profilo creato con successo!', 'success');
+      console.log('Profile creation completed successfully');
     } catch (error) {
+      console.error('Error in QR generation:', error);
       showToast('Errore nella creazione del QR code', 'error');
     }
-  }, [loadGameProgress]);
+  }, [loadGameProgress, showToast]);
 
   const updateChallengeProgress = useCallback((challengeId: string, progress: number, completed: boolean = false) => {
     setGameState(prev => {
