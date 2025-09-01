@@ -229,7 +229,6 @@
   }
 
   .canvas-map {
-    background: #87ceeb; /* Sky blue background */
     width: 100vw;
     height: calc(100vh - var(--ldc-header-height));
     position: relative;

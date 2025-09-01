@@ -641,8 +641,9 @@ const CanvasMap: React.FC = () => {
     const tileHeight = containerHeight / MAP_HEIGHT;
     const actualTileSize = Math.max(tileWidth, tileHeight, 12); // Use max to fill screen completely, min 12px
 
-    // Clear canvas
-    ctx.clearRect(0, 0, containerWidth, containerHeight);
+    // Clear canvas con background verde base
+    ctx.fillStyle = '#6FBF3C'; // Verde erba di base
+    ctx.fillRect(0, 0, containerWidth, containerHeight);
 
     // Generate and draw terrain
     const terrainTiles = generateTerrainTiles();
