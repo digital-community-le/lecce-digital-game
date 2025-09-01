@@ -178,6 +178,13 @@
     overflow: hidden;
   }
 
+  .canvas-map {
+    background: #87ceeb; /* Sky blue background */
+    min-height: calc(100vh - var(--ldc-header-height));
+    position: relative;
+    overflow: hidden;
+  }
+
   .map-node {
     position: absolute;
     width: 80px;

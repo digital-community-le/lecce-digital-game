@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { useGameStore } from '@/hooks/use-game-store';
 import Header from '@/components/Header';
-import FantasyMap from '@/components/FantasyMap';
+import CanvasMap from '@/components/CanvasMap';
 import FloatingActionButton from '@/components/FloatingActionButton';
 import QRModal from '@/components/QRModal';
 import ScannerView from '@/components/ScannerView';
@@ -34,7 +34,7 @@ const GameMapPage: React.FC = () => {
     <div className="min-h-screen bg-background text-foreground" data-testid="game-app">
       <Header />
       <main className="relative">
-        <FantasyMap />
+        <CanvasMap />
       </main>
       
       <FloatingActionButton />
