@@ -9,6 +9,16 @@ const CameraCapture: React.FC<Props> = ({ onCapture, onCancel }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const stickerRef = useRef<HTMLDivElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
+  // Heuristic to label camera facing based on device label
+  const getFacingLabel = (label?: string | null) => {
+    if (!label) return "Sconosciuta";
+    const l = label.toLowerCase();
+    if (/front|frontale|facing/i.test(l)) return "Frontale";
+    if (/back|rear|posteriore|trasera/i.test(l)) return "Posteriore";
+    return "Sconosciuta";
+  };
   const [error, setError] = useState<string | null>(null);
   const [capturing, setCapturing] = useState(false);
   const [hasStream, setHasStream] = useState(false);
@@ -141,14 +151,46 @@ const CameraCapture: React.FC<Props> = ({ onCapture, onCancel }) => {
     };
   }, [selectedSticker, stickerPos, stickerScale]);
 
+  // enumerate devices on mount
   useEffect(() => {
     let mounted = true;
-
-    const start = async () => {
+    const updateDevices = async () => {
       try {
-        const s = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "environment" },
-        });
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        if (!mounted) return;
+        const vids = devices.filter((d) => d.kind === "videoinput");
+        setVideoDevices(vids);
+        // keep previously selected if available, otherwise pick first
+        if (!selectedDeviceId && vids.length > 0) setSelectedDeviceId(vids[0].deviceId);
+      } catch (e) {
+        console.warn("enumerateDevices error", e);
+      }
+    };
+    updateDevices();
+    // also update when devicechange event fires
+    const onDeviceChange = () => updateDevices();
+    navigator.mediaDevices.addEventListener?.("devicechange", onDeviceChange);
+    return () => {
+      mounted = false;
+      navigator.mediaDevices.removeEventListener?.("devicechange", onDeviceChange as any);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // start / restart stream when selectedDeviceId changes
+  useEffect(() => {
+    let mounted = true;
+    const start = async (deviceId?: string | null) => {
+      // stop existing stream first
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
+      }
+      try {
+        const constraints: MediaStreamConstraints = deviceId
+          ? { video: { deviceId: { exact: deviceId } } }
+          : { video: { facingMode: "environment" } };
+        const s = await navigator.mediaDevices.getUserMedia(constraints);
         if (!mounted) {
           s.getTracks().forEach((t) => t.stop());
           return;
@@ -156,7 +198,6 @@ const CameraCapture: React.FC<Props> = ({ onCapture, onCancel }) => {
         streamRef.current = s;
         if (videoRef.current) {
           videoRef.current.srcObject = s;
-          // ensure the video starts playing and mark stream ready
           videoRef.current.play().catch(() => {});
           setHasStream(true);
         }
@@ -167,7 +208,7 @@ const CameraCapture: React.FC<Props> = ({ onCapture, onCancel }) => {
       }
     };
 
-    start();
+    start(selectedDeviceId);
 
     return () => {
       mounted = false;
@@ -177,7 +218,7 @@ const CameraCapture: React.FC<Props> = ({ onCapture, onCancel }) => {
       }
       setHasStream(false);
     };
-  }, []);
+  }, [selectedDeviceId]);
 
   const handleCapture = async () => {
     if (!videoRef.current) return;
@@ -190,37 +231,74 @@ const CameraCapture: React.FC<Props> = ({ onCapture, onCancel }) => {
       const ctx = canvas.getContext("2d");
       if (ctx) ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      // If a sticker is selected, draw it onto the canvas at the chosen position/scale
-      if (selectedSticker && ctx && videoRef.current) {
-        try {
-          // Map normalized sticker position (relative to video element) to canvas pixels
-          const rect = videoRef.current.getBoundingClientRect();
-          // relative to displayed video area
-          const relX = Math.max(0, Math.min(1, stickerPos.x));
-          const relY = Math.max(0, Math.min(1, stickerPos.y));
-          const x = Math.round(relX * canvas.width);
-          const y = Math.round(relY * canvas.height);
+  // Do not draw sticker onto the source canvas here; we'll draw it onto the
+  // final (cropped) canvas so its position matches the preview after crop.
 
-          // compute font size relative to canvas and stickerScale
-          const baseFont = Math.floor(
-            Math.min(canvas.width, canvas.height) * 0.12
-          );
-          const fontSize = Math.max(12, Math.round(baseFont * stickerScale));
-          ctx.font = `${fontSize}px serif`;
-          ctx.textAlign = "center";
-          ctx.textBaseline = "middle";
-          // shadow
-          ctx.fillStyle = "rgba(0,0,0,0.45)";
-          ctx.fillText(selectedSticker, x + 2, y + 2);
-          ctx.fillStyle = "#fff";
-          ctx.fillText(selectedSticker, x, y);
-        } catch (e) {
-          console.warn("Sticker draw error", e);
+      // Crop the captured image to match the device screen aspect ratio
+      const screenRatio = window.innerWidth / window.innerHeight || 1;
+      const srcW = canvas.width;
+      const srcH = canvas.height;
+      const srcRatio = srcW / srcH;
+
+      let sx = 0,
+        sy = 0,
+        sWidth = srcW,
+        sHeight = srcH;
+
+      if (Math.abs(srcRatio - screenRatio) > 0.001) {
+        if (srcRatio > screenRatio) {
+          // source is wider -> crop horizontally
+          sHeight = srcH;
+          sWidth = Math.round(sHeight * screenRatio);
+          sx = Math.round((srcW - sWidth) / 2);
+          sy = 0;
+        } else {
+          // source is taller -> crop vertically
+          sWidth = srcW;
+          sHeight = Math.round(sWidth / screenRatio);
+          sx = 0;
+          sy = Math.round((srcH - sHeight) / 2);
+        }
+      }
+
+      const finalCanvas = document.createElement("canvas");
+      finalCanvas.width = sWidth;
+      finalCanvas.height = sHeight;
+      const fctx = finalCanvas.getContext("2d");
+      if (fctx) {
+        // draw the cropped area from the original canvas into final canvas
+        fctx.drawImage(canvas, sx, sy, sWidth, sHeight, 0, 0, sWidth, sHeight);
+        // If a sticker is selected, draw it on the final canvas using
+        // coordinates mapped from the normalized sticker position so it
+        // appears in the same place as the preview (compensating for crop).
+        if (selectedSticker && videoRef.current) {
+          try {
+            const relX = Math.max(0, Math.min(1, stickerPos.x));
+            const relY = Math.max(0, Math.min(1, stickerPos.y));
+            // position on the source canvas
+            const srcX = Math.round(relX * srcW);
+            const srcY = Math.round(relY * srcH);
+            // map to final canvas coordinates (account for crop offset)
+            const fx = srcX - sx;
+            const fy = srcY - sy;
+
+            const baseFont = Math.floor(Math.min(sWidth, sHeight) * 0.12);
+            const fontSize = Math.max(12, Math.round(baseFont * stickerScale));
+            fctx.font = `${fontSize}px serif`;
+            fctx.textAlign = "center";
+            fctx.textBaseline = "middle";
+            fctx.fillStyle = "rgba(0,0,0,0.45)";
+            fctx.fillText(selectedSticker, fx + 2, fy + 2);
+            fctx.fillStyle = "#fff";
+            fctx.fillText(selectedSticker, fx, fy);
+          } catch (e) {
+            console.warn("Sticker draw error on final canvas", e);
+          }
         }
       }
 
       const blob: Blob | null = await new Promise((resolve) =>
-        canvas.toBlob(resolve as any, "image/jpeg", 0.9)
+        finalCanvas.toBlob(resolve as any, "image/jpeg", 0.9)
       );
       if (blob) {
         const file = new File([blob], `capture_${Date.now()}.jpg`, {
@@ -239,6 +317,11 @@ const CameraCapture: React.FC<Props> = ({ onCapture, onCancel }) => {
     } finally {
       setCapturing(false);
     }
+  };
+
+  const handleDeviceChange = (deviceId: string) => {
+    // set selected device id; effect will restart stream
+    setSelectedDeviceId(deviceId);
   };
 
   // handlers for dragging & resizing the sticker on the live preview
@@ -392,6 +475,28 @@ const CameraCapture: React.FC<Props> = ({ onCapture, onCancel }) => {
 
   return (
     <div className="fixed inset-0 z-50 bg-black">
+      {/* camera selection control */}
+      {videoDevices.length > 1 && (
+        <div className="absolute top-4 right-4 z-60">
+          <label className="text-xs block mb-1 text-white">Fotocamera</label>
+          <select
+            className="nes-select bg-white text-xs"
+            value={selectedDeviceId || ""}
+            onChange={(e) => handleDeviceChange(e.target.value)}
+            aria-label="Seleziona fotocamera"
+          >
+            {videoDevices.map((d, i) => {
+              const facing = getFacingLabel(d.label || null);
+              const title = d.label || `Fotocamera ${i + 1}`;
+              return (
+                <option key={d.deviceId} value={d.deviceId}>
+                  {`${title} — ${facing}`}
+                </option>
+              );
+            })}
+          </select>
+        </div>
+      )}
       {/* Fullscreen video background */}
       <video
         ref={videoRef}

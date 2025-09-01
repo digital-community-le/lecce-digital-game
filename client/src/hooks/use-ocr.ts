@@ -27,8 +27,8 @@ export function useOCR() {
     try {
       let lastProgress = 0;
       const result = await runOCR(file, (_status, progress) => {
-        lastProgress = Math.max(lastProgress, Math.round(progress * 100));
-        if (mounted.current) setOcrProgress(lastProgress);
+        lastProgress = Math.round(progress * 100);
+        setOcrProgress(lastProgress);
       });
       if (mounted.current) setOcrResult(result);
       return result;

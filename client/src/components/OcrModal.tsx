@@ -12,7 +12,7 @@ type Props = {
   file: File;
   requiredTag: string;
   confidenceThreshold: number;
-  onVerified: (result: OCRResult, forced: boolean) => void; // called when verification finishes (either auto-success or manual)
+  onVerified: (result: OCRResult, forced: boolean) => Promise<void>; // called when verification finishes (either auto-success or manual)
   onRetry: () => void; // user wants to retry (re-upload)
   onAttempt?: () => void; // called when an OCR attempt fails
   failedAttempts?: number;
@@ -29,7 +29,7 @@ const OcrModal: React.FC<Props> = ({
   onClose,
   failedAttempts = 0,
 }) => {
-  const { run, isAnalyzing, ocrProgress, ocrResult, setOcrResult } = useOCR();
+  const { run, ocrProgress, ocrResult, setOcrResult } = useOCR();
   const [state, setState] = useState<"running" | "failed" | "success" | "idle">(
     "running"
   );
@@ -60,8 +60,8 @@ const OcrModal: React.FC<Props> = ({
       if (verified) {
         setState("success");
         setMessage("Tag verificato con successo!");
-        setTimeout(() => {
-          onVerified(res, false);
+        setTimeout(async () => {
+          await onVerified(res, false);
           // close dialog after 3 seconds to allow user to read the success message
           try {
             if (closeTimerRef.current)
@@ -71,7 +71,9 @@ const OcrModal: React.FC<Props> = ({
             try {
               dialogRef.current?.close();
             } catch (e) {}
-              try { onClose?.(); } catch (e) {}
+            try {
+              onClose?.();
+            } catch (e) {}
           }, 3000);
         }, 800);
       } else {
@@ -97,15 +99,28 @@ const OcrModal: React.FC<Props> = ({
     return () => {
       mounted = false;
       try {
+        // clear any pending close timer
+        if (closeTimerRef.current) {
+          window.clearTimeout(closeTimerRef.current);
+          closeTimerRef.current = null;
+        }
         dialogRef.current?.close();
       } catch (e) {}
-      if (closeTimerRef.current) {
-        try {
-          window.clearTimeout(closeTimerRef.current);
-        } catch (e) {}
-      }
     };
   }, [file]);
+
+  // Ensure dialog is closed when component is unmounted (extra safety)
+  useEffect(() => {
+    return () => {
+      try {
+        if (closeTimerRef.current) {
+          window.clearTimeout(closeTimerRef.current);
+          closeTimerRef.current = null;
+        }
+        dialogRef.current?.close();
+      } catch (e) {}
+    };
+  }, []);
 
   // Focus management: trap focus inside modal and restore on unmount
   useEffect(() => {
@@ -251,14 +266,15 @@ const OcrModal: React.FC<Props> = ({
               <button
                 ref={manualButtonRef}
                 className="nes-btn is-success"
-                onClick={() => {
+                onClick={async () => {
                   // manual verification: notify parent with forced=true and close modal
                   if (ocrResult) {
                     setMessage("Verifica manuale completata.");
                   } else {
                     setMessage("Verifica manuale eseguita.");
                   }
-                  onVerified(
+
+                  await onVerified(
                     ocrResult || {
                       detectedTags: [],
                       detected: false,
@@ -267,15 +283,9 @@ const OcrModal: React.FC<Props> = ({
                     true
                   );
                   try {
-                    if (closeTimerRef.current)
-                      window.clearTimeout(closeTimerRef.current);
+                    dialogRef.current?.close();
+                    onClose?.();
                   } catch (e) {}
-                  closeTimerRef.current = window.setTimeout(() => {
-                    try {
-                      dialogRef.current?.close();
-                    } catch (e) {}
-                        try { onClose?.(); } catch (e) {}
-                  }, 3000);
                 }}
               >
                 Verifica manuale

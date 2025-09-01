@@ -9,12 +9,13 @@ import OcrModal from "@/components/OcrModal";
 
 const SocialArena: React.FC = () => {
   const { gameState, updateChallengeProgress, showToast } = useGameStore();
-  const [proofs, setProofs] = useState<SocialProof[]>([]);
+  const [proof, setProof] = useState<SocialProof | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
   const [selectedPreviewUrl, setSelectedPreviewUrl] = useState<string | null>(null);
   const [screenshotPreviewUrl, setScreenshotPreviewUrl] = useState<string | null>(null);
+  const [proofPreviewUrl, setProofPreviewUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { isAnalyzing, ocrProgress, ocrResult, setOcrResult } = useOCR();
   const [ocrModalOpen, setOcrModalOpen] = useState(false);
@@ -51,12 +52,19 @@ const SocialArena: React.FC = () => {
       const userProofs = gameStorage.getSocialProofs(
         gameState.currentUser.userId
       );
-      setProofs(userProofs);
+      // Keep only the latest proof for this challenge in-memory
+      const latest = userProofs && userProofs.length > 0 ? userProofs[userProofs.length - 1] : null;
+      setProof(latest || null);
+      if (latest && typeof latest.imageLocalUrl === "string" && latest.imageLocalUrl.startsWith("blob_")) {
+        getBlobUrl(latest.imageLocalUrl).then((u) => {
+          if (u) setProofPreviewUrl(u);
+        }).catch(() => {});
+      }
       setIsLoading(false);
 
       // Check if challenge is completed
       const validProof = userProofs.find(
-        (proof) => proof.detected && proof.verified
+        (p) => p.detected && p.verified
       );
       if (validProof) {
         updateChallengeProgress("social-arena", 1, true);
@@ -98,7 +106,12 @@ const SocialArena: React.FC = () => {
         createdAt: new Date().toISOString(),
       };
       gameStorage.addSocialProof(gameState.currentUser.userId, proof);
-      setProofs((p) => [...p, proof]);
+      setProof(proof);
+      // resolve preview URL
+      try {
+        const url = await getBlobUrl(blobId);
+        setProofPreviewUrl(url || null);
+      } catch {}
       setSharePhase("captured");
       showToast(
         "Immagine salvata. Ora condividi la storia o salta se non vuoi condividerla.",
@@ -172,7 +185,11 @@ const SocialArena: React.FC = () => {
         createdAt: new Date().toISOString(),
       };
       gameStorage.addSocialProof(gameState.currentUser.userId, proof);
-      setProofs((p) => [...p, proof]);
+      setProof(proof);
+      try {
+        const url = await getBlobUrl(blobId);
+        setProofPreviewUrl(url || null);
+      } catch {}
       setSharePhase("captured");
       showToast(
         "Immagine salvata. Ora condividi la storia o salta se non vuoi condividerla.",
@@ -211,7 +228,11 @@ const SocialArena: React.FC = () => {
       };
 
       gameStorage.addSocialProof(gameState.currentUser.userId, proof);
-      setProofs((prev) => [...prev, proof]);
+      setProof(proof);
+      try {
+        const url = await getBlobUrl(blobId);
+        setProofPreviewUrl(url || null);
+      } catch {}
 
       setSharePhase("await_screenshot");
       showToast(
@@ -260,11 +281,8 @@ const SocialArena: React.FC = () => {
     );
   };
 
-  const latestProof = proofs[proofs.length - 1];
-  const isCompleted = useMemo(
-    () => proofs.some((proof) => proof.detected && proof.verified),
-    [proofs]
-  );
+  // single proof view
+  const isCompleted = useMemo(() => !!proof?.verified, [proof, proofPreviewUrl]);
 
   // Define a clear step-based progression
   const totalSteps = 3; // 1: capture/upload, 2: share (or await screenshot), 3: screenshot & OCR (or skip)
@@ -284,27 +302,7 @@ const SocialArena: React.FC = () => {
       : progressPercent >= 33
       ? "is-warning"
       : "is-error";
-  const getPreviewUrl = (proof?: SocialProof) => {
-    if (!proof) return null;
-    if (
-      typeof proof.imageLocalUrl === "string" &&
-      proof.imageLocalUrl.startsWith("blob_")
-    ) {
-      getBlobUrl(proof.imageLocalUrl)
-        .then((u) => {
-          setProofs((prev) =>
-            prev.map((p) =>
-              p.opId === proof.opId
-                ? ({ ...p, __previewUrl: u || p.imageLocalUrl } as any)
-                : p
-            )
-          );
-        })
-        .catch(() => {});
-      return (proof as any).__previewUrl || null;
-    }
-    return proof.imageLocalUrl as string;
-  };
+  // no-op: preview URL is stored in proofPreviewUrl
 
   if (isLoading) {
     return (
@@ -538,6 +536,7 @@ const SocialArena: React.FC = () => {
                       imageLocalUrl: blobId,
                       detectedTags: result?.detectedTags || [],
                       detected: !!result?.detected,
+                      // If user manually forces verification, treat as verified
                       verified:
                         forced ||
                         (!!result?.detected &&
@@ -549,7 +548,11 @@ const SocialArena: React.FC = () => {
                       gameState.currentUser.userId,
                       proof
                     );
-                    setProofs((p) => [...p, proof]);
+                    setProof(proof);
+                    try {
+                      const url = await getBlobUrl(blobId);
+                      setProofPreviewUrl(url || null);
+                    } catch {}
                     if (proof.verified) {
                       updateChallengeProgress("social-arena", 1, true);
                       setForcedValidated(true);
@@ -614,12 +617,9 @@ const SocialArena: React.FC = () => {
             <div className="nes-container is-success p-4 mb-4">
               <div className="flex items-center justify-center gap-4 mb-2">
                 <div className="text-5xl">🏆</div>
-                {latestProof && (
+                {proof && (
                   <img
-                    src={
-                      getPreviewUrl(latestProof) ||
-                      (latestProof.imageLocalUrl as string)
-                    }
+                    src={proofPreviewUrl || (proof.imageLocalUrl as string)}
                     alt="Prova verificata"
                     className="w-16 h-16 object-cover border-2 border-black"
                   />
@@ -630,13 +630,13 @@ const SocialArena: React.FC = () => {
                 La tua prova è stata verificata! La leggenda del Sigillo è ora
                 completa.
               </p>
-              {latestProof && (
+              {proof && (
                 <div className="nes-container is-light p-3">
                   <div className="text-xs text-left">
-                    <div>Tag rilevati: {latestProof.detectedTags.join(", ")}</div>
+                    <div>Tag rilevati: {proof.detectedTags.join(", ")}</div>
                     <div>
-                      Verificato:{" "}
-                      {new Date(latestProof.createdAt).toLocaleString("it-IT")}
+                      Verificato: {" "}
+                      {new Date(proof.createdAt).toLocaleString("it-IT")}
                     </div>
                   </div>
                 </div>
