@@ -298,6 +298,11 @@ const CanvasMap: React.FC = () => {
     const tileIndex = (tile.x + tile.y * 3) % tileOptions.length;
     const selectedTileId = tileOptions[tileIndex];
     
+    // Debug per forest tiles
+    if (tile.type === 'forest' && tile.x === 0 && tile.y === 0) {
+      console.log('Forest tile debug:', { selectedTileId, tileOptions });
+    }
+    
     // Trova il tile nell'atlas
     let tileData = null;
     for (const category of Object.values(tilesConfig.categories)) {
@@ -309,6 +314,7 @@ const CanvasMap: React.FC = () => {
     }
     
     if (!tileData) {
+      console.log('Tile non trovato:', selectedTileId, 'tipo:', tile.type);
       drawTileProgrammatic(ctx, tile, x, y, size);
       return;
     }
@@ -413,47 +419,9 @@ const CanvasMap: React.FC = () => {
         break;
 
       case 'mountain':
-        // Base grass per sfondo
-        ctx.fillStyle = '#6FBF3C';
+        // Usa solo sprites dall'atlas, nessun disegno dinamico
+        ctx.fillStyle = '#8D6E63'; // Fallback colore montagna
         ctx.fillRect(x, y, size, size);
-        
-        // Montagna triangolare 3D come nel riferimento
-        const mountainCenterX = x + size / 2;
-        const mountainBase = y + size;
-        const mountainTop = y + Math.floor(size * 0.2);
-        const mountainWidth = Math.max(8, Math.floor(size * 0.8));
-        
-        // Base della montagna - marrone chiaro
-        ctx.fillStyle = '#A0816C';
-        for (let dy = 0; dy < size * 0.8; dy++) {
-          const currentY = mountainBase - dy;
-          const currentWidth = Math.floor(mountainWidth * (1 - dy / (size * 0.8)));
-          if (currentWidth > 0) {
-            ctx.fillRect(mountainCenterX - currentWidth/2, currentY, currentWidth, 1);
-          }
-        }
-        
-        // Lato in ombra (destro) - marrone scuro
-        ctx.fillStyle = '#6D4C41';
-        for (let dy = 0; dy < size * 0.8; dy++) {
-          const currentY = mountainBase - dy;
-          const currentWidth = Math.floor(mountainWidth * (1 - dy / (size * 0.8)));
-          const shadowWidth = Math.max(1, Math.floor(currentWidth / 3));
-          if (currentWidth > 0 && shadowWidth > 0) {
-            ctx.fillRect(mountainCenterX + currentWidth/2 - shadowWidth, currentY, shadowWidth, 1);
-          }
-        }
-        
-        // Lato illuminato (sinistro) - beige chiaro
-        ctx.fillStyle = '#BCAAA4';
-        for (let dy = 0; dy < size * 0.8; dy++) {
-          const currentY = mountainBase - dy;
-          const currentWidth = Math.floor(mountainWidth * (1 - dy / (size * 0.8)));
-          const highlightWidth = Math.max(1, Math.floor(currentWidth / 4));
-          if (currentWidth > 0 && highlightWidth > 0) {
-            ctx.fillRect(mountainCenterX - currentWidth/2, currentY, highlightWidth, 1);
-          }
-        }
         break;
 
       case 'lake':

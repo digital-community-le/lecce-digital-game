@@ -98,7 +98,7 @@
   "terrain_mapping": {
     "grass": ["grass_plain", "grass_flowers_1", "grass_flowers_2", "grass_dark", "grass_light"],
     "forest": ["tree_green_1", "tree_green_2", "tree_autumn_1", "tree_pine_1", "tree_dark"],
-    "mountain": ["mountain_brown_1", "mountain_brown_2", "mountain_gray_1", "rock_small", "cliff_1"],
+    "mountain": ["mountain_brown_1", "mountain_brown_2", "mountain_gray_1", "mountain_gray_2"],
     "lake": ["water_deep", "water_medium", "water_shallow", "water_wave"]
   },
   "biome_variants": {
