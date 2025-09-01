@@ -1,1 +1,1 @@
-export * from './use-game-store.tsx';
+export * from "./use-game-store.tsx";

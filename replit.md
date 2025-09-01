@@ -2,6 +2,16 @@
 
 This is a Progressive Web App (PWA) for the DevFest Lecce 2025 event. It's a retro 8-bit styled interactive game called "Il Sigillo di Lecce" (The Lecce Seal) featuring four distinct challenges in a gamified experience. The application uses a fantasy RPG-style narrative where users collect gems by completing networking, puzzle-solving, debugging, and social media challenges. The app operates in a local-first architecture with optional remote synchronization, designed to work offline and provide an engaging community-building experience for event attendees.
 
+# Recent Changes
+
+## Settembre 2025 - Sistema Mappa Canvas e Documentazione
+- **01/09**: Migrazione completa da CSS tiles a Canvas HTML5 per rendering pixel-perfect
+- **01/09**: Implementata generazione procedurale terreno con 4 tipi (grass, forest, mountain, lake)  
+- **01/09**: Sistema responsive con calcolo dinamico dimensioni e scaling
+- **01/09**: Fix allineamento strade usando coordinate pixel reali invece di griglia fissa
+- **01/09**: Aggiunta documentazione completa JSDoc in italiano per componenti core
+- **01/09**: Creata documentazione sviluppatori completa (README.md, ARCHITECTURE.md, DEVELOPMENT.md, COMPONENTS.md)
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.

@@ -2,7 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { useGameStore } from '@/hooks/use-game-store';
 import { AVATAR_PRESETS } from '@/lib/avatars';
 
+/**
+ * Form per la creazione del profilo utente con selezione avatar
+ * 
+ * Features:
+ * - Validazione nome in tempo reale (2-30 caratteri, solo lettere)
+ * - 8 avatar pixel art pre-caricati (4 maschili + 4 femminili)
+ * - Auto-selezione primo avatar per UX ottimale
+ * - Design responsive NES.css con feedback visivo
+ * - Gestione errori integrata con toast system
+ */
 interface ProfileCreationFormProps {
+  /** Callback chiamata dopo creazione profilo completata */
   onComplete: () => void;
 }
 
@@ -18,6 +29,17 @@ const ProfileCreationForm: React.FC<ProfileCreationFormProps> = ({ onComplete })
     setSelectedAvatar(AVATAR_PRESETS[0].url);
   }, []);
 
+  /**
+   * Valida il nome utente inserito secondo le regole di business
+   * 
+   * Regole:
+   * - Obbligatorio (non vuoto)
+   * - Lunghezza: 2-30 caratteri
+   * - Solo lettere (inclusi accenti italiani) e spazi
+   * 
+   * @param name Nome da validare
+   * @returns Messaggio di errore o stringa vuota se valido
+   */
   const validateName = (name: string): string => {
     if (!name.trim()) return 'Il nome è obbligatorio';
     if (name.trim().length < 2) return 'Il nome deve essere almeno 2 caratteri';
