@@ -66,6 +66,19 @@
   --ldc-on-background: #f7f7f7;
   --ldc-on-surface: #f7f7f7;
   --ldc-border: rgba(255, 255, 255, 0.06);
+
+  /* Full palette overrides for dark theme */
+  --ldc-primary: #9c4b8a; /* brighter on dark */
+  --ldc-primary-dark: #5b1450; /* maintain contrast for shadows */
+  --ldc-secondary: #5a3b98;
+  --ldc-accent: #ff7abf;
+  --ldc-error: #ff6978;
+  --ldc-success: #1fb65a;
+  --ldc-success-dark: #0e7a34;
+  --ldc-warning: #f0b000;
+  --ldc-warning-dark: #b07f00;
+  --ldc-neutral-dark: rgba(255,255,255,0.12);
+  --ldc-focus: #ff7abf;
   
   --background: var(--ldc-background);
   --foreground: var(--ldc-on-background);
@@ -115,6 +128,25 @@
   .nes-btn {
     font-family: var(--ldc-font-title) !important;
     font-size: 12px !important;
+  }
+
+  /* NES button raised-bottom effect using pseudo-element ::after. The visible 'raised'
+     border is simulated with box-shadow; we provide color-specific shadows per variant. */
+  .nes-btn {
+    position: relative;
+    z-index: 1;
+    overflow: visible;
+  }
+
+  .nes-btn::after {
+    /* default subtle shadow for normal buttons */
+    box-shadow: inset -4px -4px rgba(0,0,0,0.3) !important;
+  }
+
+  /* When button is pressed reduce the offset to simulate press */
+  .nes-btn:active::after {
+    box-shadow: inset -4px -4px rgba(0,0,0,0.18) !important;
+    bottom: -3px;
   }
 
   .nes-btn.is-primary {
@@ -281,25 +313,42 @@
     border-color: var(--ldc-border) !important;
   }
 
-  /* FAB styling */
-  .fab {
+  /* Floating action button: use NES.css button look, override only color/position */
+  .fab-nes {
     position: fixed;
-    bottom: 2rem;
-    right: 2rem;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    z-index: 40;
     width: 56px;
     height: 56px;
-    border-radius: 50%;
-    background-color: var(--ldc-primary);
-    color: white;
-    border: none;
-    box-shadow: 0 4px 12px hsla(0, 0%, 0%, 0.3);
-    cursor: pointer;
-    z-index: 40;
-    transition: transform var(--ldc-transition-fast);
+    padding: 0.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  .fab:hover {
-    transform: scale(1.1);
+  /* Keep NES visual, but override background color to match the theme */
+  .fab-nes.nes-btn.is-primary {
+    background-color: var(--ldc-primary) !important;
+    border-color: var(--ldc-primary) !important;
+    color: white !important;
+  }
+
+  .fab-nes .icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Strong visible focus ring for keyboard users */
+  .fab-nes:focus {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(200, 56, 128, 0.25), 0 2px 6px rgba(0,0,0,0.2);
+    transform: translateY(-1px);
+  }
+
+  /* Ensure keyboard can activate via Enter/Space (semantic button handles this natively) */
+  .fab-nes:active {
+    transform: translateY(0);
   }
 
   /* Progress bar custom styling */
