@@ -3,10 +3,11 @@ import { useLocation } from 'wouter';
 import { useGameStore } from '@/hooks/use-game-store';
 import { MapNode } from '@/types/game';
 
-// Import tileset assets
-import terrainTilesetUrl from '@assets/generated_images/Base_terrain_tiles_sheet_3cc582ed.png';
-import treeTilesetUrl from '@assets/generated_images/Tree_variations_sprite_sheet_57fd4957.png';
-import mountainTilesetUrl from '@assets/generated_images/Mountains_and_roads_sheet_6aa0a455.png';
+// Import custom sprite assets provided by user
+import treeSpriteUrl from '@assets/image_1756761540584.png';
+import mountainSpriteUrl from '@assets/image_1756761545372.png';
+import grassSpriteUrl from '@assets/image_1756761550096.png';
+import roadSpriteUrl from '@assets/image_1756761554169.png';
 
 /**
  * CanvasMap Component - Sistema di mappa retro 8-bit basato su Canvas HTML5
@@ -46,16 +47,18 @@ const CanvasMap: React.FC = () => {
   const [, setLocation] = useLocation();
   const { gameState, showToast } = useGameStore();
   
-  // Stato per gestire il caricamento dei tileset
-  const [tilesetsLoaded, setTilesetsLoaded] = useState(false);
-  const [tilesets, setTilesets] = useState<{
-    terrain: HTMLImageElement | null;
+  // Stato per gestire il caricamento degli sprite
+  const [spritesLoaded, setSpritesLoaded] = useState(false);
+  const [sprites, setSprites] = useState<{
     trees: HTMLImageElement | null;
     mountains: HTMLImageElement | null;
+    grass: HTMLImageElement | null;
+    roads: HTMLImageElement | null;
   }>({
-    terrain: null,
     trees: null,
-    mountains: null
+    mountains: null,
+    grass: null,
+    roads: null
   });
 
   /** Dimensione di ogni tile in pixel - ridotta per forme più smussate */
@@ -67,30 +70,32 @@ const CanvasMap: React.FC = () => {
   /** Altezza griglia mappa (numero di tile verticali) - bilanciata per dettaglio e visibilità */
   const MAP_HEIGHT = 36;
 
-  // Carica i tileset al mount del componente
+  // Carica gli sprite al mount del componente
   useEffect(() => {
-    const loadTilesets = async () => {
+    const loadSprites = async () => {
       try {
-        const [terrainImg, treesImg, mountainsImg] = await Promise.all([
-          loadImage(terrainTilesetUrl),
-          loadImage(treeTilesetUrl), 
-          loadImage(mountainTilesetUrl)
+        const [treesImg, mountainsImg, grassImg, roadsImg] = await Promise.all([
+          loadImage(treeSpriteUrl),
+          loadImage(mountainSpriteUrl),
+          loadImage(grassSpriteUrl),
+          loadImage(roadSpriteUrl)
         ]);
         
-        setTilesets({
-          terrain: terrainImg,
+        setSprites({
           trees: treesImg,
-          mountains: mountainsImg
+          mountains: mountainsImg,
+          grass: grassImg,
+          roads: roadsImg
         });
-        setTilesetsLoaded(true);
+        setSpritesLoaded(true);
       } catch (error) {
-        console.error('Errore nel caricamento dei tileset:', error);
+        console.error('Errore nel caricamento degli sprite:', error);
         // Fallback al sistema di disegno programmatico
-        setTilesetsLoaded(false);
+        setSpritesLoaded(false);
       }
     };
     
-    loadTilesets();
+    loadSprites();
   }, []);
 
   // Helper function per caricare immagini
@@ -270,8 +275,8 @@ const CanvasMap: React.FC = () => {
    * @param size Dimensione del tile in pixel
    */
   const drawTileResponsive = (ctx: CanvasRenderingContext2D, tile: MapTile, x: number, y: number, size: number) => {
-    // Se i tileset sono caricati, usa gli sprite
-    if (tilesetsLoaded && tilesets.terrain && tilesets.trees && tilesets.mountains) {
+    // Se gli sprite sono caricati, usali
+    if (spritesLoaded && sprites.trees && sprites.mountains && sprites.grass && sprites.roads) {
       drawTileFromSprite(ctx, tile, x, y, size);
       return;
     }
@@ -281,48 +286,56 @@ const CanvasMap: React.FC = () => {
   };
 
   /**
-   * Disegna tile usando sprite dai tileset
+   * Disegna tile usando i nuovi sprite personalizzati
    */
   const drawTileFromSprite = (ctx: CanvasRenderingContext2D, tile: MapTile, x: number, y: number, size: number) => {
     let sourceImage: HTMLImageElement;
-    let spriteX = 0, spriteY = 0;
+    let spriteX = 0, spriteY = 0, spriteWidth = 64, spriteHeight = 64;
 
     switch (tile.type) {
       case 'grass':
-        sourceImage = tilesets.terrain!;
-        // Usa diverse varianti di erba (primi 4 tile della griglia 4x4)
-        const grassVariant = (tile.x + tile.y) % 4;
-        spriteX = grassVariant * SPRITE_TILE_SIZE;
-        spriteY = 0;
+        sourceImage = sprites.grass!;
+        // Usa le 7 varianti di ciuffi d'erba (disposte in 2 righe)
+        const grassVariant = (tile.x + tile.y * 3) % 7;
+        if (grassVariant < 4) {
+          // Prima riga - 4 sprite
+          spriteX = grassVariant * 64;
+          spriteY = 0;
+        } else {
+          // Seconda riga - 3 sprite
+          spriteX = (grassVariant - 4) * 64;
+          spriteY = 64;
+        }
         break;
         
       case 'forest':
-        sourceImage = tilesets.trees!;
-        // Usa diverse varianti di alberi (primi 8 tile della griglia 4x4)
-        const treeVariant = (tile.x * 3 + tile.y * 5) % 8;
-        spriteX = (treeVariant % 4) * SPRITE_TILE_SIZE;
-        spriteY = Math.floor(treeVariant / 4) * SPRITE_TILE_SIZE;
+        sourceImage = sprites.trees!;
+        // Usa le 10 varianti di alberi (disposte in 2 righe da 5)
+        const treeVariant = (tile.x * 3 + tile.y * 5) % 10;
+        spriteX = (treeVariant % 5) * 64;
+        spriteY = Math.floor(treeVariant / 5) * 64;
         break;
         
       case 'mountain':
-        sourceImage = tilesets.mountains!;
-        // Usa diverse varianti di montagne (primi 4 tile)
+        sourceImage = sprites.mountains!;
+        // Usa le 4 varianti di montagne (2x2)
         const mountainVariant = (tile.x + tile.y * 2) % 4;
-        spriteX = mountainVariant * SPRITE_TILE_SIZE;
-        spriteY = 0;
+        spriteX = (mountainVariant % 2) * 128;
+        spriteY = Math.floor(mountainVariant / 2) * 128;
+        spriteWidth = 128;
+        spriteHeight = 128;
         break;
         
       case 'lake':
-        sourceImage = tilesets.terrain!;
-        // Usa tile di acqua (ultima riga della griglia terrain)
-        const waterVariant = (tile.x + tile.y) % 4;
-        spriteX = waterVariant * SPRITE_TILE_SIZE;
-        spriteY = 3 * SPRITE_TILE_SIZE; // Ultima riga
+        // Per ora usa erba come fallback per l'acqua
+        sourceImage = sprites.grass!;
+        spriteX = 0;
+        spriteY = 0;
         break;
         
       default:
         // Default grass
-        sourceImage = tilesets.terrain!;
+        sourceImage = sprites.grass!;
         spriteX = 0;
         spriteY = 0;
     }
@@ -330,7 +343,7 @@ const CanvasMap: React.FC = () => {
     // Disegna lo sprite scalato alla dimensione del tile
     ctx.drawImage(
       sourceImage,
-      spriteX, spriteY, SPRITE_TILE_SIZE, SPRITE_TILE_SIZE, // Sorgente
+      spriteX, spriteY, spriteWidth, spriteHeight, // Sorgente
       x, y, size, size // Destinazione scalata
     );
   };
@@ -654,7 +667,7 @@ const CanvasMap: React.FC = () => {
     
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [gameState.challenges, tilesetsLoaded]); // Redraw when challenges change or tilesets load
+  }, [gameState.challenges, spritesLoaded]); // Redraw when challenges change or sprites load
 
   const getNodeClassName = (node: MapNode): string => {
     const baseClass = 'map-node';
