@@ -23,9 +23,9 @@ const CanvasMap: React.FC = () => {
   const [, setLocation] = useLocation();
   const { gameState, showToast } = useGameStore();
 
-  const TILE_SIZE = 32; // Pixel size for each tile
-  const MAP_WIDTH = 24; // Grid width
-  const MAP_HEIGHT = 18; // Grid height
+  const TILE_SIZE = 16; // Pixel size for each tile (smaller for smoother shapes)
+  const MAP_WIDTH = 48; // Grid width (more tiles)
+  const MAP_HEIGHT = 36; // Grid height (more tiles)
 
   // Generate terrain tiles
   const generateTerrainTiles = (): MapTile[] => {
@@ -36,19 +36,19 @@ const CanvasMap: React.FC = () => {
         let tileType: TerrainType = 'grass'; // Default
         
         // Forest areas (top-left quadrant and bottom-left)
-        if ((x < 8 && y < 6) || (x < 6 && y > 12)) {
+        if ((x < 16 && y < 12) || (x < 12 && y > 24)) {
           tileType = 'forest';
         }
         // Mountain range (top-center and top-right)
-        else if (y < 4 && x > 10 && x < 20) {
+        else if (y < 8 && x > 20 && x < 40) {
           tileType = 'mountain';
         }
         // Lake (bottom-right corner)
-        else if (x > 18 && y > 13) {
+        else if (x > 36 && y > 26) {
           tileType = 'lake';
         }
         // Add some scattered forest patches deterministically
-        else if ((x + y) % 7 === 0 && x > 5 && x < 18 && y > 8) {
+        else if ((x + y) % 14 === 0 && x > 10 && x < 36 && y > 16) {
           tileType = 'forest';
         }
         
@@ -80,36 +80,39 @@ const CanvasMap: React.FC = () => {
     return paths;
   };
 
-  // Draw individual tile on canvas
-  const drawTile = (ctx: CanvasRenderingContext2D, tile: MapTile) => {
-    const x = tile.x * TILE_SIZE;
-    const y = tile.y * TILE_SIZE;
+  // Draw individual tile on canvas (responsive version)
+  const drawTileResponsive = (ctx: CanvasRenderingContext2D, tile: MapTile, x: number, y: number, size: number) => {
 
     switch (tile.type) {
       case 'grass':
         // Green grass with random dots
         ctx.fillStyle = '#22c55e';
-        ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+        ctx.fillRect(x, y, size, size);
         ctx.fillStyle = '#16a34a';
-        for (let i = 0; i < 8; i++) {
-          const dotX = x + ((tile.x * 7 + tile.y * 3 + i) % TILE_SIZE);
-          const dotY = y + ((tile.y * 5 + tile.x * 2 + i) % TILE_SIZE);
-          ctx.fillRect(dotX, dotY, 2, 2);
+        const dotCount = Math.max(4, Math.floor(size / 4));
+        for (let i = 0; i < dotCount; i++) {
+          const dotX = x + ((tile.x * 7 + tile.y * 3 + i) % size);
+          const dotY = y + ((tile.y * 5 + tile.x * 2 + i) % size);
+          const dotSize = Math.max(1, Math.floor(size / 16));
+          ctx.fillRect(dotX, dotY, dotSize, dotSize);
         }
         break;
 
       case 'forest':
         // Dark green with tree-like patterns
         ctx.fillStyle = '#166534';
-        ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+        ctx.fillRect(x, y, size, size);
         ctx.fillStyle = '#052e16';
-        // Draw tree trunks
-        for (let i = 0; i < 4; i++) {
-          const treeX = x + ((tile.x * 11 + i * 7) % (TILE_SIZE - 8));
-          const treeY = y + ((tile.y * 13 + i * 5) % (TILE_SIZE - 12));
-          ctx.fillRect(treeX, treeY + 8, 4, 8);
+        // Draw tree trunks (responsive)
+        const treeCount = Math.max(2, Math.floor(size / 8));
+        for (let i = 0; i < treeCount; i++) {
+          const treeX = x + ((tile.x * 11 + i * 7) % (size - size/4));
+          const treeY = y + ((tile.y * 13 + i * 5) % (size - size/3));
+          const trunkWidth = Math.max(2, Math.floor(size / 8));
+          const trunkHeight = Math.max(4, Math.floor(size / 4));
+          ctx.fillRect(treeX, treeY + trunkHeight, trunkWidth, trunkHeight);
           ctx.fillStyle = '#15803d';
-          ctx.fillRect(treeX - 2, treeY, 8, 8);
+          ctx.fillRect(treeX - trunkWidth/2, treeY, trunkWidth * 2, trunkHeight);
           ctx.fillStyle = '#052e16';
         }
         break;
@@ -117,14 +120,16 @@ const CanvasMap: React.FC = () => {
       case 'mountain':
         // Gray rocky texture
         ctx.fillStyle = '#6b7280';
-        ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+        ctx.fillRect(x, y, size, size);
         ctx.fillStyle = '#374151';
-        // Rocky pattern
-        for (let i = 0; i < 16; i++) {
-          const rockX = x + ((tile.x * 17 + tile.y * 11 + i) % TILE_SIZE);
-          const rockY = y + ((tile.y * 19 + tile.x * 7 + i) % TILE_SIZE);
+        // Rocky pattern (responsive)
+        const rockCount = Math.max(8, Math.floor(size * size / 32));
+        for (let i = 0; i < rockCount; i++) {
+          const rockX = x + ((tile.x * 17 + tile.y * 11 + i) % size);
+          const rockY = y + ((tile.y * 19 + tile.x * 7 + i) % size);
           if ((rockX + rockY) % 8 < 4) {
-            ctx.fillRect(rockX, rockY, 2, 2);
+            const rockSize = Math.max(1, Math.floor(size / 16));
+            ctx.fillRect(rockX, rockY, rockSize, rockSize);
           }
         }
         break;
@@ -132,60 +137,67 @@ const CanvasMap: React.FC = () => {
       case 'lake':
         // Blue water with shimmer effect
         ctx.fillStyle = '#3b82f6';
-        ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+        ctx.fillRect(x, y, size, size);
         ctx.fillStyle = '#1d4ed8';
-        // Water ripples
-        for (let i = 0; i < 6; i++) {
-          const rippleX = x + ((tile.x * 23 + i * 9) % (TILE_SIZE - 4));
-          const rippleY = y + ((tile.y * 29 + i * 7) % (TILE_SIZE - 4));
-          ctx.fillRect(rippleX, rippleY, 3, 1);
-          ctx.fillRect(rippleX + 1, rippleY + 2, 1, 3);
+        // Water ripples (responsive)
+        const rippleCount = Math.max(3, Math.floor(size / 6));
+        for (let i = 0; i < rippleCount; i++) {
+          const rippleX = x + ((tile.x * 23 + i * 9) % (size - 4));
+          const rippleY = y + ((tile.y * 29 + i * 7) % (size - 4));
+          const rippleSize = Math.max(1, Math.floor(size / 16));
+          ctx.fillRect(rippleX, rippleY, rippleSize * 3, rippleSize);
+          ctx.fillRect(rippleX + rippleSize, rippleY + rippleSize * 2, rippleSize, rippleSize * 3);
         }
         break;
 
       case 'road':
         // Brown dirt road
         ctx.fillStyle = '#8B4513';
-        ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+        ctx.fillRect(x, y, size, size);
         ctx.fillStyle = '#654321';
-        // Road texture
-        for (let i = 0; i < 12; i++) {
-          const dotX = x + ((tile.x * 31 + i * 13) % TILE_SIZE);
-          const dotY = y + ((tile.y * 37 + i * 11) % TILE_SIZE);
-          ctx.fillRect(dotX, dotY, 1, 1);
+        // Road texture (responsive)
+        const roadDotCount = Math.max(6, Math.floor(size / 3));
+        for (let i = 0; i < roadDotCount; i++) {
+          const dotX = x + ((tile.x * 31 + i * 13) % size);
+          const dotY = y + ((tile.y * 37 + i * 11) % size);
+          const dotSize = Math.max(1, Math.floor(size / 32));
+          ctx.fillRect(dotX, dotY, dotSize, dotSize);
         }
         break;
     }
   };
 
-  // Draw road connecting two points
-  const drawRoad = (ctx: CanvasRenderingContext2D, path: PathSegment) => {
-    const startX = path.fromX * TILE_SIZE + TILE_SIZE / 2;
-    const startY = path.fromY * TILE_SIZE + TILE_SIZE / 2;
-    const endX = path.toX * TILE_SIZE + TILE_SIZE / 2;
-    const endY = path.toY * TILE_SIZE + TILE_SIZE / 2;
+  // Draw road connecting two points (responsive version)
+  const drawRoadResponsive = (ctx: CanvasRenderingContext2D, path: PathSegment, tileSize: number) => {
+    const startX = path.fromX * tileSize + tileSize / 2;
+    const startY = path.fromY * tileSize + tileSize / 2;
+    const endX = path.toX * tileSize + tileSize / 2;
+    const endY = path.toY * tileSize + tileSize / 2;
 
-    // Draw road path
-    ctx.strokeStyle = '#8B4513';
-    ctx.lineWidth = 12;
+    // Responsive road width
+    const roadWidth = Math.max(6, Math.floor(tileSize / 3));
+    const borderWidth = Math.max(8, Math.floor(tileSize / 2));
+
+    // Draw road border (darker)
+    ctx.strokeStyle = '#654321';
+    ctx.lineWidth = borderWidth;
     ctx.lineCap = 'round';
     ctx.beginPath();
     ctx.moveTo(startX, startY);
     ctx.lineTo(endX, endY);
     ctx.stroke();
 
-    // Draw road border
-    ctx.strokeStyle = '#654321';
-    ctx.lineWidth = 16;
-    ctx.globalCompositeOperation = 'destination-over';
+    // Draw road path (lighter)
+    ctx.strokeStyle = '#8B4513';
+    ctx.lineWidth = roadWidth;
+    ctx.lineCap = 'round';
     ctx.beginPath();
     ctx.moveTo(startX, startY);
     ctx.lineTo(endX, endY);
     ctx.stroke();
-    ctx.globalCompositeOperation = 'source-over';
   };
 
-  // Main drawing function
+  // Main drawing function with responsive sizing
   const drawMap = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -193,24 +205,59 @@ const CanvasMap: React.FC = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Set canvas size
-    canvas.width = MAP_WIDTH * TILE_SIZE;
-    canvas.height = MAP_HEIGHT * TILE_SIZE;
+    // Get container dimensions for responsive sizing
+    const container = canvas.parentElement;
+    if (!container) return;
+
+    const containerWidth = container.clientWidth;
+    const containerHeight = container.clientHeight || window.innerHeight - 48; // Account for header
+
+    // Set canvas display size (CSS)
+    canvas.style.width = `${containerWidth}px`;
+    canvas.style.height = `${containerHeight}px`;
+
+    // Set canvas actual size (for drawing)
+    const pixelRatio = window.devicePixelRatio || 1;
+    canvas.width = containerWidth * pixelRatio;
+    canvas.height = containerHeight * pixelRatio;
+
+    // Scale context for high DPI
+    ctx.scale(pixelRatio, pixelRatio);
+
+    // Disable image smoothing for pixel-perfect rendering
+    ctx.imageSmoothingEnabled = false;
+
+    // Calculate tile size based on container
+    const tileWidth = containerWidth / MAP_WIDTH;
+    const tileHeight = containerHeight / MAP_HEIGHT;
+    const actualTileSize = Math.min(tileWidth, tileHeight);
 
     // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, containerWidth, containerHeight);
 
     // Generate and draw terrain
     const terrainTiles = generateTerrainTiles();
-    terrainTiles.forEach(tile => drawTile(ctx, tile));
+    terrainTiles.forEach(tile => {
+      const tileX = tile.x * actualTileSize;
+      const tileY = tile.y * actualTileSize;
+      drawTileResponsive(ctx, tile, tileX, tileY, actualTileSize);
+    });
 
     // Generate and draw roads
     const roadPaths = generatePaths();
-    roadPaths.forEach(path => drawRoad(ctx, path));
+    roadPaths.forEach(path => drawRoadResponsive(ctx, path, actualTileSize));
   };
 
   useEffect(() => {
     drawMap();
+    
+    // Redraw on window resize for responsiveness
+    const handleResize = () => {
+      setTimeout(drawMap, 100); // Debounce resize
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, [gameState.challenges]); // Redraw when challenges change
 
   const getNodeClassName = (node: MapNode): string => {

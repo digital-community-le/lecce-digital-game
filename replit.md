@@ -5,6 +5,7 @@ This is a Progressive Web App (PWA) for the DevFest Lecce 2025 event. It's a ret
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
+Write documentation both in code and in markdown files
 
 # System Architecture
 
