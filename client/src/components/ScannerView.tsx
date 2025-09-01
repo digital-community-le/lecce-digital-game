@@ -132,28 +132,9 @@ const ScannerView: React.FC = () => {
 
   return (
     <div className="scanner-overlay" data-testid="scanner-view">
-      <div className="relative w-full h-full">
-        {/* Camera viewport */}
-        <video 
-          ref={videoRef}
-          className="w-full h-full object-cover" 
-          autoPlay 
-          playsInline
-          data-testid="camera-preview"
-        />
-        
-        {/* Scanner UI overlay */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="scanner-viewfinder relative" data-testid="scanner-viewfinder">
-            <div className="absolute -top-1 -left-1 w-8 h-8 border-t-4 border-l-4 border-yellow-400"></div>
-            <div className="absolute -top-1 -right-1 w-8 h-8 border-t-4 border-r-4 border-yellow-400"></div>
-            <div className="absolute -bottom-1 -left-1 w-8 h-8 border-b-4 border-l-4 border-yellow-400"></div>
-            <div className="absolute -bottom-1 -right-1 w-8 h-8 border-b-4 border-r-4 border-yellow-400"></div>
-          </div>
-        </div>
-        
+      <div className="relative w-full h-full flex flex-col justify-evenly">
         {/* Instructions */}
-        <div className="absolute bottom-32 left-0 right-0 text-center text-white">
+        <div className="text-center text-white">
           <p className="font-retro text-sm mb-4" data-testid="scanner-instructions">
             Inquadra il QR di un partecipante
           </p>
@@ -161,9 +142,30 @@ const ScannerView: React.FC = () => {
             <p className="text-xs">Scansionando...</p>
           )}
         </div>
+
+        <div className="relative">
+          {/* Camera viewport */}
+          <video 
+            ref={videoRef}
+            className="object-cover" 
+            autoPlay 
+            playsInline
+            data-testid="camera-preview"
+          />
+
+          {/* Scanner UI overlay */}
+          <div className="inset-0 flex items-center justify-center absolute pointer-events-none top-0 left-0 w-full h-full">
+            <div className="scanner-viewfinder" data-testid="scanner-viewfinder">
+              <div className="absolute -top-1 -left-1 w-8 h-8 border-t-4 border-l-4 border-yellow-400"></div>
+              <div className="absolute -top-1 -right-1 w-8 h-8 border-t-4 border-r-4 border-yellow-400"></div>
+              <div className="absolute -bottom-1 -left-1 w-8 h-8 border-b-4 border-l-4 border-yellow-400"></div>
+              <div className="absolute -bottom-1 -right-1 w-8 h-8 border-b-4 border-r-4 border-yellow-400"></div>
+            </div>
+          </div>
+        </div>
         
         {/* Controls */}
-        <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-4">
+        <div className="flex justify-center gap-4">
           <button 
             className="nes-btn is-error" 
             onClick={handleClose}

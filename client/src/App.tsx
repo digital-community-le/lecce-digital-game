@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import IntroPage from "@/pages/Intro";
 import GameMapPage from "@/pages/GameMap";
+import ScannerView from '@/components/ScannerView';
+import ScanPreviewModal from '@/components/ScanPreviewModal';
 import NetworkingForestPage from "@/pages/challenges/NetworkingForest";
 import RetroPuzzlePage from "@/pages/challenges/RetroPuzzle";
 import DebugDungeonPage from "@/pages/challenges/DebugDungeon";
@@ -25,12 +27,19 @@ function Router() {
   );
 }
 
+import { GameStoreProvider } from '@/hooks/use-game-store';
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Router />
+        <GameStoreProvider>
+          <Toaster />
+          <Router />
+          {/* Global scanner + preview mounted at app root so any page can open them */}
+          <ScannerView />
+          <ScanPreviewModal />
+        </GameStoreProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

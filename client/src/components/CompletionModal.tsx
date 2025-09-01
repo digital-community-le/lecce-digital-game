@@ -2,7 +2,7 @@ import React from 'react';
 import { useGameStore } from '@/hooks/use-game-store';
 
 const CompletionModal: React.FC = () => {
-  const { modals, closeModal, gameState } = useGameStore();
+  const { modals, closeModal, openModal, gameState } = useGameStore();
   const isOpen = modals.completion?.isOpen;
   const completionData = modals.completion?.data;
 
