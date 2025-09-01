@@ -144,8 +144,6 @@ const RetroPuzzle: React.FC = () => {
 
   return (
     <div>
-      <p className="title bg-card">Retro Puzzle</p>
-      
       <div className="p-4">
         {/* Challenge description */}
         <div className="mb-6">

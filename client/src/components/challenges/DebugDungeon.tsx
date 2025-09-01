@@ -232,8 +232,6 @@ const DebugDungeon: React.FC = () => {
     
     return (
       <div>
-        <p className="title bg-card">Debug Dungeon</p>
-        
         <div className="p-4">
           <div className="text-center">
             <div className={`nes-container p-4 mb-4 ${passed ? 'is-success' : 'is-error'}`}>

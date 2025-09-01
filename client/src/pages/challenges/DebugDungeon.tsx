@@ -24,6 +24,18 @@ const DebugDungeonPage: React.FC = () => {
     <div className="min-h-screen bg-background text-foreground">
       <Header />
       <main className="container mx-auto px-4 py-8">
+        {/* Page header: back to map + challenge title */}
+        <div className="flex items-center gap-4 mb-6">
+          <button
+            className="nes-btn is-normal"
+            onClick={() => setLocation('/game')}
+            aria-label="Torna alla mappa"
+            data-testid="button-back-to-map"
+          >
+            <i className="nes-icon caret-left is-small" aria-hidden="true" />
+          </button>
+          <h1 className="text-lg font-retro" data-testid="challenge-title">{challenge.title}</h1>
+        </div>
         <DebugDungeonChallenge />
       </main>
     </div>

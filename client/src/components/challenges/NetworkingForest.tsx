@@ -49,8 +49,6 @@ const NetworkingForest: React.FC = () => {
 
   return (
     <div>
-      <p className="title bg-card">Networking Forest</p>
-      
       <div className="p-4">
         {/* Challenge description */}
         <div className="mb-6">
