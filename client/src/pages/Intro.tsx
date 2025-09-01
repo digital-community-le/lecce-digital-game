@@ -15,7 +15,6 @@ const IntroPage: React.FC = () => {
   useEffect(() => {
     // Check if user already has a profile
     if (gameState.currentUser.userId) {
-      console.log('User already has profile, redirecting to /game:', gameState.currentUser);
       setLocation('/game');
       return;
     }
@@ -41,7 +40,6 @@ const IntroPage: React.FC = () => {
   };
 
   const handleProfileComplete = () => {
-    console.log('Profile completed, navigating to /game');
     setLocation('/game');
   };
 
