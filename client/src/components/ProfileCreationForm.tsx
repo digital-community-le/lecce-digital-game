@@ -47,10 +47,12 @@ const ProfileCreationForm: React.FC<ProfileCreationFormProps> = ({ onComplete })
     try {
       await saveProfile(trimmedName, selectedAvatar);
       showToast('Profilo creato con successo!', 'success');
-      onComplete();
+      // Small delay to ensure state is updated before completing
+      setTimeout(() => {
+        onComplete();
+      }, 100);
     } catch (error) {
       showToast('Errore nella creazione del profilo', 'error');
-    } finally {
       setIsLoading(false);
     }
   };
