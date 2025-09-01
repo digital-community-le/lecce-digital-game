@@ -251,33 +251,43 @@ const CanvasMap: React.FC = () => {
         ctx.fillStyle = '#7ed321';
         ctx.fillRect(x, y, size, size);
         
-        // Chioma dell'albero - circolare stilizzata
-        ctx.fillStyle = '#2d8a2f';
-        const treeSize = Math.max(8, Math.floor(size * 0.8));
+        // Albero più organico come nel riferimento
         const treeCenterX = x + size / 2;
         const treeCenterY = y + size / 2;
+        const treeSize = Math.max(8, Math.floor(size * 0.7));
         
-        // Disegna chioma come quadrato arrotondato
-        ctx.fillRect(treeCenterX - treeSize/2, treeCenterY - treeSize/2, treeSize, treeSize);
-        
-        // Tronco marrone semplice
+        // Tronco marrone per primo (più spesso)
         ctx.fillStyle = '#8b4513';
-        const trunkWidth = Math.max(2, Math.floor(treeSize / 4));
-        const trunkHeight = Math.max(3, Math.floor(treeSize / 3));
-        ctx.fillRect(treeCenterX - trunkWidth/2, treeCenterY + treeSize/2 - 2, trunkWidth, trunkHeight);
+        const trunkWidth = Math.max(3, Math.floor(treeSize / 3));
+        const trunkHeight = Math.max(4, Math.floor(treeSize / 2));
+        ctx.fillRect(treeCenterX - trunkWidth/2, treeCenterY + treeSize/4, trunkWidth, trunkHeight);
         
-        // Dettagli chioma per profondità
+        // Chioma principale - forma più organica
+        ctx.fillStyle = '#2d8a2f';
+        // Centro della chioma
+        ctx.fillRect(treeCenterX - treeSize/2, treeCenterY - treeSize/3, treeSize, Math.floor(treeSize * 0.8));
+        
+        // Espansioni laterali per forma più naturale
+        const expansionSize = Math.floor(treeSize * 0.3);
+        ctx.fillRect(treeCenterX - treeSize/2 - expansionSize/2, treeCenterY - treeSize/6, expansionSize, Math.floor(treeSize * 0.5));
+        ctx.fillRect(treeCenterX + treeSize/2 - expansionSize/2, treeCenterY - treeSize/6, expansionSize, Math.floor(treeSize * 0.5));
+        
+        // Parte superiore della chioma (più piccola)
+        ctx.fillRect(treeCenterX - treeSize/3, treeCenterY - treeSize/2, Math.floor(treeSize * 0.6), Math.floor(treeSize * 0.4));
+        
+        // Dettagli scuri per profondità
         ctx.fillStyle = '#1f5f21';
-        const detailSize = Math.max(2, Math.floor(treeSize / 6));
-        for (let i = 0; i < 3; i++) {
-          const detailX = treeCenterX - treeSize/4 + (i * detailSize * 2);
-          const detailY = treeCenterY - treeSize/4 + ((i % 2) * detailSize);
-          ctx.fillRect(detailX, detailY, detailSize, detailSize);
-        }
+        const detailSize = Math.max(1, Math.floor(size / 8));
+        // Ombreggiature sui lati
+        ctx.fillRect(treeCenterX - treeSize/2, treeCenterY - treeSize/6, detailSize, Math.floor(treeSize * 0.4));
+        ctx.fillRect(treeCenterX + treeSize/2 - detailSize, treeCenterY - treeSize/6, detailSize, Math.floor(treeSize * 0.4));
+        // Ombreggiatura sotto
+        ctx.fillRect(treeCenterX - treeSize/3, treeCenterY + treeSize/4 - detailSize, Math.floor(treeSize * 0.6), detailSize);
         
-        // Highlight chioma
+        // Highlight verde chiaro sulla chioma
         ctx.fillStyle = '#45a049';
-        ctx.fillRect(treeCenterX - treeSize/4, treeCenterY - treeSize/3, treeSize/3, treeSize/4);
+        const highlightSize = Math.floor(treeSize * 0.3);
+        ctx.fillRect(treeCenterX - highlightSize/2, treeCenterY - treeSize/4, highlightSize, Math.floor(highlightSize * 0.8));
         break;
 
       case 'mountain':
