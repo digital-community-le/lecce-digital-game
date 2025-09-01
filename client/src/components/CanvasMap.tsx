@@ -3,19 +3,37 @@ import { useLocation } from 'wouter';
 import { useGameStore } from '@/hooks/use-game-store';
 import { MapNode } from '@/types/game';
 
+/**
+ * CanvasMap Component - Sistema di mappa retro 8-bit basato su Canvas HTML5
+ * 
+ * Questo componente genera e renderizza una mappa di gioco dinamica utilizzando
+ * Canvas HTML5 per disegnare tile di terreno in stile pixel art. La mappa è
+ * completamente responsive e si adatta a qualsiasi dimensione schermo.
+ * 
+ * Caratteristiche principali:
+ * - Tile di terreno generati proceduralmente (prati, bosco, montagne, laghi)
+ * - Strade sterrate che collegano dinamicamente i nodi delle sfide
+ * - Rendering pixel-perfect con stile retro 8-bit
+ * - Completamente responsive e ottimizzato per dispositivi mobili
+ * - Overlay interattivo per nodi delle sfide e avatar del giocatore
+ */
+
+/** Tipi di terreno supportati dalla mappa */
 type TerrainType = 'grass' | 'forest' | 'mountain' | 'lake' | 'road';
 
+/** Singolo tile di terreno con posizione e tipo */
 interface MapTile {
-  x: number;
-  y: number;
-  type: TerrainType;
+  x: number; // Coordinata X nella griglia
+  y: number; // Coordinata Y nella griglia
+  type: TerrainType; // Tipo di terreno
 }
 
+/** Segmento di strada che collega due punti */
 interface PathSegment {
-  fromX: number;
-  fromY: number;
-  toX: number;
-  toY: number;
+  fromX: number; // Coordinate pixel di partenza X
+  fromY: number; // Coordinate pixel di partenza Y
+  toX: number;   // Coordinate pixel di arrivo X
+  toY: number;   // Coordinate pixel di arrivo Y
 }
 
 const CanvasMap: React.FC = () => {
