@@ -59,8 +59,8 @@ const CanvasMap: React.FC = () => {
     return tiles;
   };
 
-  // Generate paths connecting challenge nodes
-  const generatePaths = (): PathSegment[] => {
+  // Generate paths connecting challenge nodes using real pixel positions
+  const generatePaths = (canvasWidth: number, canvasHeight: number): PathSegment[] => {
     const paths: PathSegment[] = [];
     const challenges = gameState.challenges;
     
@@ -68,11 +68,11 @@ const CanvasMap: React.FC = () => {
       const current = challenges[i];
       const next = challenges[i + 1];
       
-      // Convert percentage positions to grid coordinates
-      const fromX = Math.round((parseFloat(current.position.left.replace('%', '')) / 100) * MAP_WIDTH);
-      const fromY = Math.round((parseFloat(current.position.top.replace('%', '')) / 100) * MAP_HEIGHT);
-      const toX = Math.round((parseFloat(next.position.left.replace('%', '')) / 100) * MAP_WIDTH);
-      const toY = Math.round((parseFloat(next.position.top.replace('%', '')) / 100) * MAP_HEIGHT);
+      // Convert percentage positions to actual canvas pixel coordinates
+      const fromX = (parseFloat(current.position.left.replace('%', '')) / 100) * canvasWidth;
+      const fromY = (parseFloat(current.position.top.replace('%', '')) / 100) * canvasHeight;
+      const toX = (parseFloat(next.position.left.replace('%', '')) / 100) * canvasWidth;
+      const toY = (parseFloat(next.position.top.replace('%', '')) / 100) * canvasHeight;
       
       paths.push({ fromX, fromY, toX, toY });
     }
@@ -167,16 +167,17 @@ const CanvasMap: React.FC = () => {
     }
   };
 
-  // Draw road connecting two points (responsive version)
-  const drawRoadResponsive = (ctx: CanvasRenderingContext2D, path: PathSegment, tileSize: number) => {
-    const startX = path.fromX * tileSize + tileSize / 2;
-    const startY = path.fromY * tileSize + tileSize / 2;
-    const endX = path.toX * tileSize + tileSize / 2;
-    const endY = path.toY * tileSize + tileSize / 2;
+  // Draw road connecting two points using actual pixel coordinates
+  const drawRoadResponsive = (ctx: CanvasRenderingContext2D, path: PathSegment) => {
+    // Path coordinates are already in pixel positions
+    const startX = path.fromX + 40; // Offset to center of node (80px node / 2)
+    const startY = path.fromY + 40;
+    const endX = path.toX + 40;
+    const endY = path.toY + 40;
 
-    // Responsive road width
-    const roadWidth = Math.max(6, Math.floor(tileSize / 3));
-    const borderWidth = Math.max(8, Math.floor(tileSize / 2));
+    // Responsive road width based on screen size
+    const roadWidth = Math.max(8, Math.floor(Math.min(window.innerWidth, window.innerHeight) / 80));
+    const borderWidth = roadWidth + 4;
 
     // Draw road border (darker)
     ctx.strokeStyle = '#654321';
@@ -240,9 +241,9 @@ const CanvasMap: React.FC = () => {
       drawTileResponsive(ctx, tile, tileX, tileY, actualTileSize);
     });
 
-    // Generate and draw roads
-    const roadPaths = generatePaths();
-    roadPaths.forEach(path => drawRoadResponsive(ctx, path, actualTileSize));
+    // Generate and draw roads using actual canvas dimensions
+    const roadPaths = generatePaths(containerWidth, containerHeight);
+    roadPaths.forEach(path => drawRoadResponsive(ctx, path));
   };
 
   useEffect(() => {
