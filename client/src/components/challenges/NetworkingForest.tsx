@@ -104,8 +104,16 @@ const NetworkingForest: React.FC = () => {
                   className="nes-container is-light p-3 flex items-center gap-3"
                   data-testid={`scan-card-${scan.scannedUserId}`}
                 >
-                  <div className="w-12 h-12 bg-muted border-2 border-black flex items-center justify-center text-lg">
-                    {scan.scannedAvatarUrl || '👤'}
+                  <div className="w-12 h-12 bg-muted border-2 border-black flex items-center justify-center overflow-hidden">
+                    {scan.scannedAvatarUrl ? (
+                      <img 
+                        src={scan.scannedAvatarUrl} 
+                        alt="Avatar" 
+                        className="w-full h-full object-cover pixelated"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-300 flex items-center justify-center text-xs">?</div>
+                    )}
                   </div>
                   <div className="flex-1">
                     <div className="font-medium text-sm" data-testid={`scan-name-${scan.scannedUserId}`}>

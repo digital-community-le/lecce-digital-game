@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useGameStore } from '@/hooks/use-game-store';
-
-const AVATAR_OPTIONS = [
-  '👨‍💻', '👩‍💼', '🧑‍🎨', '👨‍🔬', 
-  '👩‍🚀', '🧑‍🏫', '👨‍🎓', '👩‍💻'
-];
+import { AVATAR_PRESETS } from '@/lib/avatars';
 
 const ProfileModal: React.FC = () => {
   const { modals, closeModal, saveProfile, gameState } = useGameStore();
@@ -12,12 +8,12 @@ const ProfileModal: React.FC = () => {
   const modalData = modals.profile?.data;
 
   const [displayName, setDisplayName] = useState(gameState.currentUser.displayName || '');
-  const [selectedAvatar, setSelectedAvatar] = useState(gameState.currentUser.avatar || '👨‍💻');
+  const [selectedAvatar, setSelectedAvatar] = useState(gameState.currentUser.avatar || AVATAR_PRESETS[0].url);
 
   useEffect(() => {
     if (isOpen) {
       setDisplayName(gameState.currentUser.displayName || '');
-      setSelectedAvatar(gameState.currentUser.avatar || '👨‍💻');
+      setSelectedAvatar(gameState.currentUser.avatar || AVATAR_PRESETS[0].url);
     }
   }, [isOpen, gameState.currentUser]);
 
@@ -44,18 +40,23 @@ const ProfileModal: React.FC = () => {
           <div className="mb-4">
             <label className="block text-sm font-medium mb-2">Scegli il tuo avatar</label>
             <div className="grid grid-cols-4 gap-2" data-testid="avatar-picker">
-              {AVATAR_OPTIONS.map((avatar) => (
+              {AVATAR_PRESETS.map((avatar) => (
                 <button
-                  key={avatar}
-                  className={`w-12 h-12 border-2 border-black flex items-center justify-center text-xl transition-colors ${
-                    selectedAvatar === avatar 
-                      ? 'bg-primary text-white' 
-                      : 'bg-muted hover:bg-primary hover:text-white'
+                  key={avatar.id}
+                  className={`w-12 h-12 border-2 border-black flex items-center justify-center overflow-hidden transition-colors ${
+                    selectedAvatar === avatar.url 
+                      ? 'border-primary bg-primary/20' 
+                      : 'bg-muted hover:bg-primary/10 hover:border-primary'
                   }`}
-                  onClick={() => setSelectedAvatar(avatar)}
-                  data-testid={`avatar-${avatar}`}
+                  onClick={() => setSelectedAvatar(avatar.url)}
+                  data-testid={`avatar-${avatar.id}`}
+                  title={avatar.name}
                 >
-                  {avatar}
+                  <img 
+                    src={avatar.url} 
+                    alt={avatar.name}
+                    className="w-full h-full object-cover pixelated"
+                  />
                 </button>
               ))}
             </div>

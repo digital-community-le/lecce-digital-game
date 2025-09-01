@@ -5,29 +5,23 @@
 @tailwind utilities;
 
 :root {
-  /* Color Palette */
-  --ldc-background: hsl(0, 0%, 88%);
-  --ldc-surface: hsl(0, 0%, 100%);
-  --ldc-on-background: hsl(0, 0%, 0%);
-  --ldc-on-surface: hsl(0, 0%, 0%);
-  
-  --ldc-primary: hsl(327, 85%, 43%);
-  --ldc-primary-light: hsl(346, 75%, 75%);
-  --ldc-primary-dark: hsl(327, 69%, 30%);
-  
-  --ldc-contrast-yellow: hsl(48, 84%, 60%);
-  --ldc-accent-blue: hsl(205, 84%, 60%);
-  --ldc-rpg-green: hsl(120, 53%, 37%);
-  --ldc-accent-orange: hsl(14, 87%, 55%);
-  
-  --ldc-secondary: var(--ldc-accent-blue);
-  --ldc-accent: var(--ldc-accent-orange);
-  --ldc-success: var(--ldc-rpg-green);
-  --ldc-error: hsl(350, 89%, 60%);
-  --ldc-neutral: var(--ldc-background);
-  
-  --ldc-border: hsla(0, 0%, 0%, 0.12);
-  --ldc-focus: var(--ldc-primary);
+  /* LDC Official Color Palette */
+  --ldc-background: #f7f7f7;
+  --ldc-surface: #000000;
+  --ldc-on-background: #000000;
+  --ldc-on-surface: #f7f7f7;
+
+  --ldc-primary: #86257b;
+  --ldc-secondary: #442c80;
+  --ldc-accent: #c93880;
+  --ldc-error: #ff3366;
+
+  --ldc-border: rgba(0, 0, 0, 0.12);
+  --ldc-focus: #c93880;
+
+  --ldc-transition-fast: 240ms;
+  --ldc-transition-medium: 420ms;
+  --ldc-transition-slow: 680ms;
   
   /* Semantic tokens */
   --background: var(--ldc-background);
@@ -64,14 +58,30 @@
   --ldc-header-height: 48px;
 }
 
-/* Dark theme */
+/* Dark theme overrides */
 .ldc-theme--dark {
-  --ldc-background: hsl(217, 33%, 8%);
-  --ldc-surface: hsl(217, 33%, 12%);
-  --ldc-on-background: hsl(210, 40%, 95%);
-  --ldc-on-surface: hsl(210, 40%, 95%);
-  --muted: hsl(217, 33%, 16%);
-  --muted-foreground: hsl(210, 40%, 60%);
+  --ldc-background: #0b0b0b;
+  --ldc-surface: #111111;
+  --ldc-on-background: #f7f7f7;
+  --ldc-on-surface: #f7f7f7;
+  --ldc-border: rgba(255, 255, 255, 0.06);
+  
+  --background: var(--ldc-background);
+  --foreground: var(--ldc-on-background);
+  --card: var(--ldc-surface);
+  --card-foreground: var(--ldc-on-surface);
+}
+
+/* High-contrast theme */
+.ldc-theme--high-contrast {
+  --ldc-background: #ffffff;
+  --ldc-surface: #000000;
+  --ldc-on-background: #000000;
+  --ldc-on-surface: #ffffff;
+  --ldc-primary: #6b1d61; /* più scuro per maggiore contrasto */
+  --ldc-accent: #ff4f91; /* evidenza più vivida */
+  --ldc-border: #000000;
+  
   --background: var(--ldc-background);
   --foreground: var(--ldc-on-background);
   --card: var(--ldc-surface);
@@ -276,6 +286,14 @@
 
   .fade-in-retro {
     animation: fadeInRetro var(--ldc-transition-medium) steps(6, end);
+  }
+
+  /* Pixelated images for retro feel */
+  .pixelated {
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-crisp-edges;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
   }
 
   /* Responsive adjustments */

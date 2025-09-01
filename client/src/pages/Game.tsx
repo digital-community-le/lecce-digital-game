@@ -9,6 +9,7 @@ import ChallengeModal from '@/components/challenges/ChallengeModal';
 import ScannerView from '@/components/ScannerView';
 import ScanPreviewModal from '@/components/ScanPreviewModal';
 import CompletionModal from '@/components/CompletionModal';
+import IntroScreen from '@/components/IntroScreen';
 
 const Game: React.FC = () => {
   const { gameState, toasts, removeToast } = useGameStore();
@@ -18,6 +19,11 @@ const Game: React.FC = () => {
     document.documentElement.className = `ldc-theme--${gameState.theme}`;
     localStorage.setItem('ldc:theme', gameState.theme);
   }, [gameState.theme]);
+
+  // Show intro screen if no user profile exists
+  if (!gameState.currentUser.userId) {
+    return <IntroScreen />;
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground" data-testid="game-app">

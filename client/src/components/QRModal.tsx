@@ -31,6 +31,21 @@ const QRModal: React.FC = () => {
     }
   };
 
+  const handleCopyData = async () => {
+    try {
+      const qrData = {
+        userId: gameState.currentUser.userId,
+        displayName: gameState.currentUser.displayName,
+        avatarUrl: gameState.currentUser.avatar,
+        timestamp: new Date().toISOString(),
+      };
+      await navigator.clipboard.writeText(JSON.stringify(qrData, null, 2));
+      showToast('Dati JSON copiati negli appunti!', 'success');
+    } catch (error) {
+      showToast('Errore nella copia dei dati', 'error');
+    }
+  };
+
   const handleClose = () => {
     closeModal('qr');
   };
@@ -45,8 +60,12 @@ const QRModal: React.FC = () => {
         <div className="text-center p-4">
           {/* User info */}
           <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="w-16 h-16 bg-muted border-2 border-black flex items-center justify-center text-2xl">
-              {gameState.currentUser.avatar}
+            <div className="w-16 h-16 bg-muted border-2 border-black flex items-center justify-center overflow-hidden">
+              <img 
+                src={gameState.currentUser.avatar} 
+                alt="Avatar utente"
+                className="w-full h-full object-cover pixelated"
+              />
             </div>
             <div>
               <div className="font-retro text-sm" data-testid="text-user-name">
@@ -90,7 +109,14 @@ const QRModal: React.FC = () => {
               disabled={!gameState.currentUser.qrData}
               data-testid="button-copy-qr"
             >
-              Copia
+              Copia QR
+            </button>
+            <button 
+              className="nes-btn is-normal" 
+              onClick={handleCopyData}
+              data-testid="button-copy-data"
+            >
+              Copia dati
             </button>
             <button 
               className="nes-btn is-normal" 

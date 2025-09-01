@@ -7,8 +7,6 @@ export class QRGenerator {
       const jsonString = JSON.stringify(data);
       const qrDataUrl = await QRCode.toDataURL(jsonString, {
         errorCorrectionLevel: 'M',
-        type: 'image/png',
-        quality: 0.92,
         margin: 1,
         color: {
           dark: '#000000',

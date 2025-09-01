@@ -47,12 +47,20 @@ const Header: React.FC = () => {
         
         {/* Profile indicator */}
         <button
-          className="w-8 h-8 bg-muted border-2 border-black flex items-center justify-center"
+          className="w-8 h-8 bg-muted border-2 border-black flex items-center justify-center overflow-hidden"
           onClick={() => openModal('profile')}
           aria-label="Apri profilo"
           data-testid="button-profile"
         >
-          <span className="text-xs">{gameState.currentUser.avatar || '👤'}</span>
+          {gameState.currentUser.avatar ? (
+            <img 
+              src={gameState.currentUser.avatar} 
+              alt="Avatar"
+              className="w-full h-full object-cover pixelated"
+            />
+          ) : (
+            <span className="text-xs">👤</span>
+          )}
         </button>
       </div>
     </header>

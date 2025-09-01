@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { GameState, MapNode, Toast, Modal, Theme } from '@/types/game';
+import { GameState, MapNode, Toast, Modal, Theme, ChallengeStatus } from '@/types/game';
 import { UserProfile, GameProgress } from '@shared/schema';
 import { gameStorage } from '@/lib/storage';
 import { QRGenerator } from '@/lib/qr';
@@ -108,6 +108,7 @@ export function useGameStore() {
         },
         challenges: prev.challenges.map((challenge, index) => {
           const isCompleted = progress.completedChallenges.includes(challenge.id);
+          // Sequential progression: each challenge unlocks only after the previous one is completed
           const isAvailable = index === 0 || progress.completedChallenges.includes(prev.challenges[index - 1]?.id);
           
           return {
@@ -182,7 +183,7 @@ export function useGameStore() {
           return {
             ...challenge,
             progress,
-            status: completed ? 'completed' : 'in-progress',
+            status: completed ? 'completed' : 'in-progress' as ChallengeStatus,
           };
         }
         return challenge;
@@ -273,13 +274,26 @@ export function useGameStore() {
 
   const openChallenge = useCallback((challengeId: string) => {
     const challenge = gameState.challenges.find(c => c.id === challengeId);
+    const challengeIndex = gameState.challenges.findIndex(c => c.id === challengeId);
+    
+    // Enforce sequential progression according to game-story.md
     if (challenge && challenge.status !== 'locked') {
-      setGameState(prev => ({ ...prev, currentChallengeId: challengeId }));
-      openModal('challenge', { challengeId });
+      // Check if previous challenges are completed (sequential requirement)
+      const previousChallengesCompleted = gameState.challenges.slice(0, challengeIndex).every(c => 
+        gameState.gameProgress.completedChallenges.includes(c.id)
+      );
+      
+      if (challengeIndex === 0 || previousChallengesCompleted) {
+        setGameState(prev => ({ ...prev, currentChallengeId: challengeId }));
+        openModal('challenge', { challengeId });
+      } else {
+        const remainingChallenges = challengeIndex - gameState.gameProgress.completedChallenges.length;
+        showToast(`Devi completare ${remainingChallenges} sfida/e prima di questa`, 'warning');
+      }
     } else {
       showToast('Questa challenge non è ancora disponibile', 'warning');
     }
-  }, [gameState.challenges, openModal, showToast]);
+  }, [gameState.challenges, gameState.gameProgress.completedChallenges, openModal, showToast]);
 
   return {
     gameState,
