@@ -244,15 +244,7 @@ const FantasyMap: React.FC = () => {
         </div>
       </div>
 
-      {/* Map legend */}
-      <div className="absolute bottom-4 left-4 bg-card border-2 border-black p-3" data-testid="map-legend">
-        <div className="font-retro text-xs mb-2">Legenda</div>
-        <div className="space-y-1 text-xs">
-          <div>✅ Completato</div>
-          <div>🔒 Bloccato</div>
-          <div>👨‍💻 La tua posizione</div>
-        </div>
-      </div>
+  {/* Map legend removed per request */}
 
       {/* Progress summary */}
       <div className="absolute top-4 right-4 bg-card border-2 border-black p-3 min-w-48" data-testid="progress-summary">
