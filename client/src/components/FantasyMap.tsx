@@ -3,9 +3,78 @@ import { useLocation } from 'wouter';
 import { useGameStore } from '@/hooks/use-game-store';
 import { MapNode } from '@/types/game';
 
+type TerrainType = 'grass' | 'forest' | 'mountain' | 'lake' | 'road';
+
+interface MapTile {
+  x: number;
+  y: number;
+  type: TerrainType;
+}
+
+interface PathSegment {
+  fromX: number;
+  fromY: number;
+  toX: number;
+  toY: number;
+}
+
 const FantasyMap: React.FC = () => {
   const [, setLocation] = useLocation();
   const { gameState, showToast } = useGameStore();
+
+  // Generate procedural terrain tiles based on map dimensions
+  const generateTerrainTiles = (): MapTile[] => {
+    const tiles: MapTile[] = [];
+    const mapWidth = 20; // Grid width
+    const mapHeight = 15; // Grid height
+    
+    for (let x = 0; x < mapWidth; x++) {
+      for (let y = 0; y < mapHeight; y++) {
+        let tileType: TerrainType = 'grass'; // Default
+        
+        // Forest areas (top-left and scattered patches)
+        if ((x < 6 && y < 4) || (x > 15 && y > 10) || (Math.random() > 0.85 && x > 2 && x < 18)) {
+          tileType = 'forest';
+        }
+        // Mountain range (top area)
+        else if (y < 3 && x > 8 && x < 16) {
+          tileType = 'mountain';
+        }
+        // Lake (bottom-right corner)
+        else if (x > 14 && y > 11) {
+          tileType = 'lake';
+        }
+        
+        tiles.push({ x, y, type: tileType });
+      }
+    }
+    
+    return tiles;
+  };
+
+  // Generate paths connecting challenge nodes
+  const generatePaths = (): PathSegment[] => {
+    const paths: PathSegment[] = [];
+    const challenges = gameState.challenges;
+    
+    for (let i = 0; i < challenges.length - 1; i++) {
+      const current = challenges[i];
+      const next = challenges[i + 1];
+      
+      // Convert percentage positions to grid coordinates
+      const fromX = Math.round((parseFloat(current.position.left.replace('%', '')) / 100) * 20);
+      const fromY = Math.round((parseFloat(current.position.top.replace('%', '')) / 100) * 15);
+      const toX = Math.round((parseFloat(next.position.left.replace('%', '')) / 100) * 20);
+      const toY = Math.round((parseFloat(next.position.top.replace('%', '')) / 100) * 15);
+      
+      paths.push({ fromX, fromY, toX, toY });
+    }
+    
+    return paths;
+  };
+
+  const terrainTiles = generateTerrainTiles();
+  const roadPaths = generatePaths();
 
   const getNodeClassName = (node: MapNode): string => {
     const baseClass = 'map-node';
@@ -80,21 +149,60 @@ const FantasyMap: React.FC = () => {
 
   return (
     <div className="fantasy-map relative" data-testid="fantasy-map">
-      {/* Decorative background elements */}
-      <div className="absolute inset-0 opacity-20">
-        {/* Forest area */}
-        <div className="absolute top-20 left-10 w-32 h-32 bg-success rounded-full opacity-30"></div>
-        <div className="absolute top-32 left-20 w-20 h-20 bg-success rounded-full opacity-40"></div>
-        
-        {/* Mountain area */}
-        <div 
-          className="absolute top-10 right-20 w-40 h-20 bg-muted-foreground opacity-40" 
-          style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }}
-        ></div>
-        
-        {/* Castle area */}
-        <div className="absolute bottom-32 right-16 w-24 h-32 bg-primary opacity-30"></div>
+      {/* Terrain Tiles Grid */}
+      <div className="absolute inset-0 terrain-grid">
+        {terrainTiles.map((tile, index) => (
+          <div
+            key={`${tile.x}-${tile.y}`}
+            className={`terrain-tile terrain-${tile.type}`}
+            style={{
+              left: `${(tile.x / 20) * 100}%`,
+              top: `${(tile.y / 15) * 100}%`,
+              width: `${100 / 20}%`,
+              height: `${100 / 15}%`,
+            }}
+            data-testid={`tile-${tile.type}-${index}`}
+          />
+        ))}
       </div>
+
+      {/* Road Paths connecting challenges */}
+      <svg className="absolute inset-0 w-full h-full z-[5]" data-testid="road-paths">
+        {roadPaths.map((path, index) => {
+          const x1 = (path.fromX / 20) * 100;
+          const y1 = (path.fromY / 15) * 100;
+          const x2 = (path.toX / 20) * 100;
+          const y2 = (path.toY / 15) * 100;
+          
+          return (
+            <g key={index}>
+              {/* Road stroke (dirt path) */}
+              <line
+                x1={`${x1}%`}
+                y1={`${y1}%`}
+                x2={`${x2}%`}
+                y2={`${y2}%`}
+                stroke="#8B4513"
+                strokeWidth="8"
+                strokeDasharray="4,2"
+                opacity="0.8"
+                data-testid={`road-segment-${index}`}
+              />
+              {/* Road border (darker) */}
+              <line
+                x1={`${x1}%`}
+                y1={`${y1}%`}
+                x2={`${x2}%`}
+                y2={`${y2}%`}
+                stroke="#654321"
+                strokeWidth="12"
+                opacity="0.4"
+                data-testid={`road-border-${index}`}
+              />
+            </g>
+          );
+        })}
+      </svg>
 
       {/* Challenge Nodes */}
       {gameState.challenges.map((node) => (

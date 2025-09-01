@@ -187,6 +187,7 @@
     height: 80px;
     cursor: pointer;
     transition: transform var(--ldc-transition-fast) steps(4, end);
+    z-index: 15;
   }
 
   .map-node:hover {
@@ -208,7 +209,7 @@
     width: 48px;
     height: 48px;
     transition: all var(--ldc-transition-medium) steps(8, end);
-    z-index: 10;
+    z-index: 20;
   }
 
   /* Modal and overlay styles */
@@ -347,5 +348,73 @@
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
     }
+  }
+
+  /* Terrain Tiles for Retro Map */
+  .terrain-grid {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+
+  .terrain-tile {
+    position: absolute;
+    transition: opacity 0.3s ease;
+  }
+
+  /* Grass tiles (default background) */
+  .terrain-grass {
+    background: 
+      radial-gradient(circle at 20% 20%, #4ade80 2px, transparent 2px),
+      radial-gradient(circle at 60% 80%, #22c55e 1px, transparent 1px),
+      linear-gradient(0deg, #16a34a 0%, #22c55e 50%, #4ade80 100%);
+    background-size: 16px 16px, 12px 12px, 100% 100%;
+    opacity: 0.6;
+  }
+
+  /* Forest tiles */
+  .terrain-forest {
+    background: 
+      radial-gradient(circle at 30% 30%, #166534 3px, transparent 3px),
+      radial-gradient(circle at 70% 70%, #15803d 2px, transparent 2px),
+      radial-gradient(circle at 50% 50%, #22c55e 1px, transparent 1px),
+      linear-gradient(45deg, #052e16 0%, #166534 50%, #15803d 100%);
+    background-size: 20px 20px, 16px 16px, 8px 8px, 100% 100%;
+    opacity: 0.8;
+  }
+
+  /* Mountain tiles */
+  .terrain-mountain {
+    background: 
+      linear-gradient(45deg, #6b7280 25%, transparent 25%),
+      linear-gradient(-45deg, #6b7280 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #374151 75%),
+      linear-gradient(-45deg, transparent 75%, #374151 75%),
+      linear-gradient(0deg, #9ca3af 0%, #6b7280 50%, #374151 100%);
+    background-size: 16px 16px, 16px 16px, 16px 16px, 16px 16px, 100% 100%;
+    background-position: 0 0, 0 8px, 8px -8px, -8px 0px, 0 0;
+    opacity: 0.9;
+  }
+
+  /* Lake tiles */
+  .terrain-lake {
+    background: 
+      radial-gradient(circle at 25% 25%, #3b82f6 2px, transparent 2px),
+      radial-gradient(circle at 75% 75%, #1d4ed8 1px, transparent 1px),
+      linear-gradient(45deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%);
+    background-size: 24px 24px, 16px 16px, 100% 100%;
+    opacity: 0.7;
+    animation: water-shimmer 4s ease-in-out infinite;
+  }
+
+  @keyframes water-shimmer {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 0.9; }
+  }
+
+  /* Road path styling */
+  .road-segment {
+    z-index: 5;
   }
 }
