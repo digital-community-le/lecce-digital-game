@@ -19,21 +19,23 @@
     "trees": {
       "description": "Alberi di diverse tipologie e stagioni",
       "tiles": [
-        {"id": "tree_green_1", "x": 128, "y": 0, "description": "Albero verde standard"},
-        {"id": "tree_green_2", "x": 144, "y": 0, "description": "Albero verde variante"},
-        {"id": "tree_autumn_1", "x": 160, "y": 0, "description": "Albero autunnale arancione"},
-        {"id": "tree_autumn_2", "x": 176, "y": 0, "description": "Albero autunnale giallo"},
-        {"id": "tree_pine_1", "x": 192, "y": 0, "description": "Pino sempreverde"},
-        {"id": "tree_dark", "x": 208, "y": 0, "description": "Albero verde scuro"}
+        {"id": "tree_green_1", "x": 128, "y": 0, "width": 16, "height": 16, "description": "Albero verde standard"},
+        {"id": "tree_green_2", "x": 144, "y": 0, "width": 16, "height": 16, "description": "Albero verde variante"},
+        {"id": "tree_autumn_1", "x": 160, "y": 0, "width": 16, "height": 16, "description": "Albero autunnale arancione"},
+        {"id": "tree_autumn_2", "x": 176, "y": 0, "width": 16, "height": 16, "description": "Albero autunnale giallo"},
+        {"id": "tree_pine_1", "x": 192, "y": 0, "width": 16, "height": 16, "description": "Pino sempreverde"},
+        {"id": "tree_dark", "x": 208, "y": 0, "width": 16, "height": 16, "description": "Albero verde scuro"},
+        {"id": "tree_big_1", "x": 0, "y": 48, "width": 32, "height": 32, "description": "Albero grande 1"},
+        {"id": "tree_big_2", "x": 32, "y": 48, "width": 32, "height": 32, "description": "Albero grande 2"}
       ]
     },
     "mountains": {
       "description": "Montagne e formazioni rocciose",
       "tiles": [
-        {"id": "mountain_brown_1", "x": 0, "y": 224, "description": "Montagna marrone base"},
-        {"id": "mountain_brown_2", "x": 16, "y": 224, "description": "Montagna marrone variante"},
-        {"id": "mountain_gray_1", "x": 32, "y": 224, "description": "Montagna grigia"},
-        {"id": "mountain_gray_2", "x": 48, "y": 224, "description": "Montagna grigia variante"}
+        {"id": "mountain_brown_1", "x": 0, "y": 224, "width": 32, "height": 32, "description": "Montagna marrone base"},
+        {"id": "mountain_brown_2", "x": 32, "y": 224, "width": 32, "height": 32, "description": "Montagna marrone variante"},
+        {"id": "mountain_gray_1", "x": 64, "y": 224, "width": 32, "height": 32, "description": "Montagna grigia"},
+        {"id": "mountain_gray_2", "x": 96, "y": 224, "width": 32, "height": 32, "description": "Montagna grigia variante"}
       ]
     },
     "water": {

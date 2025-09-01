@@ -313,11 +313,33 @@ const CanvasMap: React.FC = () => {
       return;
     }
     
-    // Usa dimensioni fisse 16x16 per ora per tutti i tile base
+    // Gestione multi-tile per sprite di dimensioni diverse
+    const spriteWidth = (tileData as any).width || 16;
+    const spriteHeight = (tileData as any).height || 16;
+    
+    // Per sprite più grandi di 16x16, centra e scala appropriatamente
+    let destX = x;
+    let destY = y;
+    let destWidth = size;
+    let destHeight = size;
+    
+    if (spriteWidth > 16 || spriteHeight > 16) {
+      // Sprite grande: calcola scaling e posizionamento
+      const scaleX = size / 16;
+      const scaleY = size / 16;
+      
+      destWidth = spriteWidth * scaleX;
+      destHeight = spriteHeight * scaleY;
+      
+      // Centra orizzontalmente, allinea al fondo verticalmente
+      destX = x + (size - destWidth) / 2;
+      destY = y + size - destHeight;
+    }
+    
     ctx.drawImage(
       atlasImage,
-      tileData.x, tileData.y, 16, 16, // Source sempre 16x16
-      x, y, size, size  // Destination
+      tileData.x, tileData.y, spriteWidth, spriteHeight, // Source con dimensioni reali
+      destX, destY, destWidth, destHeight  // Destination scalata e posizionata
     );
   };
 
