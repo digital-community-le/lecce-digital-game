@@ -1,0 +1,306 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;800&family=Press+Start+2P&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Color Palette */
+  --ldc-background: hsl(0, 0%, 88%);
+  --ldc-surface: hsl(0, 0%, 100%);
+  --ldc-on-background: hsl(0, 0%, 0%);
+  --ldc-on-surface: hsl(0, 0%, 0%);
+  
+  --ldc-primary: hsl(327, 85%, 43%);
+  --ldc-primary-light: hsl(346, 75%, 75%);
+  --ldc-primary-dark: hsl(327, 69%, 30%);
+  
+  --ldc-contrast-yellow: hsl(48, 84%, 60%);
+  --ldc-accent-blue: hsl(205, 84%, 60%);
+  --ldc-rpg-green: hsl(120, 53%, 37%);
+  --ldc-accent-orange: hsl(14, 87%, 55%);
+  
+  --ldc-secondary: var(--ldc-accent-blue);
+  --ldc-accent: var(--ldc-accent-orange);
+  --ldc-success: var(--ldc-rpg-green);
+  --ldc-error: hsl(350, 89%, 60%);
+  --ldc-neutral: var(--ldc-background);
+  
+  --ldc-border: hsla(0, 0%, 0%, 0.12);
+  --ldc-focus: var(--ldc-primary);
+  
+  /* Semantic tokens */
+  --background: var(--ldc-background);
+  --foreground: var(--ldc-on-background);
+  --card: var(--ldc-surface);
+  --card-foreground: var(--ldc-on-surface);
+  --primary: var(--ldc-primary);
+  --primary-foreground: var(--ldc-surface);
+  --secondary: var(--ldc-secondary);
+  --secondary-foreground: var(--ldc-surface);
+  --muted: hsl(0, 0%, 96%);
+  --muted-foreground: hsl(0, 0%, 45%);
+  --accent: var(--ldc-accent);
+  --accent-foreground: var(--ldc-surface);
+  --destructive: var(--ldc-error);
+  --destructive-foreground: var(--ldc-surface);
+  --border: var(--ldc-border);
+  --input: var(--ldc-surface);
+  --ring: var(--ldc-focus);
+  --radius: 0px;
+  
+  /* Typography */
+  --ldc-font-title: 'Press Start 2P', cursive;
+  --ldc-font-body: 'Nunito', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  --font-retro: var(--ldc-font-title);
+  --font-sans: var(--ldc-font-body);
+  
+  /* Transitions */
+  --ldc-transition-fast: 240ms;
+  --ldc-transition-medium: 420ms;
+  --ldc-transition-slow: 680ms;
+  
+  /* Header */
+  --ldc-header-height: 48px;
+}
+
+/* Dark theme */
+.ldc-theme--dark {
+  --ldc-background: hsl(217, 33%, 8%);
+  --ldc-surface: hsl(217, 33%, 12%);
+  --ldc-on-background: hsl(210, 40%, 95%);
+  --ldc-on-surface: hsl(210, 40%, 95%);
+  --muted: hsl(217, 33%, 16%);
+  --muted-foreground: hsl(210, 40%, 60%);
+  --background: var(--ldc-background);
+  --foreground: var(--ldc-on-background);
+  --card: var(--ldc-surface);
+  --card-foreground: var(--ldc-on-surface);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    box-sizing: border-box;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-family: var(--ldc-font-body);
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+  }
+
+  h1, h2, h3, .ldc-title {
+    font-family: var(--ldc-font-title);
+    letter-spacing: 0.02em;
+    line-height: 1.4;
+  }
+}
+
+@layer components {
+  /* Custom button styles */
+  .nes-btn {
+    font-family: var(--ldc-font-title) !important;
+    font-size: 12px !important;
+  }
+
+  .nes-btn.is-primary {
+    background-color: var(--ldc-primary) !important;
+    border-color: var(--ldc-primary-dark) !important;
+    color: white !important;
+  }
+
+  .nes-btn.is-success {
+    background-color: var(--ldc-success) !important;
+    border-color: var(--ldc-rpg-green) !important;
+  }
+
+  .nes-btn.is-warning {
+    background-color: var(--ldc-contrast-yellow) !important;
+    border-color: var(--ldc-contrast-yellow) !important;
+    color: var(--ldc-on-background) !important;
+  }
+
+  /* Header styling */
+  .ldc-header {
+    height: var(--ldc-header-height);
+    background-color: var(--ldc-surface);
+    border-bottom: 4px solid var(--ldc-border);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  /* Map styling */
+  .fantasy-map {
+    background: linear-gradient(135deg, 
+      hsl(120, 40%, 85%) 0%, 
+      hsl(60, 30%, 90%) 50%, 
+      hsl(200, 40%, 85%) 100%);
+    min-height: calc(100vh - var(--ldc-header-height));
+    position: relative;
+    overflow: hidden;
+  }
+
+  .map-node {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    cursor: pointer;
+    transition: transform var(--ldc-transition-fast) steps(4, end);
+  }
+
+  .map-node:hover {
+    transform: scale(1.1);
+  }
+
+  .map-node.completed {
+    filter: brightness(1.2) saturate(1.3);
+  }
+
+  .map-node.locked {
+    filter: grayscale(100%) brightness(0.6);
+    cursor: not-allowed;
+  }
+
+  /* Avatar on map */
+  .player-avatar {
+    position: absolute;
+    width: 48px;
+    height: 48px;
+    transition: all var(--ldc-transition-medium) steps(8, end);
+    z-index: 10;
+  }
+
+  /* Modal and overlay styles */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: hsla(0, 0%, 0%, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 1rem;
+  }
+
+  .modal-content {
+    background-color: var(--ldc-surface);
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  /* FAB styling */
+  .fab {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: var(--ldc-primary);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 12px hsla(0, 0%, 0%, 0.3);
+    cursor: pointer;
+    z-index: 40;
+    transition: transform var(--ldc-transition-fast);
+  }
+
+  .fab:hover {
+    transform: scale(1.1);
+  }
+
+  /* Progress bar custom styling */
+  .progress-custom {
+    background-color: var(--muted);
+    height: 16px;
+    border: 2px solid var(--ldc-on-background);
+  }
+
+  .progress-fill {
+    background-color: var(--ldc-success);
+    height: 100%;
+    transition: width var(--ldc-transition-medium);
+  }
+
+  /* Scanner styles */
+  .scanner-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: black;
+    z-index: 200;
+  }
+
+  .scanner-viewfinder {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 280px;
+    height: 280px;
+    border: 4px solid var(--ldc-contrast-yellow);
+    border-radius: 8px;
+  }
+
+  /* Toast notifications */
+  .toast {
+    position: fixed;
+    top: calc(var(--ldc-header-height) + 1rem);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 150;
+    max-width: 90vw;
+  }
+}
+
+@layer utilities {
+  /* Animation for retro effects */
+  @keyframes pixelPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
+
+  .pixel-pop {
+    animation: pixelPop var(--ldc-transition-fast) steps(4, end);
+  }
+
+  @keyframes fadeInRetro {
+    0% { opacity: 0; transform: translateY(8px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-in-retro {
+    animation: fadeInRetro var(--ldc-transition-medium) steps(6, end);
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .ldc-header__title--mobile-hidden {
+      display: none;
+    }
+    
+    .map-node {
+      width: 60px;
+      height: 60px;
+    }
+    
+    .player-avatar {
+      width: 36px;
+      height: 36px;
+    }
+  }
+
+  /* Accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
