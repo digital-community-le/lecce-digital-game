@@ -11,7 +11,7 @@ import CompletionModal from '@/components/CompletionModal';
 
 const GameMapPage: React.FC = () => {
   const [, setLocation] = useLocation();
-  const { gameState, toasts, removeToast } = useGameStore();
+  const { gameState, toasts, removeToast, acknowledgeCompletion } = useGameStore();
 
   useEffect(() => {
     // Set theme class on document
@@ -24,6 +24,8 @@ const GameMapPage: React.FC = () => {
     if (!gameState.currentUser.userId) {
       setLocation('/');
     }
+  // When the map mounts, surface any pending completion modal queued by store
+  acknowledgeCompletion();
   }, [gameState.currentUser.userId, setLocation]);
 
   if (!gameState.currentUser.userId) {

@@ -14,10 +14,11 @@ export interface MapNode {
 
 export interface GameState {
   currentUser: {
-    userId: string;
-    displayName: string;
-    avatar: string;
-    qrData: string | null;
+  userId: string;
+  displayName: string;
+  avatar: string;
+  qrData: string | null;
+  title?: string;
   };
   challenges: MapNode[];
   currentChallengeId: string | null;

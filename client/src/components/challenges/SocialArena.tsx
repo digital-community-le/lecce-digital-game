@@ -1,117 +1,310 @@
-import React, { useState, useEffect } from 'react';
-import { useGameStore } from '@/hooks/use-game-store';
-import { gameStorage } from '@/lib/storage';
-import { SocialProof } from '@shared/schema';
+import React, { useState, useEffect, useRef, useMemo } from "react";
+import { useGameStore } from "@/hooks/use-game-store";
+import { gameStorage } from "@/lib/storage";
+import { putBlob, getBlobUrl } from "@/lib/blobStore";
+import useOCR from "@/hooks/use-ocr";
+import { SocialProof } from "@shared/schema";
+import CameraCapture from "@/components/CameraCapture";
+import OcrModal from "@/components/OcrModal";
 
 const SocialArena: React.FC = () => {
   const { gameState, updateChallengeProgress, showToast } = useGameStore();
   const [proofs, setProofs] = useState<SocialProof[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
+  const [selectedPreviewUrl, setSelectedPreviewUrl] = useState<string | null>(null);
+  const [screenshotPreviewUrl, setScreenshotPreviewUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { isAnalyzing, ocrProgress, ocrResult, setOcrResult } = useOCR();
+  const [ocrModalOpen, setOcrModalOpen] = useState(false);
+  const [showShareGuide, setShowShareGuide] = useState<boolean>(false);
+  const [sharePhase, setSharePhase] = useState<
+    "idle" | "captured" | "shared" | "await_screenshot" | "skipped"
+  >("idle");
+  const cameraInputRef = useRef<HTMLInputElement | null>(null);
+  const [showCamera, setShowCamera] = useState(false);
+  const [forcedValidated, setForcedValidated] = useState(false);
+  const [failedAttempts, setFailedAttempts] = useState(0);
 
-  const REQUIRED_TAG = '@lecce_digital';
+  const [requiredTag, setRequiredTag] = useState<string>("@lecce_digital");
+  const [confidenceThreshold, setConfidenceThreshold] = useState<number>(40);
 
   useEffect(() => {
+    // Load game config to get challenge-specific settings (confidence threshold, required tag)
+    fetch("/game-data.json")
+      .then((r) => r.json())
+      .then((data) => {
+        const challenge = (data?.challenges || []).find(
+          (c: any) => c.id === "social-arena"
+        );
+        if (challenge && challenge.settings) {
+          if (typeof challenge.settings.requiredTag === "string")
+            setRequiredTag(challenge.settings.requiredTag);
+          if (typeof challenge.settings.confidenceThreshold === "number")
+            setConfidenceThreshold(challenge.settings.confidenceThreshold);
+        }
+      })
+      .catch(() => {});
+
     if (gameState.currentUser.userId) {
-      const userProofs = gameStorage.getSocialProofs(gameState.currentUser.userId);
+      const userProofs = gameStorage.getSocialProofs(
+        gameState.currentUser.userId
+      );
       setProofs(userProofs);
       setIsLoading(false);
-      
+
       // Check if challenge is completed
-      const validProof = userProofs.find(proof => proof.detected && proof.verified);
+      const validProof = userProofs.find(
+        (proof) => proof.detected && proof.verified
+      );
       if (validProof) {
-        updateChallengeProgress('social-arena', 1, true);
+        updateChallengeProgress("social-arena", 1, true);
       }
     }
   }, [gameState.currentUser.userId]);
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
-    if (file && file.type.startsWith('image/')) {
-      setSelectedFile(file);
-    } else {
-      showToast('Seleziona un\'immagine valida', 'error');
+    if (!file || !file.type.startsWith("image/")) {
+      showToast("Seleziona un'immagine valida", "error");
+      return;
+    }
+    // set file and preview
+    if (selectedPreviewUrl) {
+      try { URL.revokeObjectURL(selectedPreviewUrl); } catch (e) {}
+      setSelectedPreviewUrl(null);
+    }
+    setSelectedFile(file);
+    setSelectedPreviewUrl(URL.createObjectURL(file));
+    // reset failed attempts when user provides a new image
+    setFailedAttempts(0);
+    // show share step immediately so UI doesn't become empty while persisting
+    setSharePhase("captured");
+    // persist immediately as pending proof so user can share/skip next
+    if (!gameState.currentUser.userId) return;
+    try {
+      const blobId = await putBlob(file);
+      const proof: SocialProof = {
+        opId: `proof_${Date.now()}`,
+        userId: gameState.currentUser.userId,
+        imageLocalUrl: blobId,
+        detectedTags: [],
+        detected: false,
+        verified: false,
+        attempts: 0,
+        createdAt: new Date().toISOString(),
+      };
+      gameStorage.addSocialProof(gameState.currentUser.userId, proof);
+      setProofs((p) => [...p, proof]);
+      setSharePhase("captured");
+      showToast(
+        "Immagine salvata. Ora condividi la storia o salta se non vuoi condividerla.",
+        "info"
+      );
+    } catch (err) {
+      console.error("Errore salvataggio immagine:", err);
+      showToast("Errore nel salvataggio dell'immagine", "error");
     }
   };
 
   const handleTakePicture = () => {
-    // Create a file input for camera capture
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.capture = 'environment';
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        setSelectedFile(file);
-      }
-    };
-    input.click();
-  };
+    // Prefer using native camera capture component
+    setShowCamera(true);
+    return;
 
-  const simulateOCR = async (imageUrl: string): Promise<{ detectedTags: string[]; detected: boolean }> => {
-    // Simulate OCR processing delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Simulate OCR results - in a real implementation, this would use Tesseract.js
-    const hasRequiredTag = Math.random() > 0.3; // 70% chance of detecting the tag for demo
-    
-    return {
-      detectedTags: hasRequiredTag ? [REQUIRED_TAG, '#devfest', '#lecce'] : ['#devfest', '#lecce'],
-      detected: hasRequiredTag,
-    };
-  };
-
-  const handleUpload = async () => {
-    if (!selectedFile || !gameState.currentUser.userId) return;
-
-    setIsUploading(true);
-    setIsAnalyzing(true);
-
+    // Fallback: create a file input for camera capture dynamically
     try {
-      // Create object URL for the image
-      const imageLocalUrl = URL.createObjectURL(selectedFile);
-      
-      // Simulate OCR processing
-      const ocrResult = await simulateOCR(imageLocalUrl);
-      
-      // Create social proof
-      const proof: SocialProof = {
-        opId: `proof_${Date.now()}`,
-        userId: gameState.currentUser.userId,
-        imageLocalUrl,
-        detectedTags: ocrResult.detectedTags,
-        detected: ocrResult.detected,
-        verified: ocrResult.detected, // Auto-verify if detected for demo
-        attempts: 1,
-        createdAt: new Date().toISOString(),
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/*";
+      input.setAttribute("capture", "environment");
+      input.style.display = "none";
+
+      const onChange = (e: Event) => {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (file) {
+          setSelectedFile(file);
+        }
+        // cleanup
+        input.removeEventListener("change", onChange);
+        if (input.parentNode) input.parentNode.removeChild(input);
       };
 
-      // Save proof
-      gameStorage.addSocialProof(gameState.currentUser.userId, proof);
-      setProofs(prev => [...prev, proof]);
-      
-      if (proof.detected) {
-        updateChallengeProgress('social-arena', 1, true);
-        showToast('Tag rilevato! Prova verificata con successo!', 'success');
-      } else {
-        showToast('Tag non rilevato nell\'immagine. Riprova con un\'immagine più chiara.', 'warning');
-      }
-      
-    } catch (error) {
-      console.error('Error processing image:', error);
-      showToast('Errore nell\'elaborazione dell\'immagine', 'error');
-    } finally {
-      setIsUploading(false);
-      setIsAnalyzing(false);
-      setSelectedFile(null);
+      input.addEventListener("change", onChange);
+      document.body.appendChild(input);
+      input.click();
+    } catch (err) {
+      console.error("Errore nell’aprire la fotocamera/file picker:", err);
+      showToast(
+        'Impossibile aprire la fotocamera. Usa "Scegli immagine".',
+        "error"
+      );
     }
   };
 
+  const handleCameraCapture = async (file: File) => {
+    // Persist the captured image as a pending proof but DO NOT run OCR.
+    setShowCamera(false);
+    if (selectedPreviewUrl) {
+      try { URL.revokeObjectURL(selectedPreviewUrl); } catch (e) {}
+      setSelectedPreviewUrl(null);
+    }
+    setSelectedFile(file);
+    setSelectedPreviewUrl(URL.createObjectURL(file));
+    // reset failed attempts when user provides a new image
+    setFailedAttempts(0);
+    // advance UI to share step immediately
+    setSharePhase("captured");
+    if (!gameState.currentUser.userId) return;
+    try {
+      const blobId = await putBlob(file);
+      const proof: SocialProof = {
+        opId: `proof_${Date.now()}`,
+        userId: gameState.currentUser.userId,
+        imageLocalUrl: blobId,
+        detectedTags: [],
+        detected: false,
+        verified: false,
+        attempts: 0,
+        createdAt: new Date().toISOString(),
+      };
+      gameStorage.addSocialProof(gameState.currentUser.userId, proof);
+      setProofs((p) => [...p, proof]);
+      setSharePhase("captured");
+      showToast(
+        "Immagine salvata. Ora condividi la storia o salta se non vuoi condividerla.",
+        "info"
+      );
+    } catch (err) {
+      console.error("Errore salvataggio immagine:", err);
+      showToast("Errore nel salvataggio dell'immagine", "error");
+    }
+  };
+
+  const handleCameraCancel = () => {
+    setShowCamera(false);
+  };
+
+  // runOCR provided by worker wrapper from '@/lib/ocr'
+
+  const handleUpload = async () => {
+    // For the share flow we persist the captured image but do NOT run OCR on it.
+    // Only the uploaded Story screenshot is used for verification.
+    if (!selectedFile || !gameState.currentUser.userId) return;
+
+    setIsUploading(true);
+    try {
+      const blobId = await putBlob(selectedFile);
+      // Save a pending proof record (not verified and no OCR run yet)
+      const proof: SocialProof = {
+        opId: `proof_${Date.now()}`,
+        userId: gameState.currentUser.userId,
+        imageLocalUrl: blobId,
+        detectedTags: [],
+        detected: false,
+        verified: false,
+        attempts: 0,
+        createdAt: new Date().toISOString(),
+      };
+
+      gameStorage.addSocialProof(gameState.currentUser.userId, proof);
+      setProofs((prev) => [...prev, proof]);
+
+      setSharePhase("await_screenshot");
+      showToast(
+        "Immagine salvata. Condividi la storia e poi carica lo screenshot per la verifica.",
+        "info"
+      );
+    } catch (error) {
+      console.error("Error saving image blob:", error);
+      showToast("Errore nel salvataggio dell'immagine", "error");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  // Handler when user uploads the screenshot of the shared story
+  const handleScreenshotSelect = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file || !gameState.currentUser.userId) return;
+  // Save screenshot to state and open OCR modal; modal will run OCR and call onVerified/onAttempt
+  if (screenshotPreviewUrl) {
+    try { URL.revokeObjectURL(screenshotPreviewUrl); } catch (e) {}
+    setScreenshotPreviewUrl(null);
+  }
+  setScreenshotFile(file);
+  setScreenshotPreviewUrl(URL.createObjectURL(file));
+  setOcrModalOpen(true);
+  };
+
+  const handleForceValidate = () => {
+    if (!gameState.currentUser.userId) return;
+    updateChallengeProgress("social-arena", 1, true);
+    setForcedValidated(true);
+    showToast("Prova convalidata manualmente.", "success");
+  };
+
+  const handleSkipChallenge = () => {
+    // allow user to skip the challenge; mark as completed but unverified
+    if (!gameState.currentUser.userId) return;
+    // Skip: mark as completed (but do not mark OCR/verification as done). Progress only reaches 100% when OCR succeeds or manual validation.
+    updateChallengeProgress("social-arena", 1, true);
+    showToast(
+      "Hai scelto di saltare la condivisione. La challenge è considerata completata senza verifica.",
+      "info"
+    );
+  };
+
   const latestProof = proofs[proofs.length - 1];
-  const isCompleted = proofs.some(proof => proof.detected && proof.verified);
+  const isCompleted = useMemo(
+    () => proofs.some((proof) => proof.detected && proof.verified),
+    [proofs]
+  );
+
+  // Define a clear step-based progression
+  const totalSteps = 3; // 1: capture/upload, 2: share (or await screenshot), 3: screenshot & OCR (or skip)
+  const step1Done = sharePhase !== "idle";
+  const step2Done =
+    sharePhase === "shared" || sharePhase === "await_screenshot";
+  // Final step only completes when OCR verified (isCompleted) or manual validation occurred (forcedValidated)
+  const step3Done = isCompleted || forcedValidated;
+  const currentStepNumber = step3Done ? 3 : step2Done ? 2 : step1Done ? 1 : 0;
+  const progressPercent = Math.round((currentStepNumber / totalSteps) * 100);
+  // Map progress percent to NES.css progress variants
+  const progressClass =
+    progressPercent >= 100
+      ? "is-success"
+      : progressPercent >= 66
+      ? "is-primary"
+      : progressPercent >= 33
+      ? "is-warning"
+      : "is-error";
+  const getPreviewUrl = (proof?: SocialProof) => {
+    if (!proof) return null;
+    if (
+      typeof proof.imageLocalUrl === "string" &&
+      proof.imageLocalUrl.startsWith("blob_")
+    ) {
+      getBlobUrl(proof.imageLocalUrl)
+        .then((u) => {
+          setProofs((prev) =>
+            prev.map((p) =>
+              p.opId === proof.opId
+                ? ({ ...p, __previewUrl: u || p.imageLocalUrl } as any)
+                : p
+            )
+          );
+        })
+        .catch(() => {});
+      return (proof as any).__previewUrl || null;
+    }
+    return proof.imageLocalUrl as string;
+  };
 
   if (isLoading) {
     return (
@@ -124,17 +317,25 @@ const SocialArena: React.FC = () => {
 
   return (
     <div>
+      {showCamera && (
+        <CameraCapture
+          onCapture={handleCameraCapture}
+          onCancel={handleCameraCancel}
+        />
+      )}
       <div className="p-4">
         {/* Challenge description */}
         <div className="mb-6">
           <h3 className="font-retro text-sm mb-3">La Prova Finale</h3>
           <p className="text-sm mb-4">
-            Davanti allo Stand, il tuo gesto diventa simbolo: cattura la foto con il gadget e attiva l'epilogo della leggenda.
+            Davanti allo Stand, il tuo gesto diventa simbolo: cattura la foto
+            con il gadget e attiva l'epilogo della leggenda.
           </p>
           <div className="nes-container is-dark p-3 mb-4">
             <p className="text-xs">
-              💡 Scatta la foto al gadget nello stand; lascia che la comunità veda la tua impresa. 
-              Il sistema rileverà automaticamente il tag {REQUIRED_TAG}.
+              💡 Scatta la foto al gadget nello stand; lascia che la comunità
+              veda la tua impresa. Il sistema rileverà automaticamente il tag{" "}
+              {requiredTag}.
             </p>
           </div>
         </div>
@@ -143,14 +344,16 @@ const SocialArena: React.FC = () => {
         <div className="mb-6">
           <div className="flex justify-between text-sm mb-2">
             <span>Progressione</span>
-            <span data-testid="text-social-progress">{isCompleted ? '1/1' : '0/1'}</span>
+            <span data-testid="text-social-progress">
+              {currentStepNumber > 0 ? currentStepNumber : 0}/{totalSteps}
+            </span>
           </div>
-          <div className="progress-custom">
-            <div 
-              className="progress-fill" 
-              style={{ width: isCompleted ? '100%' : '0%' }}
-              data-testid="progress-social"
-            ></div>
+          <div>
+            <progress
+              className={`nes-progress ${progressClass}`}
+              value={progressPercent}
+              max={100}
+            />
           </div>
         </div>
 
@@ -158,46 +361,45 @@ const SocialArena: React.FC = () => {
           <>
             {/* Upload area */}
             <div className="border-4 border-dashed border-muted-foreground p-8 text-center mb-6">
-              {selectedFile ? (
+              {/* Step 1: no selectedFile yet -> show capture/upload only */}
+              {!selectedFile && (
                 <div className="space-y-4">
-                  <div className="text-4xl">📸</div>
-                  <p className="text-sm">Immagine selezionata: {selectedFile.name}</p>
-                  <div className="flex gap-2 justify-center flex-wrap">
-                    <button 
-                      className="nes-btn is-primary"
-                      onClick={handleUpload}
-                      disabled={isUploading}
-                      data-testid="button-upload-image"
-                    >
-                      {isUploading ? 'Caricamento...' : 'Carica e analizza'}
-                    </button>
-                    <button 
-                      className="nes-btn is-normal"
-                      onClick={() => setSelectedFile(null)}
-                      disabled={isUploading}
-                      data-testid="button-cancel-upload"
-                    >
-                      Annulla
-                    </button>
+                  <div className="text-4xl">
+                    {selectedPreviewUrl ? (
+                      <img src={selectedPreviewUrl} alt="Preview" className="w-16 h-16 object-cover inline-block" />
+                    ) : (
+                      '📸'
+                    )}
                   </div>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="text-4xl">📸</div>
-                  <p className="text-sm mb-4">Carica la foto con il gadget della community</p>
+                  <p className="text-sm mb-4">
+                    Carica la foto con il gadget della community
+                  </p>
                   <div className="flex gap-2 justify-center flex-wrap">
-                    <button 
+                    <button
                       className="nes-btn is-primary"
                       onClick={handleTakePicture}
                       data-testid="button-take-picture"
                     >
                       Scatta foto
                     </button>
+                    <input
+                      ref={cameraInputRef}
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      className="hidden"
+                      onChange={(e) =>
+                        handleFileSelect(
+                          e as React.ChangeEvent<HTMLInputElement>
+                        )
+                      }
+                      data-testid="input-camera-hidden"
+                    />
                     <label className="nes-btn is-normal cursor-pointer">
                       Scegli immagine
-                      <input 
-                        type="file" 
-                        accept="image/*" 
+                      <input
+                        type="file"
+                        accept="image/*"
                         onChange={handleFileSelect}
                         className="hidden"
                         data-testid="input-select-image"
@@ -206,72 +408,235 @@ const SocialArena: React.FC = () => {
                   </div>
                 </div>
               )}
+
+              {/* Step 2: after selectedFile saved (sharePhase === 'captured') -> show only share or skip */}
+              {selectedFile && sharePhase === "captured" && (
+                <div className="space-y-4">
+                  <div className="text-4xl">
+                    {selectedPreviewUrl ? (
+                      <img src={selectedPreviewUrl} alt="Preview" className="w-16 h-16 object-cover inline-block" />
+                    ) : (
+                      '📸'
+                    )}
+                  </div>
+                  <p className="text-sm">
+                    Immagine selezionata: {selectedFile.name}
+                  </p>
+                  <div className="flex gap-2 justify-center flex-wrap">
+                    <button
+                      className="nes-btn is-normal"
+                      onClick={async () => {
+                        if (navigator.share && selectedFile) {
+                          try {
+                            await navigator.share({
+                              files: [selectedFile],
+                              text: "Condivido la mia storia su Instagram",
+                            });
+                            setSharePhase("shared");
+                            showToast(
+                              "Condividi la storia su Instagram, poi torna qui e carica lo screenshot.",
+                              "info"
+                            );
+                          } catch (e) {
+                            setSharePhase("await_screenshot");
+                            showToast(
+                              "Perfetto: ora carica lo screenshot della Story.",
+                              "info"
+                            );
+                          }
+                        } else {
+                          setSharePhase("await_screenshot");
+                          showToast(
+                            "Condividi manualmente su Instagram, poi carica lo screenshot da questa schermata.",
+                            "info"
+                          );
+                        }
+                      }}
+                    >
+                      Condividi
+                    </button>
+                    <button
+                      className="nes-btn is-warning"
+                      onClick={() => handleSkipChallenge()}
+                    >
+                      Salta condivisione
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 3: after sharePhase advances to 'shared' or 'await_screenshot' -> allow screenshot upload and OCR */}
+              {selectedFile &&
+                (sharePhase === "shared" ||
+                  sharePhase === "await_screenshot") && (
+                  <div className="space-y-4">
+                    <div className="text-4xl">
+                      {screenshotPreviewUrl ? (
+                        <img src={screenshotPreviewUrl} alt="Screenshot preview" className="w-16 h-16 object-cover inline-block" />
+                      ) : (
+                        '📸'
+                      )}
+                    </div>
+                    <p className="text-sm">
+                      Hai condiviso la foto? Carica lo screenshot della Story
+                      per la verifica.
+                    </p>
+                    <input
+                      id="input-screenshot-upload"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleScreenshotSelect}
+                      data-testid="input-screenshot-upload"
+                    />
+                    <label
+                      htmlFor="input-screenshot-upload"
+                      className="nes-btn is-normal cursor-pointer"
+                    >
+                      Carica screenshot della Story
+                    </label>
+                    <div>
+                      <button
+                        className="nes-btn is-normal"
+                        onClick={() => setSelectedFile(null)}
+                      >
+                        Annulla
+                      </button>
+                    </div>
+                  </div>
+                )}
             </div>
 
-            {/* OCR Analysis Status */}
-            {isAnalyzing && (
-              <div className="nes-container is-light p-4 mb-6 text-center">
-                <div className="text-2xl mb-2">🔍</div>
-                <p className="text-sm">Analizzo l'immagine...</p>
-                <p className="text-xs text-muted-foreground">Ricerco il tag {REQUIRED_TAG}</p>
-              </div>
+            {/* OCR UI moved into modal (modal shows progress, result and actions) */}
+
+            {/* OCR Modal component */}
+            {ocrModalOpen && screenshotFile && (
+        <OcrModal
+          file={screenshotFile}
+          requiredTag={requiredTag}
+          confidenceThreshold={confidenceThreshold}
+          failedAttempts={failedAttempts}
+              onAttempt={() => {
+                setFailedAttempts((n) => n + 1);
+              }}
+              onRetry={() => {
+                  // clear and close modal so user can re-upload
+                  setSelectedFile(null);
+                  setScreenshotFile(null);
+                  setOcrResult(null);
+                  setFailedAttempts(0);
+                  setOcrModalOpen(false);
+                }}
+                onVerified={async (result, forced) => {
+                  // persist proof and update progress if verified or forced
+                  if (!gameState.currentUser.userId) return;
+                  try {
+                    const blobId = await putBlob(screenshotFile);
+                    const proof: SocialProof = {
+                      opId: `proof_${Date.now()}`,
+                      userId: gameState.currentUser.userId,
+                      imageLocalUrl: blobId,
+                      detectedTags: result?.detectedTags || [],
+                      detected: !!result?.detected,
+                      verified:
+                        forced ||
+                        (!!result?.detected &&
+                          result.confidence >= confidenceThreshold),
+                      attempts: 1,
+                      createdAt: new Date().toISOString(),
+                    };
+                    gameStorage.addSocialProof(
+                      gameState.currentUser.userId,
+                      proof
+                    );
+                    setProofs((p) => [...p, proof]);
+                    if (proof.verified) {
+                      updateChallengeProgress("social-arena", 1, true);
+                      setForcedValidated(true);
+                      setFailedAttempts(0);
+                    } else {
+                      setFailedAttempts((n) => n + 1);
+                    }
+                  } catch (err) {
+                    console.error(
+                      "Error saving screenshot proof after OCR modal verification",
+                      err
+                    );
+                  } finally {
+                    // modal will close itself after showing success message; parent no longer closes it immediately
+                  }
+                }}
+                onClose={() => {
+                  // modal closed: show action buttons to re-upload or finish
+                  setOcrModalOpen(false);
+                }}
+              />
             )}
 
-            {/* Latest proof result */}
-            {latestProof && !isAnalyzing && (
-              <div className="mb-6">
-                <h4 className="font-retro text-xs mb-3">Ultimo risultato</h4>
-                <div className={`nes-container p-3 ${latestProof.detected ? 'is-success' : 'is-error'}`}>
-                  <div className="flex items-start gap-3">
-                    <img 
-                      src={latestProof.imageLocalUrl} 
-                      alt="Prova caricata" 
-                      className="w-16 h-16 object-cover border-2 border-black"
-                    />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium mb-1">
-                        {latestProof.detected ? 'Tag rilevato!' : 'Tag non trovato'}
-                      </p>
-                      <p className="text-xs mb-2">
-                        Tag trovati: {latestProof.detectedTags.join(', ') || 'Nessuno'}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(latestProof.createdAt).toLocaleString('it-IT')}
-                      </p>
-                    </div>
+            {/* Post-OCR action area removed per request */}
+
+            {/* Share guide modal */}
+            {showShareGuide && (
+              <div className="fixed inset-0 z-60 flex items-center justify-center bg-black bg-opacity-70">
+                <div className="bg-white rounded-lg p-4 max-w-md w-full">
+                  <h3 className="font-retro text-sm mb-2">
+                    Come condividere su Instagram
+                  </h3>
+                  <ol className="text-xs mb-3">
+                    <li>Apri Instagram e crea una nuova Storia.</li>
+                    <li>Carica la foto che hai appena scattato.</li>
+                    <li>
+                      Pubblica la Storia e fai uno screenshot della Storia
+                      pubblicata.
+                    </li>
+                    <li>
+                      Torni qui e usa "Carica screenshot" per caricare lo
+                      screenshot della Storia.
+                    </li>
+                  </ol>
+                  <div className="flex justify-end gap-2">
+                    <button
+                      className="nes-btn is-normal"
+                      onClick={() => setShowShareGuide(false)}
+                    >
+                      Chiudi
+                    </button>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Instructions */}
-            <div className="nes-container is-light p-3">
-              <p className="text-xs">
-                <strong>Istruzioni:</strong> Cerca il gadget ufficiale LecceDigital allo stand e includilo nella foto. 
-                Il sistema rileverà automaticamente i tag della community per verificare la tua partecipazione.
-              </p>
-            </div>
+            {/* Latest proof result removed per request */}
           </>
         ) : (
           /* Completion message */
           <div className="text-center">
             <div className="nes-container is-success p-4 mb-4">
-              <div className="text-4xl mb-2">🏆</div>
+              <div className="flex items-center justify-center gap-4 mb-2">
+                <div className="text-5xl">🏆</div>
+                {latestProof && (
+                  <img
+                    src={
+                      getPreviewUrl(latestProof) ||
+                      (latestProof.imageLocalUrl as string)
+                    }
+                    alt="Prova verificata"
+                    className="w-16 h-16 object-cover border-2 border-black"
+                  />
+                )}
+              </div>
               <h4 className="font-retro text-sm mb-2">Arena Conquistata!</h4>
               <p className="text-sm mb-3">
-                La tua prova è stata verificata! La leggenda del Sigillo è ora completa.
+                La tua prova è stata verificata! La leggenda del Sigillo è ora
+                completa.
               </p>
               {latestProof && (
                 <div className="nes-container is-light p-3">
-                  <div className="flex items-center gap-3 justify-center">
-                    <img 
-                      src={latestProof.imageLocalUrl} 
-                      alt="Prova verificata" 
-                      className="w-12 h-12 object-cover border-2 border-black"
-                    />
-                    <div className="text-xs text-left">
-                      <div>Tag rilevati: {latestProof.detectedTags.join(', ')}</div>
-                      <div>Verificato: {new Date(latestProof.createdAt).toLocaleString('it-IT')}</div>
+                  <div className="text-xs text-left">
+                    <div>Tag rilevati: {latestProof.detectedTags.join(", ")}</div>
+                    <div>
+                      Verificato:{" "}
+                      {new Date(latestProof.createdAt).toLocaleString("it-IT")}
                     </div>
                   </div>
                 </div>

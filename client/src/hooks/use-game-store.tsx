@@ -48,8 +48,10 @@ function createGameStore() {
     currentUser: {
       userId: '',
       displayName: '',
-      avatar: '👨‍💻',
-      qrData: null,
+  avatar: '👨‍💻',
+  qrData: null,
+  // optional title assigned on challenge completion
+  title: undefined,
     },
     challenges: INITIAL_CHALLENGES,
     currentChallengeId: null,
@@ -117,6 +119,21 @@ function createGameStore() {
       }));
     }
   }, []);
+
+  // Called by UI when navigating back to map to surface any pending completion
+  const acknowledgeCompletion = useCallback(() => {
+    setModals(prev => {
+      const pending = prev['pendingCompletion'];
+      if (pending && pending.data) {
+        // Remove pendingCompletion so it won't re-trigger on subsequent mounts
+        const next = { ...prev } as Record<string, Modal>;
+        delete next['pendingCompletion'];
+        next['completion'] = { id: 'completion', isOpen: true, data: pending.data };
+        return next;
+      }
+      return prev;
+    });
+  }, [setModals]);
 
   const showToast = useCallback((message: string, type: Toast['type'] = 'info', duration: number = 3000) => {
     const toast: Toast = {
@@ -213,40 +230,76 @@ function createGameStore() {
         return challenge;
       });
 
-      // Update game progress
+      // Update game progress only when this is the first time the challenge is completed
       if (completed && prev.currentUser.userId) {
-        const newCompletedChallenges = [...prev.gameProgress.completedChallenges];
-        if (!newCompletedChallenges.includes(challengeId)) {
-          newCompletedChallenges.push(challengeId);
-        }
+        const wasAlreadyCompleted = prev.gameProgress.completedChallenges.includes(challengeId);
 
-        const gameProgress: GameProgress = {
-          userId: prev.currentUser.userId,
-          currentChallengeIndex: Math.min(newCompletedChallenges.length, prev.challenges.length - 1),
-          completedChallenges: newCompletedChallenges,
-          totalScore: prev.gameProgress.totalScore + (progress * 10), // Simple scoring
-          startedAt: gameStorage.getProgress(prev.currentUser.userId)?.startedAt || new Date().toISOString(),
-          lastUpdated: new Date().toISOString(),
-          gameCompleted: newCompletedChallenges.length === prev.challenges.length,
-        };
+        if (!wasAlreadyCompleted) {
+          const newCompletedChallenges = [...prev.gameProgress.completedChallenges, challengeId];
 
-        gameStorage.saveProgress(gameProgress);
-
-        // Unlock next challenge
-        const nextChallengeIndex = prev.challenges.findIndex(c => c.id === challengeId) + 1;
-        if (nextChallengeIndex < prev.challenges.length) {
-          updatedChallenges[nextChallengeIndex].status = 'available';
-        }
-
-        return {
-          ...prev,
-          challenges: updatedChallenges,
-          gameProgress: {
+          const gameProgress: GameProgress = {
+            userId: prev.currentUser.userId,
+            currentChallengeIndex: Math.min(newCompletedChallenges.length, prev.challenges.length - 1),
             completedChallenges: newCompletedChallenges,
-            totalScore: gameProgress.totalScore,
-            gameCompleted: gameProgress.gameCompleted,
-          },
-        };
+            totalScore: prev.gameProgress.totalScore + (progress * 10), // Simple scoring
+            startedAt: gameStorage.getProgress(prev.currentUser.userId)?.startedAt || new Date().toISOString(),
+            lastUpdated: new Date().toISOString(),
+            gameCompleted: newCompletedChallenges.length === prev.challenges.length,
+          };
+
+          gameStorage.saveProgress(gameProgress);
+
+          // Unlock next challenge
+          const nextChallengeIndex = prev.challenges.findIndex(c => c.id === challengeId) + 1;
+          if (nextChallengeIndex < prev.challenges.length) {
+            updatedChallenges[nextChallengeIndex].status = 'available';
+          }
+
+          // Assign a title to the player for this completion (simple mapping)
+          const titleForChallenge = (() => {
+            switch (challengeId) {
+              case 'networking-forest': return 'Ally of the Forest';
+              case 'retro-puzzle': return 'Puzzle Master';
+              case 'debug-dungeon': return 'Dungeon Delver';
+              case 'social-arena': return 'Social Champion';
+              default: return undefined;
+            }
+          })();
+
+          // Persist title into profile
+          if (titleForChallenge) {
+            const existingProfile = gameStorage.getProfile(prev.currentUser.userId);
+            if (existingProfile) {
+              const updatedProfile = { ...existingProfile, title: titleForChallenge } as any;
+              gameStorage.saveProfile(updatedProfile);
+            }
+          }
+
+          // Queue a pending completion modal so it can be shown when user returns to map
+          const completionData = {
+            challengeId,
+            title: titleForChallenge || 'Gemma',
+            description: `Hai ottenuto la gemma per ${challengeId}`,
+            score: gameProgress.totalScore,
+            time: new Date().toLocaleTimeString(),
+          };
+
+          setModals(prevModals => ({
+            ...prevModals,
+            pendingCompletion: { id: 'pendingCompletion', isOpen: true, data: completionData },
+          }));
+
+          return {
+            ...prev,
+            challenges: updatedChallenges,
+            gameProgress: {
+              completedChallenges: newCompletedChallenges,
+              totalScore: gameProgress.totalScore,
+              gameCompleted: gameProgress.gameCompleted,
+            },
+          };
+        }
+        // if it was already completed, do not re-queue modal or change score
       }
 
       return {
@@ -254,7 +307,7 @@ function createGameStore() {
         challenges: updatedChallenges,
       };
     });
-  }, []);
+  }, [setModals]);
 
   const setTheme = useCallback((theme: Theme) => {
     setGameState(prev => ({ ...prev, theme }));
@@ -308,6 +361,7 @@ function createGameStore() {
     modals,
     saveProfile,
     updateChallengeProgress,
+  acknowledgeCompletion,
     setTheme,
     showToast,
     removeToast,

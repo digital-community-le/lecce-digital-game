@@ -167,6 +167,7 @@
       "position": { "top": "65%", "left": "40%" },
       "settings": {
         "requiredTag": "@lecce_digital",
+  "confidenceThreshold": 40,
         "verificationMode": "ocr-client",
         "allowManualProof": true,
         "maxAttempts": 3,
