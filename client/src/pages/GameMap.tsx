@@ -37,12 +37,13 @@ const GameMapPage: React.FC = () => {
         <CanvasMap />
       </main>
       
-      <FloatingActionButton />
+  <FloatingActionButton />
       
-      {/* Modals - Keep these for overlays */}
-      <ScannerView />
-      <ScanPreviewModal />
-      <CompletionModal />
+  {/* Modals - Keep these for overlays */}
+  <ScannerView />
+  <ScanPreviewModal />
+  <CompletionModal />
+  <QRModal />
       
       {/* Toast notifications */}
       {toasts.map((toast) => (

@@ -274,8 +274,6 @@ const DebugDungeon: React.FC = () => {
 
   return (
     <div>
-      <p className="title bg-card">Debug Dungeon</p>
-      
       <div className="p-4">
         {/* Challenge description */}
         <div className="mb-6">

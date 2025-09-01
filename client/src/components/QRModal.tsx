@@ -93,7 +93,7 @@ const QRModal: React.FC = () => {
             )}
           </div>
           
-          {/* Action buttons */}
+          {/* Action buttons: only Download and Close are needed */}
           <div className="flex gap-2 justify-center flex-wrap">
             <button 
               className="nes-btn is-primary" 
@@ -102,21 +102,6 @@ const QRModal: React.FC = () => {
               data-testid="button-download-qr"
             >
               Scarica
-            </button>
-            <button 
-              className="nes-btn is-normal" 
-              onClick={handleCopy}
-              disabled={!gameState.currentUser.qrData}
-              data-testid="button-copy-qr"
-            >
-              Copia QR
-            </button>
-            <button 
-              className="nes-btn is-normal" 
-              onClick={handleCopyData}
-              data-testid="button-copy-data"
-            >
-              Copia dati
             </button>
             <button 
               className="nes-btn is-normal" 
