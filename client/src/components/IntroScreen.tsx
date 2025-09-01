@@ -24,8 +24,11 @@ const IntroScreen: React.FC = () => {
     };
   }, []);
 
-  const handleStart = () => {
+  const handleStart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    console.log('Button clicked, opening modal');
     openModal('profile');
+    console.log('Modal open call completed');
   };
 
   return (
