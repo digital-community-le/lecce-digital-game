@@ -141,21 +141,29 @@ const CanvasMap: React.FC = () => {
         if (isInClearZone(x, y)) {
           tileType = 'grass';
         } else {
-          // Distribuisci altri terreni solo nelle aree sicuramente libere
-          // Forest areas (angoli lontani dai nodi)
-          if ((x < 8 && y < 6) || (x < 6 && y > 30)) {
+          // Distribuisci terreni più generosamente nelle aree libere
+          // Forest areas principali (angoli e zone sicure)
+          if ((x < 10 && y < 8) || (x < 8 && y > 28) || (x > 38 && y > 30)) {
             tileType = 'forest';
           }
-          // Mountain range (angolo in alto a destra, lontano dai nodi)
-          else if (y < 4 && x > 36 && x < 46) {
+          // Mountain ranges (due catene montuose)
+          else if ((y < 6 && x > 32 && x < 46) || (x < 8 && y > 20 && y < 28)) {
             tileType = 'mountain';
           }
-          // Lake (angolo in basso a destra, molto ridotto)
-          else if (x > 42 && y > 32 && x < 47 && y < 36) {
+          // Lake (angolo in basso a destra)
+          else if (x > 40 && y > 32 && x < 47 && y < 37) {
             tileType = 'lake';
           }
-          // Scattered forest patches (molto ridotti e distanti)
-          else if ((x + y) % 24 === 0 && x > 6 && x < 36 && y > 8 && y < 30 && !isInClearZone(x, y)) {
+          // Scattered forest patches (alberi sparsi più numerosi)
+          else if ((x + y) % 16 === 0 && x > 8 && x < 38 && y > 10 && y < 30) {
+            tileType = 'forest';
+          }
+          // Additional mountain patches (montagne sparse)
+          else if ((x * y) % 32 === 0 && x > 10 && x < 35 && y > 6 && y < 20) {
+            tileType = 'mountain';
+          }
+          // More scattered trees (pattern diverso)
+          else if ((x * 3 + y * 7) % 20 === 0 && x > 12 && x < 40 && y > 12 && y < 32) {
             tileType = 'forest';
           }
           // Default: sempre grass per sicurezza
@@ -248,55 +256,47 @@ const CanvasMap: React.FC = () => {
         break;
 
       case 'forest':
-        // Base grass come sfondo
+        // Base grass verde come sfondo
         ctx.fillStyle = '#8FD14F';
         ctx.fillRect(x, y, size, size);
         
-        // Albero fedele al riferimento - forma circolare con dettagli
+        // Albero più organico (versione precedente migliorata)
         const treeCenterX = x + size / 2;
         const treeCenterY = y + size / 2;
-        const treeRadius = Math.max(6, Math.floor(size * 0.35));
+        const treeSize = Math.max(8, Math.floor(size * 0.7));
         
-        // Chioma principale - verde scuro come nel riferimento
-        ctx.fillStyle = '#2D5016';
-        // Forma circolare dell'albero usando quadrati sovrapposti
-        for (let dx = -treeRadius; dx <= treeRadius; dx++) {
-          for (let dy = -treeRadius; dy <= treeRadius; dy++) {
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            if (distance <= treeRadius) {
-              ctx.fillRect(treeCenterX + dx, treeCenterY + dy - treeRadius/3, 1, 1);
-            }
-          }
-        }
+        // Tronco marrone per primo (più spesso)
+        ctx.fillStyle = '#8b4513';
+        const trunkWidth = Math.max(3, Math.floor(treeSize / 3));
+        const trunkHeight = Math.max(4, Math.floor(treeSize / 2));
+        ctx.fillRect(treeCenterX - trunkWidth/2, treeCenterY + treeSize/4, trunkWidth, trunkHeight);
         
-        // Dettagli interni della chioma
-        ctx.fillStyle = '#1A3009';
-        const innerRadius = treeRadius * 0.6;
-        for (let i = 0; i < 12; i++) {
-          const angle = (i / 12) * Math.PI * 2;
-          const detailX = treeCenterX + Math.cos(angle) * innerRadius * 0.7;
-          const detailY = treeCenterY + Math.sin(angle) * innerRadius * 0.7 - treeRadius/3;
-          const detailSize = Math.max(1, Math.floor(size / 16));
-          ctx.fillRect(detailX, detailY, detailSize, detailSize);
-        }
+        // Chioma principale - forma più organica
+        ctx.fillStyle = '#2d8a2f';
+        // Centro della chioma
+        ctx.fillRect(treeCenterX - treeSize/2, treeCenterY - treeSize/3, treeSize, Math.floor(treeSize * 0.8));
         
-        // Tronco marrone al centro-basso
-        ctx.fillStyle = '#8B4513';
-        const trunkWidth = Math.max(2, Math.floor(treeRadius / 3));
-        const trunkHeight = Math.max(3, Math.floor(treeRadius / 2));
-        ctx.fillRect(treeCenterX - trunkWidth/2, treeCenterY + treeRadius/2, trunkWidth, trunkHeight);
+        // Espansioni laterali per forma più naturale
+        const expansionSize = Math.floor(treeSize * 0.3);
+        ctx.fillRect(treeCenterX - treeSize/2 - expansionSize/2, treeCenterY - treeSize/6, expansionSize, Math.floor(treeSize * 0.5));
+        ctx.fillRect(treeCenterX + treeSize/2 - expansionSize/2, treeCenterY - treeSize/6, expansionSize, Math.floor(treeSize * 0.5));
         
-        // Highlight sulla chioma
-        ctx.fillStyle = '#4A7C23';
-        const highlightRadius = treeRadius * 0.4;
-        for (let dx = -highlightRadius; dx <= highlightRadius; dx++) {
-          for (let dy = -highlightRadius; dy <= highlightRadius; dy++) {
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            if (distance <= highlightRadius && (dx + dy) % 3 === 0) {
-              ctx.fillRect(treeCenterX + dx, treeCenterY + dy - treeRadius/2, 1, 1);
-            }
-          }
-        }
+        // Parte superiore della chioma (più piccola)
+        ctx.fillRect(treeCenterX - treeSize/3, treeCenterY - treeSize/2, Math.floor(treeSize * 0.6), Math.floor(treeSize * 0.4));
+        
+        // Dettagli scuri per profondità
+        ctx.fillStyle = '#1f5f21';
+        const detailSize = Math.max(1, Math.floor(size / 8));
+        // Ombreggiature sui lati
+        ctx.fillRect(treeCenterX - treeSize/2, treeCenterY - treeSize/6, detailSize, Math.floor(treeSize * 0.4));
+        ctx.fillRect(treeCenterX + treeSize/2 - detailSize, treeCenterY - treeSize/6, detailSize, Math.floor(treeSize * 0.4));
+        // Ombreggiatura sotto
+        ctx.fillRect(treeCenterX - treeSize/3, treeCenterY + treeSize/4 - detailSize, Math.floor(treeSize * 0.6), detailSize);
+        
+        // Highlight verde chiaro sulla chioma
+        ctx.fillStyle = '#45a049';
+        const highlightSize = Math.floor(treeSize * 0.3);
+        ctx.fillRect(treeCenterX - highlightSize/2, treeCenterY - treeSize/4, highlightSize, Math.floor(highlightSize * 0.8));
         break;
 
       case 'mountain':
