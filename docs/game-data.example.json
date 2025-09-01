@@ -1,0 +1,155 @@
+{
+  "gridSize": 32,
+  "map": {
+    "background": "assets/map.png"
+  },
+  "challenges": [
+    {
+      "id": "networking-forest",
+      "type": "networking",
+      "requirements": {
+        "type": "scans",
+        "minDistinctScans": 5
+      }
+    },
+    {
+      "id": "retro-puzzle",
+      "type": "puzzle",
+      "settings": {
+        "pairsCount": 8,
+        "mode": "relaxed",
+        "basePoints": 10,
+        "penalty": 2
+      }
+    },
+    {
+      "id": "debug-dungeon",
+      "type": "quiz",
+      "settings": {
+        "questionsPerRun": 10,
+        "passThresholdPercent": 50
+      }
+    },
+    {
+      "id": "social-arena",
+      "type": "social",
+      "settings": {
+        "requiredTag": "@lecce_digital_community",
+        "verificationMode": "ocr-client",
+        "maxAttempts": 3,
+        "confidenceThreshold": 0.7
+      }
+    }
+  ],
+  "nodes": [
+    {
+      "id": "start",
+      "x": 1,
+      "y": 1
+    },
+    {
+      "id": "networking-forest",
+      "x": 3,
+      "y": 2
+    },
+    {
+      "id": "retro-puzzle",
+      "x": 5,
+      "y": 2
+    },
+    {
+      "id": "debug-dungeon",
+      "x": 7,
+      "y": 3
+    },
+    {
+      "id": "social-arena",
+      "x": 9,
+      "y": 4
+    }
+  ],
+  "avatars": [
+    {
+      "id": "avatar-1",
+      "name": "Aria",
+      "file": "/assets/avatars/avatar-1.svg",
+      "pngFallback": "/assets/avatars/avatar-1-256.png",
+      "alt": "Avatar Aria — volto sorridente, stile illustrato",
+      "colors": [
+        "#F6D1E6",
+        "#BD1F76",
+        "#FFFFFF"
+      ],
+      "tags": [
+        "friendly",
+        "pastel",
+        "rounded"
+      ]
+    },
+    {
+      "id": "avatar-2",
+      "name": "Marco",
+      "file": "/assets/avatars/avatar-2.svg",
+      "pngFallback": "/assets/avatars/avatar-2-256.png",
+      "alt": "Avatar Marco — figura giovane con ciuffo",
+      "colors": [
+        "#2D9CDB",
+        "#0F172A",
+        "#F8FAFC"
+      ],
+      "tags": [
+        "modern",
+        "casual"
+      ]
+    },
+    {
+      "id": "avatar-3",
+      "name": "Nina",
+      "file": "/assets/avatars/avatar-3.svg",
+      "pngFallback": "/assets/avatars/avatar-3-256.png",
+      "alt": "Avatar Nina — volto con accessorio creativo",
+      "colors": [
+        "#FFC857",
+        "#119DA4",
+        "#4A4A4A"
+      ],
+      "tags": [
+        "creative",
+        "expressive"
+      ]
+    },
+    {
+      "id": "avatar-4",
+      "name": "Pixel",
+      "file": "/assets/avatars/avatar-4.svg",
+      "pngFallback": "/assets/avatars/avatar-4-256.png",
+      "alt": "Avatar Pixel — icona in stile pixel art",
+      "colors": [
+        "#000000",
+        "#FFFFFF",
+        "#FF6B6B",
+        "#4ECDC4"
+      ],
+      "tags": [
+        "retro",
+        "pixel"
+      ]
+    },
+    {
+      "id": "avatar-5",
+      "name": "Robo",
+      "file": "/assets/avatars/avatar-5.svg",
+      "pngFallback": "/assets/avatars/avatar-5-256.png",
+      "alt": "Avatar Robo — icona robot minimal",
+      "colors": [
+        "#0B3D91",
+        "#A7C9FF",
+        "#E6EEF7"
+      ],
+      "tags": [
+        "tech",
+        "minimal"
+      ]
+    }
+  ]
+}

@@ -27,17 +27,10 @@ Write documentation both in code and in markdown files
 - **UI Components**: Radix UI primitives with shadcn/ui component library for accessible, customizable components
 - **PWA Features**: Service worker implementation for offline functionality, web app manifest for installability
 
-## Backend Architecture
-- **Server Framework**: Express.js with TypeScript
-- **Development Setup**: Integrated development server with Vite middleware for seamless full-stack development
-- **API Structure**: RESTful API endpoints prefixed with `/api` (currently minimal implementation)
-- **Build Process**: ESBuild for server bundling, separate client and server build processes
-
 ## Data Storage Solutions
 - **Primary Storage**: Browser localStorage with structured key-value pairs using `ldc:*` prefix
 - **Schema**: Zod validation schemas for type safety across user profiles, game progress, challenge states, and social proofs
 - **Persistence Strategy**: Local-first architecture with append-only operations for scans and game events
-- **Optional Remote Sync**: Configurable backend synchronization via `remoteBackend` flag in game configuration
 
 ## Authentication and Authorization
 - **User Identification**: URL query parameter based user ID system (from DevFest redirect)
@@ -47,7 +40,6 @@ Write documentation both in code and in markdown files
 
 ## External Dependencies
 
-- **Database**: Drizzle ORM configured for PostgreSQL (via Neon serverless)
 - **Styling Libraries**: 
   - NES.css for retro gaming aesthetics
   - Google Fonts (Press Start 2P, Nunito)

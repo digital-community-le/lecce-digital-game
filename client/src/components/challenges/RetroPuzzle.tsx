@@ -208,7 +208,7 @@ const RetroPuzzle: React.FC = () => {
                               : 'bg-muted hover:bg-primary hover:text-white'
                         }`}
                         onClick={() => !isMatched && handleTermClick(term)}
-                        disabled={isMatched}
+                        disabled={!!isMatched}
                         data-testid={`term-${term.toLowerCase().replace(/[^a-z]/g, '-')}`}
                       >
                         {term} {isMatched && '✓'}
