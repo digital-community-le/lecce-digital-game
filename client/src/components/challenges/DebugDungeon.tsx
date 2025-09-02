@@ -5,90 +5,6 @@ import { QuizState, QuizQuestion } from '@shared/schema';
 import ChallengeContentLayout from '@/components/layout/ChallengeContentLayout';
 import wisdomGem from '@assets/images/gem-of-wisdom.png';
 
-// Sample quiz questions - in a real app this would come from game-data.json
-const QUIZ_QUESTIONS: QuizQuestion[] = [
-  {
-    id: '1',
-    question: 'Quale hook di React viene utilizzato per gestire lo stato locale?',
-    options: ['useEffect', 'useState', 'useContext', 'useReducer'],
-    correctAnswer: 1,
-    explanation: 'useState è l\'hook principale per gestire lo stato locale in React.',
-    category: 'React'
-  },
-  {
-    id: '2',
-    question: 'Qual è la porta predefinita per un server HTTP?',
-    options: ['80', '443', '8080', '3000'],
-    correctAnswer: 0,
-    explanation: 'La porta 80 è la porta standard per il protocollo HTTP.',
-    category: 'Networking'
-  },
-  {
-    id: '3',
-    question: 'Cosa significa SQL?',
-    options: ['Structured Query Language', 'Simple Query Language', 'Standard Query Language', 'System Query Language'],
-    correctAnswer: 0,
-    explanation: 'SQL sta per Structured Query Language.',
-    category: 'Database'
-  },
-  {
-    id: '4',
-    question: 'Quale metodo HTTP viene utilizzato per creare una nuova risorsa?',
-    options: ['GET', 'POST', 'PUT', 'DELETE'],
-    correctAnswer: 1,
-    explanation: 'POST viene utilizzato per creare nuove risorse sul server.',
-    category: 'HTTP'
-  },
-  {
-    id: '5',
-    question: 'Cos\'è Node.js?',
-    options: ['Un framework frontend', 'Un database', 'Un runtime JavaScript per server', 'Un linguaggio di programmazione'],
-    correctAnswer: 2,
-    explanation: 'Node.js è un runtime JavaScript che permette di eseguire codice JavaScript sul server.',
-    category: 'Backend'
-  },
-  {
-    id: '6',
-    question: 'Quale simbolo viene utilizzato per i commenti in JavaScript?',
-    options: ['#', '//', '/*', '<!--'],
-    correctAnswer: 1,
-    explanation: '// viene utilizzato per i commenti su singola riga in JavaScript.',
-    category: 'JavaScript'
-  },
-  {
-    id: '7',
-    question: 'Cosa significa CSS?',
-    options: ['Computer Style Sheets', 'Cascading Style Sheets', 'Creative Style Sheets', 'Colorful Style Sheets'],
-    correctAnswer: 1,
-    explanation: 'CSS sta per Cascading Style Sheets.',
-    category: 'CSS'
-  },
-  {
-    id: '8',
-    question: 'Quale comando Git viene utilizzato per clonare un repository?',
-    options: ['git clone', 'git copy', 'git download', 'git pull'],
-    correctAnswer: 0,
-    explanation: 'git clone viene utilizzato per clonare un repository Git.',
-    category: 'Git'
-  },
-  {
-    id: '9',
-    question: 'Qual è il significato di API?',
-    options: ['Application Programming Interface', 'Automated Programming Interface', 'Advanced Programming Interface', 'Application Process Interface'],
-    correctAnswer: 0,
-    explanation: 'API sta per Application Programming Interface.',
-    category: 'General'
-  },
-  {
-    id: '10',
-    question: 'Quale attributo HTML viene utilizzato per specificare un identificatore unico?',
-    options: ['class', 'id', 'name', 'unique'],
-    correctAnswer: 1,
-    explanation: 'L\'attributo id viene utilizzato per specificare un identificatore unico in HTML.',
-    category: 'HTML'
-  }
-];
-
 const DebugDungeon: React.FC = () => {
   const { gameState, updateChallengeProgress, showToast } = useGameStore();
   const [quizState, setQuizState] = useState<QuizState | null>(null);
@@ -99,28 +15,68 @@ const DebugDungeon: React.FC = () => {
   const QUESTIONS_COUNT = 10;
   const PASS_THRESHOLD = 70; // 70% to pass
 
-  useEffect(() => {
-    if (gameState.currentUser.userId) {
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  // fetch questions from game-data.json and initialize quiz state. Throws or sets loadError on failure.
+  const fetchAndInit = async (): Promise<boolean> => {
+    if (!gameState.currentUser.userId) {
+      setIsLoading(false);
+      return false;
+    }
+    setIsLoading(true);
+    setLoadError(null);
+
+    try {
+      const res = await fetch('/game-data.json');
+      if (!res.ok) {
+        throw new Error(`Impossibile caricare game-data.json (status ${res.status})`);
+      }
+
+      const data = await res.json();
+      const challenge = data.challenges?.find((c: any) => c.id === 'debug-dungeon');
+
+      if (!challenge || !Array.isArray(challenge.questions) || challenge.questions.length === 0) {
+        throw new Error('Nessuna domanda trovata per la challenge "debug-dungeon" in game-data.json');
+      }
+
+      const questions: QuizQuestion[] = challenge.questions.map((q: any, idx: number) => ({
+        id: q.id ?? String(idx + 1),
+        question: q.question ?? q.text ?? 'Question',
+        options: q.options ?? [],
+        correctAnswer: typeof q.correctAnswer === 'number' ? q.correctAnswer : 0,
+        explanation: q.explanation ?? '',
+        category: q.category ?? 'General',
+      }));
+
       let state = gameStorage.getQuizState(gameState.currentUser.userId);
-      
+
       if (!state) {
-        // Initialize new quiz state
         state = {
           id: `quiz_${Date.now()}`,
-          questions: QUIZ_QUESTIONS,
+          questions,
           currentQuestionIndex: 0,
           answers: [],
           score: 0,
           completed: false,
           startedAt: new Date().toISOString(),
         };
-        
+
         gameStorage.saveQuizState(gameState.currentUser.userId, state);
       }
-      
-      setQuizState(state);
+
+  setQuizState(state);
+  return true;
+    } catch (err: any) {
+      setLoadError(err?.message ?? 'Errore durante il caricamento delle domande');
+  return false;
+    } finally {
       setIsLoading(false);
     }
+  };
+
+  useEffect(() => {
+    // fire-and-forget init
+    fetchAndInit();
   }, [gameState.currentUser.userId]);
 
   const handleAnswerSelect = (answerIndex: number) => {
@@ -195,31 +151,65 @@ const DebugDungeon: React.FC = () => {
     setShowExplanation(false);
   };
 
-  const handleRestart = () => {
+  const handleRestart = async () => {
     if (!gameState.currentUser.userId) return;
 
-    const newState: QuizState = {
-      id: `quiz_${Date.now()}`,
-      questions: QUIZ_QUESTIONS,
-      currentQuestionIndex: 0,
-      answers: [],
-      score: 0,
-      completed: false,
-      startedAt: new Date().toISOString(),
-    };
-    
-    setQuizState(newState);
-    gameStorage.saveQuizState(gameState.currentUser.userId, newState);
-    setSelectedAnswer(null);
-    setShowExplanation(false);
-    showToast('Quiz riavviato!', 'info');
+    // If we have questions currently loaded, restart using them; otherwise attempt to re-fetch.
+    if (quizState && quizState.questions && quizState.questions.length > 0) {
+      const newState: QuizState = {
+        id: `quiz_${Date.now()}`,
+        questions: quizState.questions,
+        currentQuestionIndex: 0,
+        answers: [],
+        score: 0,
+        completed: false,
+        startedAt: new Date().toISOString(),
+      };
+
+      setQuizState(newState);
+      gameStorage.saveQuizState(gameState.currentUser.userId, newState);
+      setSelectedAnswer(null);
+      setShowExplanation(false);
+      showToast('Quiz riavviato!', 'info');
+      return;
+    }
+
+  // No questions available locally: try to re-fetch from game-data.json
+  setSelectedAnswer(null);
+  setShowExplanation(false);
+  setLoadError(null);
+  const success = await fetchAndInit();
+  if (success) showToast('Quiz riavviato!', 'info');
   };
 
-  if (isLoading || !quizState) {
+  if (isLoading) {
     return (
       <div className="p-4">
         <p className="title bg-card">Debug Dungeon</p>
         <div className="text-center">Caricamento...</div>
+      </div>
+    );
+  }
+
+  if (loadError || !quizState) {
+    return (
+      <div className="p-4">
+        <p className="title bg-card">Debug Dungeon</p>
+        <div className="text-center">
+          <p className="text-sm text-red-600 mb-3">{loadError ?? 'Impossibile inizializzare il quiz.'}</p>
+          <div className="flex justify-center gap-2">
+            <button
+              className="nes-btn is-primary"
+              onClick={() => {
+                setLoadError(null);
+                fetchAndInit();
+              }}
+              data-testid="button-retry-load"
+            >
+              Riprova
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
