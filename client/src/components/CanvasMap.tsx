@@ -2,8 +2,11 @@ import React, { useRef, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { useGameStore } from '@/hooks/use-game-store';
 import { MapNode } from '@/types/game';
+import { renderMap, determineSafePositionForChallenge, NodeRect } from '@/lib/mapRenderer';
+import { useState } from 'react';
 
 /**
+ * NodeRect type definition
  * CanvasMap Component - Sistema di mappa retro 8-bit basato su Canvas HTML5
  * 
  * Questo componente genera e renderizza una mappa di gioco dinamica utilizzando
@@ -41,11 +44,10 @@ const CanvasMap: React.FC = () => {
   const [, setLocation] = useLocation();
   const { gameState, showToast } = useGameStore();
 
+  const [nodeRectsState, setNodeRectsState] = useState<Record<string, NodeRect> | undefined>(undefined);
   /** Dimensione di ogni tile in pixel - ridotta per forme più smussate */
-  const TILE_SIZE = 16;
-  /** Larghezza griglia mappa (numero di tile orizzontali) */
+  // Map grid configuration - kept as small configuration on the component
   const MAP_WIDTH = 48;
-  /** Altezza griglia mappa (numero di tile verticali) */
   const MAP_HEIGHT = 36;
 
   /**
@@ -59,266 +61,19 @@ const CanvasMap: React.FC = () => {
    * 
    * @returns Array di tile con posizione e tipo di terreno
    */
-  const generateTerrainTiles = (): MapTile[] => {
-    const tiles: MapTile[] = [];
-    
-    for (let x = 0; x < MAP_WIDTH; x++) {
-      for (let y = 0; y < MAP_HEIGHT; y++) {
-        let tileType: TerrainType = 'grass'; // Default
-        
-        // Forest areas (top-left quadrant and bottom-left)
-        if ((x < 16 && y < 12) || (x < 12 && y > 24)) {
-          tileType = 'forest';
-        }
-        // Mountain range (top-center and top-right)
-        else if (y < 8 && x > 20 && x < 40) {
-          tileType = 'mountain';
-        }
-        // Lake (bottom-right corner)
-        else if (x > 36 && y > 26) {
-          tileType = 'lake';
-        }
-        // Add some scattered forest patches deterministically
-        else if ((x + y) % 14 === 0 && x > 10 && x < 36 && y > 16) {
-          tileType = 'forest';
-        }
-        
-        tiles.push({ x, y, type: tileType });
-      }
-    }
-    
-    return tiles;
-  };
-
-  /**
-   * Genera percorsi che collegano i nodi delle sfide usando coordinate pixel reali
-   * 
-   * Converte le posizioni percentuali dei nodi in coordinate pixel del canvas
-   * per garantire allineamento perfetto su qualsiasi dimensione schermo.
-   * 
-   * @param canvasWidth Larghezza del canvas in pixel
-   * @param canvasHeight Altezza del canvas in pixel
-   * @returns Array di segmenti di strada con coordinate pixel
-   */
-  const generatePaths = (canvasWidth: number, canvasHeight: number): PathSegment[] => {
-    const paths: PathSegment[] = [];
-    const challenges = gameState.challenges;
-    
-    for (let i = 0; i < challenges.length - 1; i++) {
-      const current = challenges[i];
-      const next = challenges[i + 1];
-      
-      // Convert percentage positions to actual canvas pixel coordinates
-      const fromX = (parseFloat(current.position.left.replace('%', '')) / 100) * canvasWidth;
-      const fromY = (parseFloat(current.position.top.replace('%', '')) / 100) * canvasHeight;
-      const toX = (parseFloat(next.position.left.replace('%', '')) / 100) * canvasWidth;
-      const toY = (parseFloat(next.position.top.replace('%', '')) / 100) * canvasHeight;
-      
-      paths.push({ fromX, fromY, toX, toY });
-    }
-    
-    return paths;
-  };
-
-  /**
-   * Disegna un singolo tile di terreno sul canvas con stile pixel art
-   * 
-   * Ogni tipo di terreno ha un pattern unico:
-   * - Grass: Verde con puntini casuali
-   * - Forest: Verde scuro con alberi stilizzati
-   * - Mountain: Grigio con texture rocciosa
-   * - Lake: Blu con increspature animate
-   * 
-   * @param ctx Contesto 2D del canvas
-   * @param tile Tile da disegnare
-   * @param x Posizione X in pixel
-   * @param y Posizione Y in pixel
-   * @param size Dimensione del tile in pixel
-   */
-  const drawTileResponsive = (ctx: CanvasRenderingContext2D, tile: MapTile, x: number, y: number, size: number) => {
-
-    switch (tile.type) {
-      case 'grass':
-        // Green grass with random dots
-        ctx.fillStyle = '#22c55e';
-        ctx.fillRect(x, y, size, size);
-        ctx.fillStyle = '#16a34a';
-        const dotCount = Math.max(4, Math.floor(size / 4));
-        for (let i = 0; i < dotCount; i++) {
-          const dotX = x + ((tile.x * 7 + tile.y * 3 + i) % size);
-          const dotY = y + ((tile.y * 5 + tile.x * 2 + i) % size);
-          const dotSize = Math.max(1, Math.floor(size / 16));
-          ctx.fillRect(dotX, dotY, dotSize, dotSize);
-        }
-        break;
-
-      case 'forest':
-        // Dark green with tree-like patterns
-        ctx.fillStyle = '#166534';
-        ctx.fillRect(x, y, size, size);
-        ctx.fillStyle = '#052e16';
-        // Draw tree trunks (responsive)
-        const treeCount = Math.max(2, Math.floor(size / 8));
-        for (let i = 0; i < treeCount; i++) {
-          const treeX = x + ((tile.x * 11 + i * 7) % (size - size/4));
-          const treeY = y + ((tile.y * 13 + i * 5) % (size - size/3));
-          const trunkWidth = Math.max(2, Math.floor(size / 8));
-          const trunkHeight = Math.max(4, Math.floor(size / 4));
-          ctx.fillRect(treeX, treeY + trunkHeight, trunkWidth, trunkHeight);
-          ctx.fillStyle = '#15803d';
-          ctx.fillRect(treeX - trunkWidth/2, treeY, trunkWidth * 2, trunkHeight);
-          ctx.fillStyle = '#052e16';
-        }
-        break;
-
-      case 'mountain':
-        // Gray rocky texture
-        ctx.fillStyle = '#6b7280';
-        ctx.fillRect(x, y, size, size);
-        ctx.fillStyle = '#374151';
-        // Rocky pattern (responsive)
-        const rockCount = Math.max(8, Math.floor(size * size / 32));
-        for (let i = 0; i < rockCount; i++) {
-          const rockX = x + ((tile.x * 17 + tile.y * 11 + i) % size);
-          const rockY = y + ((tile.y * 19 + tile.x * 7 + i) % size);
-          if ((rockX + rockY) % 8 < 4) {
-            const rockSize = Math.max(1, Math.floor(size / 16));
-            ctx.fillRect(rockX, rockY, rockSize, rockSize);
-          }
-        }
-        break;
-
-      case 'lake':
-        // Blue water with shimmer effect
-        ctx.fillStyle = '#3b82f6';
-        ctx.fillRect(x, y, size, size);
-        ctx.fillStyle = '#1d4ed8';
-        // Water ripples (responsive)
-        const rippleCount = Math.max(3, Math.floor(size / 6));
-        for (let i = 0; i < rippleCount; i++) {
-          const rippleX = x + ((tile.x * 23 + i * 9) % (size - 4));
-          const rippleY = y + ((tile.y * 29 + i * 7) % (size - 4));
-          const rippleSize = Math.max(1, Math.floor(size / 16));
-          ctx.fillRect(rippleX, rippleY, rippleSize * 3, rippleSize);
-          ctx.fillRect(rippleX + rippleSize, rippleY + rippleSize * 2, rippleSize, rippleSize * 3);
-        }
-        break;
-
-      case 'road':
-        // Brown dirt road
-        ctx.fillStyle = '#8B4513';
-        ctx.fillRect(x, y, size, size);
-        ctx.fillStyle = '#654321';
-        // Road texture (responsive)
-        const roadDotCount = Math.max(6, Math.floor(size / 3));
-        for (let i = 0; i < roadDotCount; i++) {
-          const dotX = x + ((tile.x * 31 + i * 13) % size);
-          const dotY = y + ((tile.y * 37 + i * 11) % size);
-          const dotSize = Math.max(1, Math.floor(size / 32));
-          ctx.fillRect(dotX, dotY, dotSize, dotSize);
-        }
-        break;
-    }
-  };
-
-  /**
-   * Disegna una strada sterrata che collega due punti usando coordinate pixel
-   * 
-   * La strada viene disegnata con due layer:
-   * 1. Bordo scuro più largo per profondità
-   * 2. Centro marrone per il sentiero
-   * 
-   * @param ctx Contesto 2D del canvas
-   * @param path Segmento di strada da disegnare
-   */
-  const drawRoadResponsive = (ctx: CanvasRenderingContext2D, path: PathSegment) => {
-    // Path coordinates are already in pixel positions
-    const startX = path.fromX + 40; // Offset to center of node (80px node / 2)
-    const startY = path.fromY + 40;
-    const endX = path.toX + 40;
-    const endY = path.toY + 40;
-
-    // Responsive road width based on screen size
-    const roadWidth = Math.max(8, Math.floor(Math.min(window.innerWidth, window.innerHeight) / 80));
-    const borderWidth = roadWidth + 4;
-
-    // Draw road border (darker)
-    ctx.strokeStyle = '#654321';
-    ctx.lineWidth = borderWidth;
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.moveTo(startX, startY);
-    ctx.lineTo(endX, endY);
-    ctx.stroke();
-
-    // Draw road path (lighter)
-    ctx.strokeStyle = '#8B4513';
-    ctx.lineWidth = roadWidth;
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.moveTo(startX, startY);
-    ctx.lineTo(endX, endY);
-    ctx.stroke();
-  };
-
-  /**
-   * Funzione principale di disegno con ridimensionamento responsive
-   * 
-   * Gestisce tutto il processo di rendering della mappa:
-   * 1. Calcola dimensioni responsive del canvas
-   * 2. Configura il contesto per rendering pixel-perfect
-   * 3. Disegna i tile di terreno
-   * 4. Disegna le strade che collegano le sfide
-   * 
-   * Il canvas si adatta automaticamente alle dimensioni dello schermo
-   * mantenendo le proporzioni e l'allineamento degli elementi.
-   */
+  // drawMap is now handled by the mapRenderer service to keep this component
+  // focused on rendering DOM and wiring user interactions.
   const drawMap = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    // Get full viewport dimensions
-    const containerWidth = window.innerWidth;
-    const containerHeight = window.innerHeight - 48; // Account for header height
-
-    // Set canvas display size (CSS)
-    canvas.style.width = `${containerWidth}px`;
-    canvas.style.height = `${containerHeight}px`;
-
-    // Set canvas actual size (for drawing)
-    const pixelRatio = window.devicePixelRatio || 1;
-    canvas.width = containerWidth * pixelRatio;
-    canvas.height = containerHeight * pixelRatio;
-
-    // Scale context for high DPI
-    ctx.scale(pixelRatio, pixelRatio);
-
-    // Disable image smoothing for pixel-perfect rendering
-    ctx.imageSmoothingEnabled = false;
-
-    // Calculate tile size to fill entire screen
-    const tileWidth = containerWidth / MAP_WIDTH;
-    const tileHeight = containerHeight / MAP_HEIGHT;
-    const actualTileSize = Math.max(tileWidth, tileHeight); // Use max to fill screen completely
-
-    // Clear canvas
-    ctx.clearRect(0, 0, containerWidth, containerHeight);
-
-    // Generate and draw terrain
-    const terrainTiles = generateTerrainTiles();
-    terrainTiles.forEach(tile => {
-      const tileX = tile.x * actualTileSize;
-      const tileY = tile.y * actualTileSize;
-      drawTileResponsive(ctx, tile, tileX, tileY, actualTileSize);
-    });
-
-    // Generate and draw roads using actual canvas dimensions
-    const roadPaths = generatePaths(containerWidth, containerHeight);
-    roadPaths.forEach(path => drawRoadResponsive(ctx, path));
+    // Try to collect DOM bounding boxes for each node so connectors can
+    // precisely target the node border.
+  renderMap(canvas, gameState.challenges, MAP_WIDTH, MAP_HEIGHT, 48, nodeRectsState);
   };
+
+  // Safe overlay positions (percent strings) for challenge nodes to avoid
+  // placing nodes on forbidden terrain. Map from node.id -> { leftPercent, topPercent }
+  const [safePositions, setSafePositions] = useState<Record<string, { left: string; top: string }>>({});
 
   useEffect(() => {
     drawMap();
@@ -329,8 +84,70 @@ const CanvasMap: React.FC = () => {
     };
     
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [gameState.challenges]); // Redraw when challenges change
+    // Redraw when a map icon image finishes loading in the renderer
+    const onIconLoaded = (ev?: Event) => {
+      try { console.debug('[CanvasMap] map-icon-loaded', (ev as any)?.detail); } catch (e) {}
+      drawMap();
+    };
+    window.addEventListener('map-icon-loaded', onIconLoaded as EventListener);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('map-icon-loaded', onIconLoaded as EventListener);
+    };
+  }, [gameState.challenges, nodeRectsState]); // Redraw when challenges or rects change
+
+  // Recompute safe positions whenever challenges change or canvas size changes
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const canvasWidth = window.innerWidth;
+    const canvasHeight = window.innerHeight - 48;
+
+    const newPositions: Record<string, { left: string; top: string }> = {};
+  const nodeRects: Record<string, NodeRect> = {};
+    gameState.challenges.forEach(node => {
+      const safe = determineSafePositionForChallenge(node, canvasWidth, canvasHeight, MAP_WIDTH, MAP_HEIGHT);
+      newPositions[node.id] = { left: safe.leftPercent, top: safe.topPercent };
+
+      // compute pixel rect for canvas-based rendering
+      const left = parseFloat(safe.leftPercent.replace('%', '')) / 100 * canvasWidth;
+      const top = parseFloat(safe.topPercent.replace('%', '')) / 100 * canvasHeight;
+      const w = 64; // default visual size for node boxes on canvas
+      const h = 64;
+      // Simple color mapping to match previous classes
+      const colorMap: Record<string, string> = {
+        'networking-forest': '#16a34a',
+        'retro-puzzle': '#f59e0b',
+        'debug-dungeon': '#7c3aed',
+        'social-arena': '#f97316'
+      };
+      const bg = colorMap[node.id] || '#9ca3af';
+      nodeRects[node.id] = { cx: left, cy: top, w, h, bgColor: bg, title: node.title, emoji: node.emoji };
+    });
+
+  setSafePositions(newPositions);
+  setNodeRectsState(nodeRects);
+
+    // Set up click handler mapping canvas clicks to node interactions
+    const handleCanvasClick = (ev: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = ev.clientX - rect.left;
+      const y = ev.clientY - rect.top;
+      for (const node of gameState.challenges) {
+        const nr = nodeRects[node.id];
+        if (!nr) continue;
+        const halfW = nr.w / 2;
+        const halfH = nr.h / 2;
+        if (x >= nr.cx - halfW && x <= nr.cx + halfW && y >= nr.cy - halfH && y <= nr.cy + halfH) {
+          handleChallengeClick(node);
+          return;
+        }
+      }
+    };
+
+    canvas.addEventListener('click', handleCanvasClick);
+    return () => canvas.removeEventListener('click', handleCanvasClick);
+  }, [gameState.challenges]);
 
   const getNodeClassName = (node: MapNode): string => {
     const baseClass = 'map-node';
@@ -417,26 +234,7 @@ const CanvasMap: React.FC = () => {
         data-testid="terrain-canvas"
       />
 
-      {/* Challenge Nodes Overlay */}
-      {gameState.challenges.map((node) => (
-        <div
-          key={node.id}
-          className={getNodeClassName(node)}
-          style={{ top: node.position.top, left: node.position.left }}
-          data-testid={`node-${node.id}`}
-        >
-          <div 
-            className={`${getNodeButtonClass(node)} text-center cursor-pointer h-full flex flex-col justify-center`}
-            onClick={() => handleChallengeClick(node)}
-          >
-            <p className="title" style={{ backgroundColor: 'inherit' }}>{node.title}</p>
-            <div className="text-lg" data-testid={`emoji-${node.id}`}>{node.emoji}</div>
-            <div className="text-xs font-retro mt-1" data-testid={`progress-${node.id}`}>
-              {node.progress}/{node.total}
-            </div>
-          </div>
-        </div>
-      ))}
+  {/* Challenge Nodes are rendered on the canvas (see renderMap). */}
 
       {/* Player Avatar */}
       <div 

@@ -6,6 +6,8 @@ export interface MapNode {
   id: string;
   title: string;
   emoji: string;
+  /** Optional path/URL to an icon used when rendering the node on the map */
+  nodeIcon?: string;
   position: { top: string; left: string };
   status: ChallengeStatus;
   progress: number;

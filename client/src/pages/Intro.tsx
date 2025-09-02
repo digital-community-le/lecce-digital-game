@@ -45,8 +45,8 @@ const IntroPage: React.FC = () => {
 
   if (showProfileForm) {
     return (
-      <div className="intro-screen fixed inset-0 bg-gradient-to-b from-purple-900 to-black flex flex-col items-center justify-center text-white z-10">
-        <div className="w-full max-w-md mx-auto">
+      <div className="intro-screen fixed inset-0 bg-gradient-to-b from-purple-900 to-black flex flex-col items-center text-white z-10">
+        <div className="max-w-md">
           <div className="modal-content nes-container with-title bg-card">
             <p className="title bg-card">Crea il tuo profilo</p>
             <ProfileCreationForm onComplete={handleProfileComplete} />
