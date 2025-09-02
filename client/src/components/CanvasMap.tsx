@@ -183,7 +183,7 @@ const CanvasMap: React.FC = () => {
           if ((x < 12 && y < 10) || (x > 32 && x < 46 && y < 12) || (x < 10 && y > 25 && y < 35) || (x > 35 && y > 20 && y < 30)) {
             tileType = 'mountain';
           }
-          // River system (fiume serpeggiante verticale)
+          // Lake system (laghi e zone acquatiche)
           else if (x > 20 && x < 26 && ((y > 5 && y < 15) || (y > 20 && y < 35))) {
             tileType = 'lake';
           }
@@ -285,7 +285,7 @@ const CanvasMap: React.FC = () => {
         tileOptions = tilesConfig.terrain_mapping.lake;
         break;
       case 'road':
-        tileOptions = ['road_dirt_h', 'road_dirt_v', 'path_1'];
+        tileOptions = tilesConfig.terrain_mapping.road;
         break;
     }
     
@@ -406,7 +406,7 @@ const CanvasMap: React.FC = () => {
         ctx.fillRect(x, y, size, size);
         break;
 
-      case 'lake':
+      case 'river':
         // Acqua blu vivace come nel riferimento
         ctx.fillStyle = '#2196F3';
         ctx.fillRect(x, y, size, size);
