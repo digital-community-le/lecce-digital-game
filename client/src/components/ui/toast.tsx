@@ -26,7 +26,9 @@ const toastVariants = cva(
   {
     variants: {
       variant: {
-        default: "border bg-background text-foreground",
+        // Use semantic card surface so toast contrasts with page background
+        // and adapts to light/dark themes via CSS variables.
+        default: "border bg-card text-card-foreground",
         destructive:
           "destructive border-destructive bg-destructive text-destructive-foreground",
         success: "border-green-200 bg-green-50 text-green-800",

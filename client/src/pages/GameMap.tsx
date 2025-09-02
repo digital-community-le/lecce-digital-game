@@ -53,7 +53,7 @@ const GameMapPage: React.FC = () => {
       {toasts.map((toast) => (
         <div
           key={toast.id}
-          className={`toast nes-container p-3 ${
+          className={`toast nes-container is-rounded p-3 ${
             toast.type === 'success' ? 'is-success' :
             toast.type === 'error' ? 'is-error' :
             toast.type === 'warning' ? 'is-warning' :
@@ -64,7 +64,7 @@ const GameMapPage: React.FC = () => {
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium">{toast.message}</p>
             <button 
-              className="ml-4 text-lg leading-none"
+              className="ml-4 text-lg leading-none nes-btn"
               onClick={() => removeToast(toast.id)}
               aria-label="Chiudi notifica"
               data-testid="button-close-toast"

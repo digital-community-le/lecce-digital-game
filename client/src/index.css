@@ -430,6 +430,44 @@
     z-index: 150;
     pointer-events: none; /* allow clicks to pass through unless children override */
   }
+  /* Make NES container based toasts visible and theme-adaptive */
+  .toast.nes-container,
+  .toast .nes-container {
+    pointer-events: auto; /* allow interaction with close button */
+    background-color: var(--card); /* semantic surface */
+    color: var(--card-foreground) !important;
+    box-shadow: var(--ldc-surface-shadow);
+    width: min(95%, 680px);
+    margin: 0 auto;;
+  }
+
+  /* Variant colors (keep readable in themes) */
+  .toast.is-success .nes-container,
+  .toast.nes-container.is-success {
+    background-color: var(--ldc-success);
+    color: var(--ldc-on-surface) !important;
+    border-color: rgba(0,0,0,0.08) !important;
+  }
+
+  .toast.is-error .nes-container,
+  .toast.nes-container.is-error {
+    background-color: var(--ldc-error);
+    color: var(--ldc-on-surface) !important;
+    border-color: rgba(0,0,0,0.08) !important;
+  }
+
+  .toast.is-warning .nes-container,
+  .toast.nes-container.is-warning {
+    background-color: var(--ldc-contrast-yellow);
+    color: var(--ldc-on-background) !important;
+    border-color: rgba(0,0,0,0.04) !important;
+  }
+
+  .toast.is-light .nes-container,
+  .toast.nes-container.is-light {
+    background-color: var(--card);
+    color: var(--card-foreground) !important;
+  }
 }
 
 @layer utilities {
