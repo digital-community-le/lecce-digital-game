@@ -53,10 +53,10 @@ const CanvasMap: React.FC = () => {
   const TILE_SIZE = 64;
   /** Dimensione dei tile nei tileset sprite (64x64 pixel) */
   const SPRITE_TILE_SIZE = 64;
-  /** Larghezza griglia mappa (numero di tile orizzontali) - bilanciata per dettaglio e visibilità */
-  const MAP_WIDTH = 48;
-  /** Altezza griglia mappa (numero di tile verticali) - bilanciata per dettaglio e visibilità */
-  const MAP_HEIGHT = 36;
+  /** Larghezza griglia mappa (numero di tile orizzontali) - ridotta per sprite più grandi */
+  const MAP_WIDTH = 12;
+  /** Altezza griglia mappa (numero di tile verticali) - ridotta per sprite più grandi */
+  const MAP_HEIGHT = 9;
 
   // Carica l'atlas al mount del componente
   useEffect(() => {
