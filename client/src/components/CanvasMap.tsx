@@ -4,7 +4,7 @@ import { useGameStore } from '@/hooks/use-game-store';
 import { MapNode } from '@/types/game';
 
 // Import atlas semplificato e configurazione tiles
-import atlasUrl from '@assets/image_1756806592677.png';
+import atlasUrl from '@assets/image_1756807944133.png';
 import tilesConfig from '../data/tiles.json';
 
 /**

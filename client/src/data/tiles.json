@@ -1,7 +1,7 @@
 {
   "tileSize": 64,
   "atlasWidth": 256,
-  "atlasHeight": 384,
+  "atlasHeight": 352,
   "tilesPerRow": 4,
   "categories": {
     "mountains": {
@@ -16,13 +16,14 @@
       "description": "Terreno erboso base",
       "tiles": [
         {"id": "grass_plain", "x": 192, "y": 0, "width": 64, "height": 64, "description": "Erba verde base"},
-        {"id": "grass_variant", "x": 192, "y": 64, "width": 64, "height": 64, "description": "Erba variante"}
+        {"id": "grass_variant", "x": 192, "y": 64, "width": 64, "height": 64, "description": "Erba variante"},
+        {"id": "grass_smooth", "x": 192, "y": 128, "width": 64, "height": 64, "description": "Erba liscia"}
       ]
     },
     "water": {
-      "description": "Elementi acquatici con strade",
+      "description": "Elementi acquatici",
       "tiles": [
-        {"id": "water_vertical", "x": 0, "y": 64, "width": 64, "height": 64, "description": "Acqua con strada verticale"},
+        {"id": "water_vertical", "x": 0, "y": 64, "width": 64, "height": 64, "description": "Acqua con canale verticale"},
         {"id": "water_cross", "x": 64, "y": 64, "width": 64, "height": 64, "description": "Acqua con incrocio"},
         {"id": "water_corner", "x": 128, "y": 64, "width": 64, "height": 64, "description": "Acqua con curva"}
       ]
@@ -32,78 +33,30 @@
       "tiles": [
         {"id": "road_vertical", "x": 0, "y": 128, "width": 64, "height": 64, "description": "Strada verticale"},
         {"id": "road_cross", "x": 64, "y": 128, "width": 64, "height": 64, "description": "Incrocio strade"},
-        {"id": "road_t", "x": 128, "y": 128, "width": 64, "height": 64, "description": "Strada a T"},
-        {"id": "road_curve", "x": 192, "y": 128, "width": 64, "height": 64, "description": "Curva strada"}
-      ]
-    },
-    "structures": {
-      "description": "Edifici e strutture",
-      "tiles": [
-        {"id": "castle", "x": 0, "y": 192, "width": 64, "height": 64, "description": "Castello"},
-        {"id": "cave", "x": 128, "y": 192, "width": 64, "height": 64, "description": "Grotta"},
-        {"id": "house_1", "x": 0, "y": 256, "width": 64, "height": 64, "description": "Casa 1"},
-        {"id": "house_2", "x": 64, "y": 256, "width": 64, "height": 64, "description": "Casa 2"},
-        {"id": "house_3", "x": 128, "y": 256, "width": 64, "height": 64, "description": "Casa 3"},
-        {"id": "house_small", "x": 192, "y": 256, "width": 32, "height": 32, "description": "Casa piccola"}
+        {"id": "road_t", "x": 128, "y": 128, "width": 64, "height": 64, "description": "Strada a T"}
       ]
     },
     "trees": {
       "description": "Alberi e vegetazione",
       "tiles": [
-        {"id": "tree_small_1", "x": 64, "y": 192, "width": 32, "height": 32, "description": "Alberello 1"},
-        {"id": "tree_small_2", "x": 96, "y": 192, "width": 32, "height": 32, "description": "Alberello 2"},
-        {"id": "tree_large_1", "x": 192, "y": 192, "width": 64, "height": 64, "description": "Albero grande 1"},
-        {"id": "tree_large_2", "x": 192, "y": 320, "width": 64, "height": 64, "description": "Albero grande 2"},
-        {"id": "tree_medium_1", "x": 0, "y": 320, "width": 64, "height": 64, "description": "Albero medio 1"},
-        {"id": "tree_medium_2", "x": 128, "y": 320, "width": 64, "height": 64, "description": "Albero medio 2"}
+        {"id": "tree_large_1", "x": 0, "y": 192, "width": 64, "height": 64, "description": "Albero grande 1"},
+        {"id": "tree_medium_1", "x": 64, "y": 192, "width": 64, "height": 64, "description": "Albero medio 1"},
+        {"id": "tree_small", "x": 128, "y": 192, "width": 64, "height": 64, "description": "Albero piccolo"},
+        {"id": "tree_large_2", "x": 192, "y": 192, "width": 64, "height": 64, "description": "Albero grande 2"}
+      ]
+    },
+    "structures": {
+      "description": "Edifici e strutture",
+      "tiles": [
+        {"id": "house_medieval", "x": 128, "y": 256, "width": 64, "height": 64, "description": "Casa medievale"}
       ]
     }
   },
   "terrain_mapping": {
-    "grass": ["grass_plain", "grass_variant"],
-    "forest": ["tree_large_1", "tree_large_2", "tree_medium_1", "tree_medium_2"],
+    "grass": ["grass_plain", "grass_variant", "grass_smooth"],
+    "forest": ["tree_large_1", "tree_large_2", "tree_medium_1", "tree_small"],
     "mountain": ["mountain_1", "mountain_2", "mountain_3"],
     "lake": ["water_vertical", "water_cross", "water_corner"],
-    "road": ["road_vertical", "road_cross", "road_t", "road_curve"]
-  },
-  "biome_variants": {
-    "spring": {
-      "grass": ["grass_plain", "grass_flowers_1", "grass_flowers_2"],
-      "trees": ["tree_green_1", "tree_spring", "tree_green_2"]
-    },
-    "summer": {
-      "grass": ["grass_plain", "grass_light", "grass_flowers_3"],
-      "trees": ["tree_green_1", "tree_green_2", "tree_dark"]
-    },
-    "autumn": {
-      "grass": ["grass_autumn", "grass_dark"],
-      "trees": ["tree_autumn_1", "tree_autumn_2"]
-    },
-    "winter": {
-      "grass": ["grass_winter"],
-      "trees": ["tree_winter", "tree_pine_1", "tree_pine_2"]
-    }
-  },
-  "challenge_locations": {
-    "networking_forest": {
-      "primary_tiles": ["tree_green_1", "tree_green_2", "tree_pine_1"],
-      "decorative": ["flower_red", "flower_blue", "mushroom_1"],
-      "special": ["checkpoint", "gem_green"]
-    },
-    "retro_puzzle": {
-      "primary_tiles": ["mountain_brown_1", "mountain_gray_1", "rock_small"],
-      "decorative": ["crystal_1", "crystal_2"],
-      "special": ["portal_1", "gem_blue"]
-    },
-    "debug_dungeon": {
-      "primary_tiles": ["mountain_gray_1", "cliff_1", "rock_medium"],
-      "decorative": ["mushroom_2"],
-      "special": ["treasure_chest", "gem_red"]
-    },
-    "social_arena": {
-      "primary_tiles": ["water_deep", "water_medium", "water_shallow"],
-      "decorative": ["flower_yellow", "crystal_2"],
-      "special": ["portal_2", "gem_blue"]
-    }
+    "road": ["road_vertical", "road_cross", "road_t"]
   }
 }
