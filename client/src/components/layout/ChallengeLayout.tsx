@@ -23,6 +23,24 @@ interface ChallengeLayoutProps {
 }
 
 /**
+ * Mappa dei challenge ID ai nomi delle challenge
+ */
+const getChallengeTitle = (challengeId: string) => {
+  switch (challengeId) {
+    case 'networking-forest':
+      return 'Forest';
+    case 'retro-puzzle':
+      return 'Puzzle';
+    case 'debug-dungeon':
+      return 'Dungeon';
+    case 'social-arena':
+      return 'Arena';
+    default:
+      return 'Challenge';
+  }
+};
+
+/**
  * Mappa dei challenge ID alle informazioni delle gemme
  */
 const getGemInfo = (challengeId: string) => {
@@ -30,31 +48,31 @@ const getGemInfo = (challengeId: string) => {
     case 'networking-forest':
       return {
         image: gemmaAlleanza,
-        title: 'La Gemma dell\'Alleanza',
+        title: 'LA Gemma dell\'Alleanza',
         description: 'Suggella i legami con la comunità'
       };
     case 'retro-puzzle':
       return {
         image: gemmaMemoria,
-        title: 'La Gemma della Memoria',
+        title: 'LA Gemma della Memoria',
         description: 'Custodisce i ricordi del passato'
       };
     case 'debug-dungeon':
       return {
         image: gemmaSapienza,
-        title: 'La Gemma della Sapienza',
+        title: 'LA Gemma della Sapienza',
         description: 'Illumina la via della conoscenza'
       };
     case 'social-arena':
       return {
         image: gemmaComunita,
-        title: 'La Gemma della Comunità',
+        title: 'LA Gemma della Comunità',
         description: 'Unisce le voci di tutti'
       };
     default:
       return {
         image: gemmaAlleanza,
-        title: 'La Gemma',
+        title: 'LA Gemma',
         description: 'Una gemma misteriosa'
       };
   }
@@ -97,6 +115,7 @@ const ChallengeLayout: React.FC<ChallengeLayoutProps> = ({
 
   const completedCount = gameState.gameProgress.completedChallenges.length;
   const totalChallenges = gameState.challenges.length;
+  const challengeTitle = getChallengeTitle(challengeId);
   const gemInfo = getGemInfo(challengeId);
 
   return (
@@ -107,7 +126,7 @@ const ChallengeLayout: React.FC<ChallengeLayoutProps> = ({
       <nav className="bg-card border-b-4 border-border">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            {/* Pulsante Torna alla mappa */}
+            {/* Pulsante Torna alla mappa e titolo challenge */}
             <div className="flex items-center gap-4">
               <button
                 className="nes-btn is-normal"
@@ -119,18 +138,10 @@ const ChallengeLayout: React.FC<ChallengeLayoutProps> = ({
                 <span className="hidden sm:inline">Mappa</span>
               </button>
               
-              {/* Titolo challenge con gemma */}
-              <div className="flex items-center gap-3">
-                <img 
-                  src={gemInfo.image} 
-                  alt={gemInfo.title}
-                  className="w-8 h-8 pixelated"
-                  style={{ imageRendering: 'pixelated' }}
-                />
-                <h1 className="text-lg font-retro" data-testid="challenge-title">
-                  {gemInfo.title}
-                </h1>
-              </div>
+              {/* Titolo principale della challenge */}
+              <h1 className="text-xl font-retro" data-testid="challenge-title">
+                {challengeTitle}
+              </h1>
             </div>
 
             {/* Progress indicator delle gemme */}
@@ -146,6 +157,19 @@ const ChallengeLayout: React.FC<ChallengeLayoutProps> = ({
                 </div>
               </div>
             )}
+          </div>
+          
+          {/* Sottotitolo con gemma */}
+          <div className="flex items-center gap-3 mt-2">
+            <img 
+              src={gemInfo.image} 
+              alt={gemInfo.title}
+              className="w-8 h-8 pixelated"
+              style={{ imageRendering: 'pixelated' }}
+            />
+            <h2 className="text-lg font-retro text-muted-foreground" data-testid="gem-subtitle">
+              {gemInfo.title}
+            </h2>
           </div>
         </div>
       </nav>
