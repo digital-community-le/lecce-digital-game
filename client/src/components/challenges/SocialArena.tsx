@@ -6,135 +6,57 @@ import useOCR from "@/hooks/use-ocr";
 import { SocialProof } from "@shared/schema";
 import CameraCapture from "@/components/CameraCapture";
 import OcrModal from "@/components/OcrModal";
+import ChallengeCompleted from '@/components/ChallengeCompleted';
 
 const SocialArena: React.FC = () => {
   const { gameState, updateChallengeProgress, showToast } = useGameStore();
+
+  // Proofs & files
   const [proof, setProof] = useState<SocialProof | null>(null);
+  const [proofPreviewUrl, setProofPreviewUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
-  const [selectedPreviewUrl, setSelectedPreviewUrl] = useState<string | null>(
-    null
-  );
-  const [screenshotPreviewUrl, setScreenshotPreviewUrl] = useState<
-    string | null
-  >(null);
-  const [proofPreviewUrl, setProofPreviewUrl] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const { isAnalyzing, ocrProgress, ocrResult, setOcrResult } = useOCR();
-  const [ocrModalOpen, setOcrModalOpen] = useState(false);
-  const [showShareGuide, setShowShareGuide] = useState<boolean>(false);
-  const [sharePhase, setSharePhase] = useState<
-    "idle" | "captured" | "shared" | "await_screenshot" | "skipped"
-  >("idle");
-  const cameraInputRef = useRef<HTMLInputElement | null>(null);
-  const [showCamera, setShowCamera] = useState(false);
-  const [forcedValidated, setForcedValidated] = useState(false);
-  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [selectedPreviewUrl, setSelectedPreviewUrl] = useState<string | null>(null);
+  const [screenshotPreviewUrl, setScreenshotPreviewUrl] = useState<string | null>(null);
 
-  const [requiredTag, setRequiredTag] = useState<string>("@lecce_digital");
-  const [confidenceThreshold, setConfidenceThreshold] = useState<number>(40);
+  // UI state
+  const [isLoading, setIsLoading] = useState(true);
+  const [showCamera, setShowCamera] = useState(false);
+  const cameraInputRef = useRef<HTMLInputElement | null>(null);
+  const [sharePhase, setSharePhase] = useState<
+    "idle" | "captured" | "shared" | "await_screenshot"
+  >("idle");
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [ocrModalOpen, setOcrModalOpen] = useState(false);
+  const [forcedValidated, setForcedValidated] = useState(false);
+  const [showShareGuide, setShowShareGuide] = useState(false);
+
+  // challenge settings (fallbacks to sensible defaults)
+  const challenge = gameState.challenges.find((c) => c.id === "social-arena");
+  const requiredTag = (challenge as any)?.settings?.requiredTag ?? "@lecce_digital_community";
+  const confidenceThreshold = (challenge as any)?.settings?.confidenceThreshold ?? 70;
 
   useEffect(() => {
-    // Load game config to get challenge-specific settings (confidence threshold, required tag)
-    fetch("/game-data.json")
-      .then((r) => r.json())
-      .then((data) => {
-        const challenge = (data?.challenges || []).find(
-          (c: any) => c.id === "social-arena"
-        );
-        if (challenge && challenge.settings) {
-          if (typeof challenge.settings.requiredTag === "string")
-            setRequiredTag(challenge.settings.requiredTag);
-          if (typeof challenge.settings.confidenceThreshold === "number")
-            setConfidenceThreshold(challenge.settings.confidenceThreshold);
-        }
-      })
-      .catch(() => {});
-
-    if (gameState.currentUser.userId) {
-      const userProofs = gameStorage.getSocialProofs(
-        gameState.currentUser.userId
-      );
-      // Keep only the latest proof for this challenge in-memory
-      const latest =
-        userProofs && userProofs.length > 0
-          ? userProofs[userProofs.length - 1]
-          : null;
-      setProof(latest || null);
-      if (
-        latest &&
-        typeof latest.imageLocalUrl === "string" &&
-        latest.imageLocalUrl.startsWith("blob_")
-      ) {
-        getBlobUrl(latest.imageLocalUrl)
-          .then((u) => {
-            if (u) setProofPreviewUrl(u);
-          })
-          .catch(() => {});
-      }
+    // Load latest proof from storage and update UI/progress
+    if (!gameState.currentUser.userId) {
       setIsLoading(false);
-
-      // Check if challenge is completed
-      const validProof = userProofs.find((p) => p.detected && p.verified);
-      if (validProof) {
-        updateChallengeProgress("social-arena", 1, true);
-      }
-    }
-  }, [gameState.currentUser.userId]);
-
-  const handleFileSelect = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = event.target.files?.[0];
-    if (!file || !file.type.startsWith("image/")) {
-      showToast("Seleziona un'immagine valida", "error");
       return;
     }
-    // set file and preview
-    if (selectedPreviewUrl) {
-      try {
-        URL.revokeObjectURL(selectedPreviewUrl);
-      } catch (e) {}
-      setSelectedPreviewUrl(null);
+
+    const userProofs = gameStorage.getSocialProofs(gameState.currentUser.userId);
+    const latest = userProofs && userProofs.length > 0 ? userProofs[userProofs.length - 1] : null;
+    setProof(latest || null);
+    if (latest && typeof latest.imageLocalUrl === 'string' && latest.imageLocalUrl.startsWith('blob_')) {
+      getBlobUrl(latest.imageLocalUrl)
+        .then((u) => { if (u) setProofPreviewUrl(u); })
+        .catch(() => {});
     }
-    setSelectedFile(file);
-    setSelectedPreviewUrl(URL.createObjectURL(file));
-    // reset failed attempts when user provides a new image
-    setFailedAttempts(0);
-    // show share step immediately so UI doesn't become empty while persisting
-    setSharePhase("captured");
-    // persist immediately as pending proof so user can share/skip next
-    if (!gameState.currentUser.userId) return;
-    try {
-      const blobId = await putBlob(file);
-      const proof: SocialProof = {
-        opId: `proof_${Date.now()}`,
-        userId: gameState.currentUser.userId,
-        imageLocalUrl: blobId,
-        detectedTags: [],
-        detected: false,
-        verified: false,
-        attempts: 0,
-        createdAt: new Date().toISOString(),
-      };
-      gameStorage.addSocialProof(gameState.currentUser.userId, proof);
-      setProof(proof);
-      // resolve preview URL
-      try {
-        const url = await getBlobUrl(blobId);
-        setProofPreviewUrl(url || null);
-      } catch {}
-      setSharePhase("captured");
-      showToast(
-        "Immagine salvata. Ora condividi la storia o salta se non vuoi condividerla.",
-        "info"
-      );
-    } catch (err) {
-      console.error("Errore salvataggio immagine:", err);
-      showToast("Errore nel salvataggio dell'immagine", "error");
-    }
-  };
+    setIsLoading(false);
+
+    const validProof = userProofs.find((p) => p.detected && p.verified);
+    if (validProof) updateChallengeProgress('social-arena', 1, true);
+  }, [gameState.currentUser.userId]);
 
   const handleTakePicture = () => {
     // Prefer using native camera capture component
@@ -168,6 +90,47 @@ const SocialArena: React.FC = () => {
         'Impossibile aprire la fotocamera. Usa "Scegli immagine".',
         "error"
       );
+    }
+  };
+
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !file.type.startsWith('image/')) {
+      showToast("Seleziona un'immagine valida", 'error');
+      return;
+    }
+
+    if (selectedPreviewUrl) {
+      try { URL.revokeObjectURL(selectedPreviewUrl); } catch (e) {}
+      setSelectedPreviewUrl(null);
+    }
+
+    setSelectedFile(file);
+    setSelectedPreviewUrl(URL.createObjectURL(file));
+    setFailedAttempts(0);
+    setSharePhase('captured');
+
+    if (!gameState.currentUser.userId) return;
+    try {
+      const blobId = await putBlob(file);
+      const proof: SocialProof = {
+        opId: `proof_${Date.now()}`,
+        userId: gameState.currentUser.userId,
+        imageLocalUrl: blobId,
+        detectedTags: [],
+        detected: false,
+        verified: false,
+        attempts: 0,
+        createdAt: new Date().toISOString(),
+      };
+      gameStorage.addSocialProof(gameState.currentUser.userId, proof);
+      setProof(proof);
+      try { const url = await getBlobUrl(blobId); setProofPreviewUrl(url || null); } catch {}
+      setSharePhase('captured');
+      showToast("Immagine salvata. Ora condividi la storia o salta se non vuoi condividerla.", 'info');
+    } catch (err) {
+      console.error('Errore salvataggio immagine:', err);
+      showToast('Errore nel salvataggio dell\'immagine', 'error');
     }
   };
 

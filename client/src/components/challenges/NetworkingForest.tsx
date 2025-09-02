@@ -3,6 +3,7 @@ import { useGameStore } from '@/hooks/use-game-store';
 import { gameStorage } from '@/lib/storage';
 import { UserScan } from '@shared/schema';
 import ChallengeContentLayout from '@/components/layout/ChallengeContentLayout';
+import ChallengeCompleted from '@/components/ChallengeCompleted';
 
 
 const NetworkingForest: React.FC = () => {
@@ -91,6 +92,7 @@ const NetworkingForest: React.FC = () => {
                   )}
                 </div>
 
+
                 <div className="flex-1">
                   <div className="font-medium text-sm" data-testid={`scan-name-${scan.scannedUserId}`}>
                     {scan.scannedName || 'Nome non disponibile'}
@@ -103,6 +105,29 @@ const NetworkingForest: React.FC = () => {
               </div>
             ))}
           </div>
+
+        {/* Action button */}
+        {uniqueScans.length < REQUIRED_SCANS && (
+          <div className="text-center">
+            <button 
+              className="nes-btn is-primary"
+              onClick={handleStartScanner}
+              data-testid="button-start-scanner"
+            >
+              <span className="mr-2">📱</span>
+              Scansiona QR
+            </button>
+          </div>
+        )}
+
+        {/* Completion message */}
+        {uniqueScans.length >= REQUIRED_SCANS && (
+          <ChallengeCompleted
+            title="Challenge Completata!"
+            message="Hai raccolto tutti gli alleati! La Gemma dell'Alleanza è tua."
+            emoji="🏆"
+          />
+
         )}
       </div>
 
