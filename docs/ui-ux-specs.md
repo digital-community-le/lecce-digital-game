@@ -264,7 +264,7 @@ Principi di gamification usati per incentivare partecipazione e retention:
 
 - Progressione visiva: stelle o badge per challenge completate, mostrati nel HUD e nella pagina profilo.
 - Rewards immediati: animazioni celebrative (particelle pixel, confetti) per completamenti; usare micro-animazioni con reduced-motion support.
-- Leaderboard soft: sezione statistiche con confronti anonimi (es. percentile), opt-in per la condivisione dei dati.
+- Leaderboard soft: sezione statistiche con confronti anonimi (es. percentile), opt-in per la condivisione dei dati.(opzionale, solo con sincronizzazione abilitata)
 - Achievements: popup/modal per milestone (es. "Primo networking!", "Puzzle master"); prevedere storage locale e sincronizzazione opzionale.
 
 Feedback in tempo reale:

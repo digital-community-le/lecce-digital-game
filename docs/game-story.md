@@ -64,11 +64,7 @@ CTA: "Inizia la tua leggenda"
 ## Regole sull'ordine delle challenge
 
 - L'ordine di completamento è fisso e uguale per tutti i partecipanti: **1) Networking Forest, 2) Retro Puzzle, 3) Debug Dungeon, 4) Social Arena (ultima).**
-- Il motore di gioco registra lo stato di ogni challenge in `ldc:progress:{userId}` e controlla la progressione sequenziale: una challenge si sblocca quando la precedente è completata.
-- Se l'utente si reca allo stand (Social Arena) prima di aver completato le altre prove, il sistema mostrerà un avviso: "Hai ancora {N} prova/e da completare prima del gran finale. Vuoi procedere lo stesso?" con opzioni:
-  - **Procedi comunque**: la prova viene salvata ma non sblocca l'epilogo (verrà marcata come "in attesa di epilogo").
-  - **Torna alla mappa**: ritorna alla mappa per completare le prove mancanti.
-- Solo quando le prime tre challenge risultano completate e la prova finale (Social Arena) è verificata, l'epilogo si sblocca definitivamente.
+- Il motore di gioco registra lo stato di ogni challenge e controlla la progressione sequenziale: una challenge si sblocca quando la precedente è completata.
 
 ---
 
