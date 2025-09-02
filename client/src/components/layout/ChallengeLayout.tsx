@@ -125,38 +125,22 @@ const ChallengeLayout: React.FC<ChallengeLayoutProps> = ({
       {/* Barra di navigazione stile retro con pulsante back */}
       <nav className="bg-card border-b-4 border-border">
         <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            {/* Pulsante Torna alla mappa e titolo challenge */}
-            <div className="flex items-center gap-4">
-              <button
-                className="nes-btn is-normal"
-                onClick={() => setLocation('/game')}
-                aria-label="Torna alla mappa"
-                data-testid="button-back-to-map"
-              >
-                <i className="nes-icon caret-left is-small mr-2" aria-hidden="true" />
-                <span className="hidden sm:inline">Mappa</span>
-              </button>
-              
-              {/* Titolo principale della challenge */}
-              <h1 className="text-xl font-retro" data-testid="challenge-title">
-                {challengeTitle}
-              </h1>
-            </div>
-
-            {/* Progress indicator delle gemme */}
-            {showProgress && (
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-retro text-muted-foreground">
-                  Progresso
-                </span>
-                <div className="flex items-center gap-1">
-                  <span className="font-retro text-sm">
-                    {completedCount}/{totalChallenges}
-                  </span>
-                </div>
-              </div>
-            )}
+          {/* Pulsante Torna alla mappa e titolo challenge */}
+          <div className="flex items-center gap-4">
+            <button
+              className="nes-btn is-normal"
+              onClick={() => setLocation('/game')}
+              aria-label="Torna alla mappa"
+              data-testid="button-back-to-map"
+            >
+              <i className="nes-icon caret-left is-small mr-2" aria-hidden="true" />
+              <span className="hidden sm:inline">Mappa</span>
+            </button>
+            
+            {/* Titolo principale della challenge */}
+            <h1 className="text-xl font-retro" data-testid="challenge-title">
+              {challengeTitle}
+            </h1>
           </div>
         </div>
       </nav>
