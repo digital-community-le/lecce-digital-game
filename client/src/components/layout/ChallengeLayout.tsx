@@ -1,7 +1,6 @@
 import React from 'react';
 import { useLocation } from 'wouter';
 import { useGameStore } from '@/hooks/use-game-store';
-import Header from '@/components/Header';
 
 // Import delle immagini delle gemme generate
 import gemmaAlleanza from '@assets/generated_images/Gemma_dell\'Alleanza_verde_4f1dff68.png';
@@ -113,15 +112,10 @@ const ChallengeLayout: React.FC<ChallengeLayoutProps> = ({
     return null;
   }
 
-  const completedCount = gameState.gameProgress.completedChallenges.length;
-  const totalChallenges = gameState.challenges.length;
   const challengeTitle = getChallengeTitle(challengeId);
-  const gemInfo = getGemInfo(challengeId);
 
   return (
-    <div className={`min-h-screen ${darkMode ? 'bg-gray-900' : 'bg-background'} text-foreground`}>
-      <Header />
-      
+    <>
       {/* Barra di navigazione stile retro con pulsante back */}
       <nav className="bg-card border-b-4 border-border">
         <div className="container mx-auto px-4 py-3">
@@ -158,7 +152,7 @@ const ChallengeLayout: React.FC<ChallengeLayoutProps> = ({
           Usa il pulsante 🠴 per tornare alla mappa
         </p>
       </footer>
-    </div>
+    </>
   );
 };
 

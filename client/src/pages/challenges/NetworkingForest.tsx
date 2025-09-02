@@ -1,12 +1,15 @@
 import React from 'react';
+import AppLayout from '@/components/layout/AppLayout';
 import ChallengeLayout from '@/components/layout/ChallengeLayout';
 import NetworkingForestChallenge from '@/components/challenges/NetworkingForest';
 
 const NetworkingForestPage: React.FC = () => {
   return (
-    <ChallengeLayout challengeId="networking-forest">
-      <NetworkingForestChallenge />
-    </ChallengeLayout>
+    <AppLayout>
+      <ChallengeLayout challengeId="networking-forest">
+        <NetworkingForestChallenge />
+      </ChallengeLayout>
+    </AppLayout>
   );
 };
 
