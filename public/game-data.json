@@ -14,7 +14,11 @@
       "type": "networking",
       "description": "Nel Networking Forest, ogni connessione è un filo di luce che rafforza il tuo cammino. Scansiona i QR degli altri partecipanti per raccogliere la Gemma dell'Alleanza.",
       "emoji": "🌲",
-      "position": { "top": "30%", "left": "15%" },
+      "nodeIcon": "/assets/map-icons/forest.png",
+      "position": {
+        "top": "30%",
+        "left": "15%"
+      },
       "requirements": {
         "type": "scans",
         "minDistinctScans": 5
@@ -22,7 +26,9 @@
       "rewards": {
         "points": 150,
         "badge": "Gemma dell'Alleanza",
-        "unlocks": ["retro-puzzle"]
+        "unlocks": [
+          "retro-puzzle"
+        ]
       }
     },
     {
@@ -31,7 +37,11 @@
       "type": "puzzle",
       "description": "Nel puzzle antico, ogni connessione rivela un frammento di saggezza. Abbina i termini alle loro categorie per raccogliere la Gemma della Conoscenza.",
       "emoji": "🧩",
-      "position": { "top": "20%", "left": "45%" },
+      "nodeIcon": "/assets/map-icons/house-group.png",
+      "position": {
+        "top": "20%",
+        "left": "45%"
+      },
       "settings": {
         "pairsCount": 8,
         "mode": "relaxed",
@@ -41,19 +51,53 @@
         "streakBonus": 0
       },
       "pairs": [
-        { "id": "1", "term": "React", "category": "Frontend Library" },
-        { "id": "2", "term": "Node.js", "category": "Backend Runtime" },
-        { "id": "3", "term": "MongoDB", "category": "Database" },
-        { "id": "4", "term": "TypeScript", "category": "Programming Language" },
-        { "id": "5", "term": "Docker", "category": "Containerization" },
-        { "id": "6", "term": "Git", "category": "Version Control" },
-        { "id": "7", "term": "AWS", "category": "Cloud Platform" },
-        { "id": "8", "term": "GraphQL", "category": "Query Language" }
+        {
+          "id": "1",
+          "term": "React",
+          "category": "Frontend Library"
+        },
+        {
+          "id": "2",
+          "term": "Node.js",
+          "category": "Backend Runtime"
+        },
+        {
+          "id": "3",
+          "term": "MongoDB",
+          "category": "Database"
+        },
+        {
+          "id": "4",
+          "term": "TypeScript",
+          "category": "Programming Language"
+        },
+        {
+          "id": "5",
+          "term": "Docker",
+          "category": "Containerization"
+        },
+        {
+          "id": "6",
+          "term": "Git",
+          "category": "Version Control"
+        },
+        {
+          "id": "7",
+          "term": "AWS",
+          "category": "Cloud Platform"
+        },
+        {
+          "id": "8",
+          "term": "GraphQL",
+          "category": "Query Language"
+        }
       ],
       "rewards": {
         "points": 200,
         "badge": "Gemma della Conoscenza",
-        "unlocks": ["debug-dungeon"]
+        "unlocks": [
+          "debug-dungeon"
+        ]
       }
     },
     {
@@ -62,7 +106,11 @@
       "type": "quiz",
       "description": "Nel Debug Dungeon, ogni risposta corretta illumina il sentiero verso la conoscenza. Supera il quiz per conquistare la Gemma del Sapere.",
       "emoji": "⚔️",
-      "position": { "top": "45%", "left": "70%" },
+      "nodeIcon": "/assets/map-icons/cave.png",
+      "position": {
+        "top": "45%",
+        "left": "70%"
+      },
       "settings": {
         "questionsPerRun": 10,
         "passThresholdPercent": 50,
@@ -74,7 +122,12 @@
         {
           "id": "1",
           "question": "Quale hook di React viene utilizzato per gestire lo stato locale?",
-          "options": ["useEffect", "useState", "useContext", "useReducer"],
+          "options": [
+            "useEffect",
+            "useState",
+            "useContext",
+            "useReducer"
+          ],
           "correctAnswer": 1,
           "explanation": "useState è l'hook principale per gestire lo stato locale in React.",
           "category": "React"
@@ -82,7 +135,12 @@
         {
           "id": "2",
           "question": "Qual è la porta predefinita per un server HTTP?",
-          "options": ["80", "443", "8080", "3000"],
+          "options": [
+            "80",
+            "443",
+            "8080",
+            "3000"
+          ],
           "correctAnswer": 0,
           "explanation": "La porta 80 è la porta standard per il protocollo HTTP.",
           "category": "Networking"
@@ -90,7 +148,12 @@
         {
           "id": "3",
           "question": "Cosa significa SQL?",
-          "options": ["Structured Query Language", "Simple Query Language", "Standard Query Language", "System Query Language"],
+          "options": [
+            "Structured Query Language",
+            "Simple Query Language",
+            "Standard Query Language",
+            "System Query Language"
+          ],
           "correctAnswer": 0,
           "explanation": "SQL sta per Structured Query Language.",
           "category": "Database"
@@ -98,7 +161,12 @@
         {
           "id": "4",
           "question": "Quale metodo HTTP viene utilizzato per creare una nuova risorsa?",
-          "options": ["GET", "POST", "PUT", "DELETE"],
+          "options": [
+            "GET",
+            "POST",
+            "PUT",
+            "DELETE"
+          ],
           "correctAnswer": 1,
           "explanation": "POST viene utilizzato per creare nuove risorse sul server.",
           "category": "HTTP"
@@ -106,7 +174,12 @@
         {
           "id": "5",
           "question": "Cos'è Node.js?",
-          "options": ["Un framework frontend", "Un database", "Un runtime JavaScript per server", "Un linguaggio di programmazione"],
+          "options": [
+            "Un framework frontend",
+            "Un database",
+            "Un runtime JavaScript per server",
+            "Un linguaggio di programmazione"
+          ],
           "correctAnswer": 2,
           "explanation": "Node.js è un runtime JavaScript che permette di eseguire codice JavaScript sul server.",
           "category": "Backend"
@@ -114,7 +187,12 @@
         {
           "id": "6",
           "question": "Quale simbolo viene utilizzato per i commenti in JavaScript?",
-          "options": ["#", "//", "/*", "<!--"],
+          "options": [
+            "#",
+            "//",
+            "/*",
+            "<!--"
+          ],
           "correctAnswer": 1,
           "explanation": "// viene utilizzato per i commenti su singola riga in JavaScript.",
           "category": "JavaScript"
@@ -122,7 +200,12 @@
         {
           "id": "7",
           "question": "Cosa significa CSS?",
-          "options": ["Computer Style Sheets", "Cascading Style Sheets", "Creative Style Sheets", "Colorful Style Sheets"],
+          "options": [
+            "Computer Style Sheets",
+            "Cascading Style Sheets",
+            "Creative Style Sheets",
+            "Colorful Style Sheets"
+          ],
           "correctAnswer": 1,
           "explanation": "CSS sta per Cascading Style Sheets.",
           "category": "CSS"
@@ -130,7 +213,12 @@
         {
           "id": "8",
           "question": "Quale comando Git viene utilizzato per clonare un repository?",
-          "options": ["git clone", "git copy", "git download", "git pull"],
+          "options": [
+            "git clone",
+            "git copy",
+            "git download",
+            "git pull"
+          ],
           "correctAnswer": 0,
           "explanation": "git clone viene utilizzato per clonare un repository Git.",
           "category": "Git"
@@ -138,7 +226,12 @@
         {
           "id": "9",
           "question": "Qual è il significato di API?",
-          "options": ["Application Programming Interface", "Automated Programming Interface", "Advanced Programming Interface", "Application Process Interface"],
+          "options": [
+            "Application Programming Interface",
+            "Automated Programming Interface",
+            "Advanced Programming Interface",
+            "Application Process Interface"
+          ],
           "correctAnswer": 0,
           "explanation": "API sta per Application Programming Interface.",
           "category": "General"
@@ -146,7 +239,12 @@
         {
           "id": "10",
           "question": "Quale attributo HTML viene utilizzato per specificare un identificatore unico?",
-          "options": ["class", "id", "name", "unique"],
+          "options": [
+            "class",
+            "id",
+            "name",
+            "unique"
+          ],
           "correctAnswer": 1,
           "explanation": "L'attributo id viene utilizzato per specificare un identificatore unico in HTML.",
           "category": "HTML"
@@ -155,7 +253,9 @@
       "rewards": {
         "points": 250,
         "badge": "Gemma del Sapere",
-        "unlocks": ["social-arena"]
+        "unlocks": [
+          "social-arena"
+        ]
       }
     },
     {
@@ -164,7 +264,11 @@
       "type": "social",
       "description": "Davanti allo Stand, il tuo gesto diventa simbolo: cattura la foto con il gadget e attiva l'epilogo della leggenda.",
       "emoji": "📱",
-      "position": { "top": "65%", "left": "40%" },
+      "nodeIcon": "/assets/map-icons/castle.png",
+      "position": {
+        "top": "65%",
+        "left": "40%"
+      },
       "settings": {
         "requiredTag": "@lecce_digital_community",
         "confidenceThreshold": 40,
@@ -191,7 +295,7 @@
       },
       {
         "id": "puzzle-solver",
-        "name": "Gemma della Conoscenza", 
+        "name": "Gemma della Conoscenza",
         "description": "Hai risolto tutti i puzzle del sapere",
         "icon": "🧩"
       },
@@ -210,9 +314,13 @@
     ]
   },
   "avatars": [
-    "/assets/avatars/developer.png", "/assets/avatars/designer.png", 
-    "/assets/avatars/manager.png", "/assets/avatars/scientist.png",
-    "/assets/avatars/astronaut.png", "/assets/avatars/teacher.png", 
-    "/assets/avatars/student.png", "/assets/avatars/coder.png"
+    "/assets/avatars/female_developer.png",
+    "/assets/avatars/female_designer.png",
+    "/assets/avatars/female_manager.png",
+    "/assets/avatars/female_scientist.png",
+    "/assets/avatars/male_developer.png",
+    "/assets/avatars/male_designer.png",
+    "/assets/avatars/male_manager.png",
+    "/assets/avatars/male_scientist.png"
   ]
 }

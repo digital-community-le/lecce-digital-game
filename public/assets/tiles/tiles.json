@@ -1,0 +1,26 @@
+{
+  "frames": {
+    "grass": { "frame": { "x": 0, "y": 640, "w": 32, "h": 32 } },
+    "road_straight": { "frame": { "x": 32, "y": 640, "w": 32, "h": 32 } },
+    "road_corner": { "frame": { "x": 64, "y": 640, "w": 32, "h": 32 } },
+    "road_t": { "frame": { "x": 96, "y": 640, "w": 32, "h": 32 } },
+    "road_cross": { "frame": { "x": 128, "y": 640, "w": 32, "h": 32 } },
+
+    "forest_1": { "frame": { "x": 160, "y": 640, "w": 48, "h": 48 } },
+    "forest_2": { "frame": { "x": 208, "y": 640, "w": 48, "h": 48 } },
+    "forest_3": { "frame": { "x": 256, "y": 640, "w": 48, "h": 48 } },
+
+    "mountain_1": { "frame": { "x": 304, "y": 640, "w": 64, "h": 48 } },
+
+    "water_1": { "frame": { "x": 0, "y": 704, "w": 32, "h": 32 } },
+    "sand_1": { "frame": { "x": 32, "y": 704, "w": 32, "h": 32 } }
+  },
+  "meta": {
+    "image": "tiles.png",
+    "size": { "w": 1024, "h": 1024 },
+    "scale": "1",
+    "tileSize": 32,
+    "columns": 32,
+    "notes": "This is an example tiles.json generated for the provided atlas PNG. Adjust frame x/y/w/h to match the real image if coordinates differ."
+  }
+}

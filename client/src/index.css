@@ -5,25 +5,35 @@
 @tailwind utilities;
 
 :root {
-  /* LDC Official Color Palette */
-  --ldc-background: #f7f7f7;
-  --ldc-surface: #000000;
+  /* LDC 8-bit Palette (adapted) */
+  /* Primary: magenta */
+  --ldc-primary: #BD1F76; /* colore primario */
+  --ldc-primary-dark: #7A144D; /* variante scura (ombra) */
+  --ldc-primary-light: #F28DA3; /* variante chiara (highlight) */
+
+  /* Accent & complementary */
+  --ldc-accent: #F25D27; /* arancione per accenti */
+  --ldc-contrast-yellow: #F2C641; /* giallo caldo di contrasto */
+  --ldc-info: #41A6F2; /* blu complementare acceso */
+  --ldc-rpg-green: #2F8C2F; /* verde brillante RPG */
+
+  /* Neutral / UI surfaces */
+  --ldc-background: #E0E0E0; /* grigio chiaro neutro */
+  --ldc-surface: #2b1624; /* dark plum, coherent with the magenta primary but less attention-grabbing */
   --ldc-on-background: #000000;
-  --ldc-on-surface: #f7f7f7;
+  --ldc-on-surface: #E0E0E0;
 
-  --ldc-primary: #86257b;
-  --ldc-secondary: #442c80;
-  --ldc-accent: #c93880;
-  --ldc-error: #ff3366;
-  --ldc-success: #16a34a;
+  /* Status colors */
+  --ldc-error: #ff3366; /* keep existing red for errors */
+  --ldc-success: var(--ldc-rpg-green);
 
-  --ldc-border: rgba(0, 0, 0, 0.12);
-  --ldc-focus: #c93880;
+  /* Border tuned to dark-plum surface for subtle separation */
+  --ldc-border: rgba(43, 22, 36, 0.18);
+  /* Surface shadow used for elevated elements (cards, FAB) */
+  --ldc-surface-shadow: 0 6px 18px rgba(43, 22, 36, 0.28);
+  --ldc-elevated-border: rgba(255, 255, 255, 0.04);
+  --ldc-focus: var(--ldc-primary-light);
 
-  --ldc-transition-fast: 240ms;
-  --ldc-transition-medium: 420ms;
-  --ldc-transition-slow: 680ms;
-  
   /* Semantic tokens */
   --background: var(--ldc-background);
   --foreground: var(--ldc-on-background);
@@ -31,7 +41,7 @@
   --card-foreground: var(--ldc-on-surface);
   --primary: var(--ldc-primary);
   --primary-foreground: var(--ldc-surface);
-  --secondary: var(--ldc-secondary);
+  --secondary: var(--ldc-primary-dark);
   --secondary-foreground: var(--ldc-surface);
   --muted: hsl(0, 0%, 96%);
   --muted-foreground: hsl(0, 0%, 45%);
@@ -43,18 +53,18 @@
   --input: var(--ldc-surface);
   --ring: var(--ldc-focus);
   --radius: 0px;
-  
+
   /* Typography */
   --ldc-font-title: 'Press Start 2P', cursive;
   --ldc-font-body: 'Nunito', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
   --font-retro: var(--ldc-font-title);
   --font-sans: var(--ldc-font-body);
-  
+
   /* Transitions */
   --ldc-transition-fast: 240ms;
   --ldc-transition-medium: 420ms;
   --ldc-transition-slow: 680ms;
-  
+
   /* Header */
   --ldc-header-height: 48px;
   
@@ -79,10 +89,13 @@
 /* Dark theme overrides */
 .ldc-theme--dark {
   --ldc-background: #0b0b0b;
-  --ldc-surface: #111111;
+  --ldc-surface: #2b1624; /* dark plum for dark theme surfaces to match palette */
   --ldc-on-background: #f7f7f7;
   --ldc-on-surface: #f7f7f7;
-  --ldc-border: rgba(255, 255, 255, 0.06);
+  /* Dark theme: lighter plum-tinted borders to match surface while keeping contrast */
+  --ldc-border: rgba(189, 31, 118, 0.10);
+  --ldc-surface-shadow: 0 6px 18px rgba(0,0,0,0.6);
+  --ldc-elevated-border: rgba(255,255,255,0.06);
 
   /* Full palette overrides for dark theme */
   --ldc-primary: #9c4b8a; /* brighter on dark */
@@ -283,6 +296,8 @@
     max-width: 90vw;
     max-height: 90vh;
     overflow-y: auto;
+  box-shadow: var(--ldc-surface-shadow);
+  border: 1px solid var(--ldc-elevated-border);
   }
 
   /* Semantic background utilities: ensure matching foreground color for contrast */
@@ -341,6 +356,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+  box-shadow: var(--ldc-surface-shadow);
   }
 
   /* Keep NES visual, but override background color to match the theme */
@@ -429,6 +445,44 @@
     justify-content: center; /* center toast content horizontally */
     z-index: 150;
     pointer-events: none; /* allow clicks to pass through unless children override */
+  }
+  /* Make NES container based toasts visible and theme-adaptive */
+  .toast.nes-container,
+  .toast .nes-container {
+    pointer-events: auto; /* allow interaction with close button */
+    background-color: var(--card); /* semantic surface */
+    color: var(--card-foreground) !important;
+    box-shadow: var(--ldc-surface-shadow);
+    width: min(95%, 680px);
+    margin: 0 auto;;
+  }
+
+  /* Variant colors (keep readable in themes) */
+  .toast.is-success .nes-container,
+  .toast.nes-container.is-success {
+    background-color: var(--ldc-success);
+    color: var(--ldc-on-surface) !important;
+    border-color: rgba(0,0,0,0.08) !important;
+  }
+
+  .toast.is-error .nes-container,
+  .toast.nes-container.is-error {
+    background-color: var(--ldc-error);
+    color: var(--ldc-on-surface) !important;
+    border-color: rgba(0,0,0,0.08) !important;
+  }
+
+  .toast.is-warning .nes-container,
+  .toast.nes-container.is-warning {
+    background-color: var(--ldc-contrast-yellow);
+    color: var(--ldc-on-background) !important;
+    border-color: rgba(0,0,0,0.04) !important;
+  }
+
+  .toast.is-light .nes-container,
+  .toast.nes-container.is-light {
+    background-color: var(--card);
+    color: var(--card-foreground) !important;
   }
 }
 

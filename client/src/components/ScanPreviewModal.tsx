@@ -1,5 +1,6 @@
 import React from 'react';
 import { useGameStore } from '@/hooks/use-game-store';
+import UiDialog from '@/components/UiDialog';
 import { gameStorage } from '@/lib/storage';
 import { UserScan } from '@shared/schema';
 
@@ -66,46 +67,42 @@ const ScanPreviewModal: React.FC = () => {
   if (!isOpen || !qrData) return null;
 
   return (
-    <div className="modal-overlay" data-testid="modal-scan-preview">
-      <div className="modal-content nes-container with-title bg-card max-w-md w-full">
-        <p className="title bg-card">Partecipante scansionato</p>
-        
-        <div className="text-center p-4">
-          {/* Scanned user info */}
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="w-16 h-16 bg-muted border-2 border-black flex items-center justify-center text-2xl">
-              {qrData.avatarUrl || '👤'}
-            </div>
-            <div>
-              <div className="font-retro text-sm" data-testid="text-scanned-user-name">
-                {qrData.displayName}
-              </div>
-              <div className="text-xs text-muted-foreground" data-testid="text-scanned-user-timestamp">
-                {new Date(qrData.timestamp).toLocaleString('it-IT')}
-              </div>
-            </div>
+    <UiDialog open={isOpen} onClose={() => closeModal('scanPreview')} title="Partecipante scansionato" className="max-w-md">
+      <div className="text-center p-4" data-testid="modal-scan-preview">
+        {/* Scanned user info */}
+        <div className="flex items-center justify-center gap-3 mb-4">
+          <div className="w-16 h-16 bg-muted border-2 border-black flex items-center justify-center text-2xl">
+            {qrData.avatarUrl || '👤'}
           </div>
-          
-          {/* Action buttons */}
-          <div className="flex gap-2 justify-center flex-wrap">
-            <button 
-              className="nes-btn is-primary" 
-              onClick={handleConfirm}
-              data-testid="button-confirm-scan"
-            >
-              Conferma
-            </button>
-            <button 
-              className="nes-btn is-normal" 
-              onClick={handleCancel}
-              data-testid="button-cancel-scan"
-            >
-              Annulla
-            </button>
+          <div>
+            <div className="font-retro text-sm" data-testid="text-scanned-user-name">
+              {qrData.displayName}
+            </div>
+            <div className="text-xs text-muted-foreground" data-testid="text-scanned-user-timestamp">
+              {new Date(qrData.timestamp).toLocaleString('it-IT')}
+            </div>
           </div>
         </div>
+
+        {/* Action buttons */}
+        <div className="flex gap-2 justify-center flex-wrap">
+          <button 
+            className="nes-btn is-primary" 
+            onClick={handleConfirm}
+            data-testid="button-confirm-scan"
+          >
+            Conferma
+          </button>
+          <button 
+            className="nes-btn is-normal" 
+            onClick={handleCancel}
+            data-testid="button-cancel-scan"
+          >
+            Annulla
+          </button>
+        </div>
       </div>
-    </div>
+    </UiDialog>
   );
 };
 

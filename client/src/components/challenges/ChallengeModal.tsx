@@ -1,5 +1,6 @@
 import React from 'react';
 import { useGameStore } from '@/hooks/use-game-store';
+import UiDialog from '@/components/UiDialog';
 import NetworkingForest from './NetworkingForest';
 import RetroPuzzle from './RetroPuzzle';
 import DebugDungeon from './DebugDungeon';
@@ -32,10 +33,10 @@ const ChallengeModal: React.FC = () => {
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" data-testid={`modal-challenge-${challengeId}`}>
-      <div className="modal-content nes-container with-title bg-card max-w-2xl w-full">
+    <UiDialog open={isOpen} onClose={() => closeModal('challenge')} title={challengeId || 'Challenge'} className="max-w-2xl">
+      <div className="w-full" data-testid={`modal-challenge-${challengeId}`}>
         {renderChallengeContent()}
-        
+
         {/* Close button - always present */}
         <div className="flex gap-2 justify-end mt-6 p-4 border-t">
           <button 
@@ -47,7 +48,7 @@ const ChallengeModal: React.FC = () => {
           </button>
         </div>
       </div>
-    </div>
+    </UiDialog>
   );
 };
 

@@ -1,14 +1,19 @@
 // Avatar management system with local preset images - Full body characters
-import maleDeveloper from '@assets/generated_images/Male_developer_full_body_af9636a7.png';
-import femaleDeveloper from '@assets/generated_images/Female_developer_full_body_a80fea95.png';
-import maleDesigner from '@assets/generated_images/Male_designer_full_body_01a6c883.png';
-import femaleDesigner from '@assets/generated_images/Female_designer_full_body_098049d8.png';
-import maleManager from '@assets/generated_images/Male_manager_full_body_8f494ac7.png';
-import femaleManager from '@assets/generated_images/Female_manager_full_body_56be1c7f.png';
-import maleScientist from '@assets/generated_images/Male_scientist_full_body_182cfd30.png';
-import femaleScientist from '@assets/generated_images/Female_scientist_full_body_b1999dcf.png';
+import maleDeveloper from '@assets/avatars/male_developer.png';
+import femaleDeveloper from '@assets/avatars/female_developer.png';
+import maleDesigner from '@assets/avatars/male_designer.png';
+import femaleDesigner from '@assets/avatars/female_designer.png';
+import maleManager from '@assets/avatars/male_manager.png';
+import femaleManager from '@assets/avatars/female_manager.png';
+import maleScientist from '@assets/avatars/male_scientist.png';
+import femaleScientist from '@assets/avatars/female_scientist.png';
 
-export const AVATAR_PRESETS = [
+export type AvatarPreset = { id: string; name: string; url: string };
+
+// Exported as `let` so we can replace the presets at runtime when the
+// application fetches `/game-data.json`. Other modules importing this
+// binding will observe updates thanks to ES module live bindings.
+export let AVATAR_PRESETS: AvatarPreset[] = [
   { id: 'male-developer', name: 'Sviluppatore', url: maleDeveloper },
   { id: 'female-developer', name: 'Sviluppatrice', url: femaleDeveloper },
   { id: 'male-designer', name: 'Designer', url: maleDesigner },

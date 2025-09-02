@@ -13,8 +13,12 @@ const SocialArena: React.FC = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
-  const [selectedPreviewUrl, setSelectedPreviewUrl] = useState<string | null>(null);
-  const [screenshotPreviewUrl, setScreenshotPreviewUrl] = useState<string | null>(null);
+  const [selectedPreviewUrl, setSelectedPreviewUrl] = useState<string | null>(
+    null
+  );
+  const [screenshotPreviewUrl, setScreenshotPreviewUrl] = useState<
+    string | null
+  >(null);
   const [proofPreviewUrl, setProofPreviewUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { isAnalyzing, ocrProgress, ocrResult, setOcrResult } = useOCR();
@@ -53,19 +57,26 @@ const SocialArena: React.FC = () => {
         gameState.currentUser.userId
       );
       // Keep only the latest proof for this challenge in-memory
-      const latest = userProofs && userProofs.length > 0 ? userProofs[userProofs.length - 1] : null;
+      const latest =
+        userProofs && userProofs.length > 0
+          ? userProofs[userProofs.length - 1]
+          : null;
       setProof(latest || null);
-      if (latest && typeof latest.imageLocalUrl === "string" && latest.imageLocalUrl.startsWith("blob_")) {
-        getBlobUrl(latest.imageLocalUrl).then((u) => {
-          if (u) setProofPreviewUrl(u);
-        }).catch(() => {});
+      if (
+        latest &&
+        typeof latest.imageLocalUrl === "string" &&
+        latest.imageLocalUrl.startsWith("blob_")
+      ) {
+        getBlobUrl(latest.imageLocalUrl)
+          .then((u) => {
+            if (u) setProofPreviewUrl(u);
+          })
+          .catch(() => {});
       }
       setIsLoading(false);
 
       // Check if challenge is completed
-      const validProof = userProofs.find(
-        (p) => p.detected && p.verified
-      );
+      const validProof = userProofs.find((p) => p.detected && p.verified);
       if (validProof) {
         updateChallengeProgress("social-arena", 1, true);
       }
@@ -82,7 +93,9 @@ const SocialArena: React.FC = () => {
     }
     // set file and preview
     if (selectedPreviewUrl) {
-      try { URL.revokeObjectURL(selectedPreviewUrl); } catch (e) {}
+      try {
+        URL.revokeObjectURL(selectedPreviewUrl);
+      } catch (e) {}
       setSelectedPreviewUrl(null);
     }
     setSelectedFile(file);
@@ -162,7 +175,9 @@ const SocialArena: React.FC = () => {
     // Persist the captured image as a pending proof but DO NOT run OCR.
     setShowCamera(false);
     if (selectedPreviewUrl) {
-      try { URL.revokeObjectURL(selectedPreviewUrl); } catch (e) {}
+      try {
+        URL.revokeObjectURL(selectedPreviewUrl);
+      } catch (e) {}
       setSelectedPreviewUrl(null);
     }
     setSelectedFile(file);
@@ -253,14 +268,16 @@ const SocialArena: React.FC = () => {
   ) => {
     const file = event.target.files?.[0];
     if (!file || !gameState.currentUser.userId) return;
-  // Save screenshot to state and open OCR modal; modal will run OCR and call onVerified/onAttempt
-  if (screenshotPreviewUrl) {
-    try { URL.revokeObjectURL(screenshotPreviewUrl); } catch (e) {}
-    setScreenshotPreviewUrl(null);
-  }
-  setScreenshotFile(file);
-  setScreenshotPreviewUrl(URL.createObjectURL(file));
-  setOcrModalOpen(true);
+    // Save screenshot to state and open OCR modal; modal will run OCR and call onVerified/onAttempt
+    if (screenshotPreviewUrl) {
+      try {
+        URL.revokeObjectURL(screenshotPreviewUrl);
+      } catch (e) {}
+      setScreenshotPreviewUrl(null);
+    }
+    setScreenshotFile(file);
+    setScreenshotPreviewUrl(URL.createObjectURL(file));
+    setOcrModalOpen(true);
   };
 
   const handleForceValidate = () => {
@@ -282,7 +299,10 @@ const SocialArena: React.FC = () => {
   };
 
   // single proof view
-  const isCompleted = useMemo(() => !!proof?.verified, [proof, proofPreviewUrl]);
+  const isCompleted = useMemo(
+    () => !!proof?.verified,
+    [proof, proofPreviewUrl]
+  );
 
   // Define a clear step-based progression
   const totalSteps = 3; // 1: capture/upload, 2: share (or await screenshot), 3: screenshot & OCR (or skip)
@@ -364,9 +384,13 @@ const SocialArena: React.FC = () => {
                 <div className="space-y-4">
                   <div className="text-4xl">
                     {selectedPreviewUrl ? (
-                      <img src={selectedPreviewUrl} alt="Preview" className="w-16 h-16 object-cover inline-block" />
+                      <img
+                        src={selectedPreviewUrl}
+                        alt="Preview"
+                        className="w-16 h-16 object-cover inline-block"
+                      />
                     ) : (
-                      '📸'
+                      "📸"
                     )}
                   </div>
                   <p className="text-sm mb-4">
@@ -412,9 +436,13 @@ const SocialArena: React.FC = () => {
                 <div className="space-y-4">
                   <div className="text-4xl">
                     {selectedPreviewUrl ? (
-                      <img src={selectedPreviewUrl} alt="Preview" className="w-16 h-16 object-cover inline-block" />
+                      <img
+                        src={selectedPreviewUrl}
+                        alt="Preview"
+                        className="w-16 h-16 object-cover inline-block"
+                      />
                     ) : (
-                      '📸'
+                      "📸"
                     )}
                   </div>
                   <p className="text-sm">
@@ -470,9 +498,13 @@ const SocialArena: React.FC = () => {
                   <div className="space-y-4">
                     <div className="text-4xl">
                       {screenshotPreviewUrl ? (
-                        <img src={screenshotPreviewUrl} alt="Screenshot preview" className="w-16 h-16 object-cover inline-block" />
+                        <img
+                          src={screenshotPreviewUrl}
+                          alt="Screenshot preview"
+                          className="w-16 h-16 object-cover inline-block"
+                        />
                       ) : (
-                        '📸'
+                        "📸"
                       )}
                     </div>
                     <p className="text-sm">
@@ -509,21 +541,13 @@ const SocialArena: React.FC = () => {
 
             {/* OCR Modal component */}
             {ocrModalOpen && screenshotFile && (
-        <OcrModal
-          file={screenshotFile}
-          requiredTag={requiredTag}
-          confidenceThreshold={confidenceThreshold}
-          failedAttempts={failedAttempts}
-              onAttempt={() => {
-                setFailedAttempts((n) => n + 1);
-              }}
-              onRetry={() => {
-                  // clear and close modal so user can re-upload
-                  setSelectedFile(null);
-                  setScreenshotFile(null);
-                  setOcrResult(null);
-                  setFailedAttempts(0);
-                  setOcrModalOpen(false);
+              <OcrModal
+                file={screenshotFile}
+                requiredTag={requiredTag}
+                confidenceThreshold={confidenceThreshold}
+                failedAttempts={failedAttempts}
+                onAttempt={() => {
+                  setFailedAttempts((n) => n + 1);
                 }}
                 onVerified={async (result, forced) => {
                   // persist proof and update progress if verified or forced
@@ -566,12 +590,8 @@ const SocialArena: React.FC = () => {
                       err
                     );
                   } finally {
-                    // modal will close itself after showing success message; parent no longer closes it immediately
+                    setOcrModalOpen(false);
                   }
-                }}
-                onClose={() => {
-                  // modal closed: show action buttons to re-upload or finish
-                  setOcrModalOpen(false);
                 }}
               />
             )}
@@ -635,7 +655,7 @@ const SocialArena: React.FC = () => {
                   <div className="text-xs text-left">
                     <div>Tag rilevati: {proof.detectedTags.join(", ")}</div>
                     <div>
-                      Verificato: {" "}
+                      Verificato:{" "}
                       {new Date(proof.createdAt).toLocaleString("it-IT")}
                     </div>
                   </div>
