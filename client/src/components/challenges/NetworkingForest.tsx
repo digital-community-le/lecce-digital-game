@@ -105,6 +105,7 @@ const NetworkingForest: React.FC = () => {
               </div>
             ))}
           </div>
+        )}
 
         {/* Action button */}
         {uniqueScans.length < REQUIRED_SCANS && (
