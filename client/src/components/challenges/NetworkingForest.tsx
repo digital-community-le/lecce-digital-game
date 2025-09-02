@@ -4,6 +4,7 @@ import { gameStorage } from '@/lib/storage';
 import { UserScan } from '@shared/schema';
 import ChallengeContentLayout from '@/components/layout/ChallengeContentLayout';
 
+
 const NetworkingForest: React.FC = () => {
   const { gameState, updateChallengeProgress, showToast, openModal } = useGameStore();
 
@@ -89,6 +90,7 @@ const NetworkingForest: React.FC = () => {
                     <div className="w-full h-full bg-gray-300 flex items-center justify-center text-xs">?</div>
                   )}
                 </div>
+
                 <div className="flex-1">
                   <div className="font-medium text-sm" data-testid={`scan-name-${scan.scannedUserId}`}>
                     {scan.scannedName || 'Nome non disponibile'}
