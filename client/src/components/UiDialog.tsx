@@ -70,11 +70,11 @@ const UiDialog: React.FC<UiDialogProps> = ({ open, onClose, title, rounded = tru
       <form method="dialog">
         {title && (
           ariaLabelledBy ? (
-            <p id={ariaLabelledBy} className="title">
+            <h4 id={ariaLabelledBy} className="font-retro text-sm mb-2">
               {title}
-            </p>
+            </h4>
           ) : (
-            <p className="title">{title}</p>
+            <h4 className="font-retro text-sm mb-2">{title}</h4>
           )
         )}
         <div>{children}</div>

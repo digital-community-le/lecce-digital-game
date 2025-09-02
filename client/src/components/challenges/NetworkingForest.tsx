@@ -4,6 +4,7 @@ import { gameStorage } from '@/lib/storage';
 import { UserScan } from '@shared/schema';
 import ChallengeContentLayout from '@/components/layout/ChallengeContentLayout';
 import ChallengeCompleted from '@/components/ChallengeCompleted';
+import AllianceGemIcon from '@assets/images/gem-of-alliance.png'
 
 
 const NetworkingForest: React.FC = () => {
@@ -53,6 +54,7 @@ const NetworkingForest: React.FC = () => {
   return (
     <ChallengeContentLayout
       gemTitle="La Gemma dell'Alleanza"
+      gemIcon={AllianceGemIcon}
       description="Nel Networking Forest, ogni connessione è un filo di luce che rafforza il tuo cammino. Scansiona i QR degli altri partecipanti per raccogliere la Gemma dell'Alleanza."
       tip="Usa il pulsante per scansionare i QR code degli altri partecipanti. Ogni persona può essere scansionata una sola volta."
       progress={uniqueScans.length}

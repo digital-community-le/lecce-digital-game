@@ -5,7 +5,7 @@ import DebugDungeonChallenge from '@/components/challenges/DebugDungeon';
 
 const DebugDungeonPage: React.FC = () => {
   return (
-    <AppLayout darkMode={true}>
+    <AppLayout>
       <ChallengeLayout challengeId="debug-dungeon">
         <DebugDungeonChallenge />
       </ChallengeLayout>

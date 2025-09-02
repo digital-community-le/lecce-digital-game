@@ -3,6 +3,8 @@ import React from 'react';
 interface ChallengeContentLayoutProps {
   /** Titolo della gemma (es. "La Gemma dell'Alleanza") */
   gemTitle: string;
+  /** Icona della gemma (es. "💎") */
+  gemIcon: string;
   /** Descrizione narrativa della challenge */
   description: string;
   /** Testo del suggerimento nel box scuro */
@@ -36,6 +38,7 @@ interface ChallengeContentLayoutProps {
  */
 const ChallengeContentLayout: React.FC<ChallengeContentLayoutProps> = ({
   gemTitle,
+  gemIcon,
   description,
   tip,
   progress,
@@ -62,7 +65,10 @@ const ChallengeContentLayout: React.FC<ChallengeContentLayoutProps> = ({
       <div className="p-4">
         {/* Challenge description */}
         <div className="mb-6">
-          <h3 className="font-retro text-sm mb-3">{gemTitle}</h3>
+          <h3 className="text-sm mb-3 flex items-center justify-start">
+            <img src={gemIcon} alt={gemTitle} className="mr-4 h-8" />
+            <span className="block font-retro">{gemTitle}</span>
+          </h3>
           <p className="text-sm mb-4">
             {description}
           </p>

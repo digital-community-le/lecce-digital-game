@@ -5,7 +5,7 @@ import RetroPuzzleChallenge from '@/components/challenges/RetroPuzzle';
 
 const RetroPuzzlePage: React.FC = () => {
   return (
-    <AppLayout darkMode={true}>
+    <AppLayout>
       <ChallengeLayout challengeId="retro-puzzle">
         <RetroPuzzleChallenge />
       </ChallengeLayout>
