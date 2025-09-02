@@ -3,6 +3,12 @@ import { useLocation } from 'wouter';
 import { useGameStore } from '@/hooks/use-game-store';
 import Header from '@/components/Header';
 
+// Import delle immagini delle gemme generate
+import gemmaAlleanza from '@assets/generated_images/Gemma_dell\'Alleanza_verde_4f1dff68.png';
+import gemmaMemoria from '@assets/generated_images/Gemma_della_Memoria_blu_5db7713d.png';
+import gemmaSapienza from '@assets/generated_images/Gemma_della_Sapienza_rossa_3a1cc119.png';
+import gemmaComunita from '@assets/generated_images/Gemma_della_Comunità_viola_f233649e.png';
+
 interface ChallengeLayoutProps {
   /** ID della challenge per il controllo accesso */
   challengeId: string;
@@ -15,6 +21,44 @@ interface ChallengeLayoutProps {
   /** Se true, usa uno sfondo più scuro per maggiore immersività */
   darkMode?: boolean;
 }
+
+/**
+ * Mappa dei challenge ID alle informazioni delle gemme
+ */
+const getGemInfo = (challengeId: string) => {
+  switch (challengeId) {
+    case 'networking-forest':
+      return {
+        image: gemmaAlleanza,
+        title: 'La Gemma dell\'Alleanza',
+        description: 'Suggella i legami con la comunità'
+      };
+    case 'retro-puzzle':
+      return {
+        image: gemmaMemoria,
+        title: 'La Gemma della Memoria',
+        description: 'Custodisce i ricordi del passato'
+      };
+    case 'debug-dungeon':
+      return {
+        image: gemmaSapienza,
+        title: 'La Gemma della Sapienza',
+        description: 'Illumina la via della conoscenza'
+      };
+    case 'social-arena':
+      return {
+        image: gemmaComunita,
+        title: 'La Gemma della Comunità',
+        description: 'Unisce le voci di tutti'
+      };
+    default:
+      return {
+        image: gemmaAlleanza,
+        title: 'La Gemma',
+        description: 'Una gemma misteriosa'
+      };
+  }
+};
 
 /**
  * Layout riutilizzabile per tutte le challenge del gioco
@@ -53,6 +97,7 @@ const ChallengeLayout: React.FC<ChallengeLayoutProps> = ({
 
   const completedCount = gameState.gameProgress.completedChallenges.length;
   const totalChallenges = gameState.challenges.length;
+  const gemInfo = getGemInfo(challengeId);
 
   return (
     <div className={`min-h-screen ${darkMode ? 'bg-gray-900' : 'bg-background'} text-foreground`}>
@@ -74,13 +119,16 @@ const ChallengeLayout: React.FC<ChallengeLayoutProps> = ({
                 <span className="hidden sm:inline">Mappa</span>
               </button>
               
-              {/* Titolo challenge */}
+              {/* Titolo challenge con gemma */}
               <div className="flex items-center gap-3">
-                <span className="text-2xl" role="img" aria-label={challenge.title}>
-                  {challenge.emoji}
-                </span>
+                <img 
+                  src={gemInfo.image} 
+                  alt={gemInfo.title}
+                  className="w-8 h-8 pixelated"
+                  style={{ imageRendering: 'pixelated' }}
+                />
                 <h1 className="text-lg font-retro" data-testid="challenge-title">
-                  {challenge.title}
+                  {gemInfo.title}
                 </h1>
               </div>
             </div>
@@ -89,10 +137,9 @@ const ChallengeLayout: React.FC<ChallengeLayoutProps> = ({
             {showProgress && (
               <div className="flex items-center gap-2">
                 <span className="text-sm font-retro text-muted-foreground">
-                  Gemme
+                  Progresso
                 </span>
                 <div className="flex items-center gap-1">
-                  <span className="text-xl" role="img" aria-label="gemma">💎</span>
                   <span className="font-retro text-sm">
                     {completedCount}/{totalChallenges}
                   </span>
