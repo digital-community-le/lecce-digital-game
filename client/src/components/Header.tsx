@@ -48,8 +48,8 @@ const Header: React.FC = () => {
         {/* Profile indicator */}
         <button
           className="w-8 h-8 bg-muted border-2 border-black flex items-center justify-center overflow-hidden"
-          onClick={() => openModal('profile')}
-          aria-label="Apri profilo"
+          onClick={() => openModal('statistics')}
+          aria-label="Statistiche"
           data-testid="button-profile"
         >
           {gameState.currentUser.avatar ? (

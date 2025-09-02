@@ -8,6 +8,7 @@ import QRModal from '@/components/QRModal';
 import ScannerView from '@/components/ScannerView';
 import ScanPreviewModal from '@/components/ScanPreviewModal';
 import CompletionModal from '@/components/CompletionModal';
+import StatisticsModal from '@/components/StatisticsModal';
 
 const GameMapPage: React.FC = () => {
   const [, setLocation] = useLocation();
@@ -45,6 +46,7 @@ const GameMapPage: React.FC = () => {
   <ScannerView />
   <ScanPreviewModal />
   <CompletionModal />
+  <StatisticsModal />
   <QRModal />
       
       {/* Toast notifications */}

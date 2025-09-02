@@ -246,25 +246,7 @@ const FantasyMap: React.FC = () => {
 
   {/* Map legend removed per request */}
 
-      {/* Progress summary */}
-      <div className="absolute top-4 right-4 bg-card border-2 border-black p-3 min-w-48" data-testid="progress-summary">
-        <div className="font-retro text-xs mb-2">Progresso</div>
-        <div className="space-y-2">
-          <div className="flex justify-between text-xs">
-            <span>Gemme raccolte</span>
-            <span data-testid="text-gems-collected">
-              {gameState.gameProgress.completedChallenges.length}/4
-            </span>
-          </div>
-          <div className="progress-custom">
-            <div 
-              className="progress-fill" 
-              style={{ width: `${(gameState.gameProgress.completedChallenges.length / 4) * 100}%` }}
-              data-testid="progress-bar"
-            ></div>
-          </div>
-        </div>
-      </div>
+  {/* Progress badge removed - Statistics accessible via Header avatar */}
     </div>
   );
 };

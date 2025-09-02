@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import useOCR from "@/hooks/use-ocr";
+import UiDialog from '@/components/UiDialog';
 
 type OCRResult = {
   detectedTags: string[];
@@ -13,10 +14,8 @@ type Props = {
   requiredTag: string;
   confidenceThreshold: number;
   onVerified: (result: OCRResult, forced: boolean) => Promise<void>; // called when verification finishes (either auto-success or manual)
-  onRetry: () => void; // user wants to retry (re-upload)
   onAttempt?: () => void; // called when an OCR attempt fails
   failedAttempts?: number;
-  onClose?: () => void; // called when the dialog actually closes
 };
 
 const OcrModal: React.FC<Props> = ({
@@ -24,9 +23,7 @@ const OcrModal: React.FC<Props> = ({
   requiredTag,
   confidenceThreshold,
   onVerified,
-  onRetry,
   onAttempt,
-  onClose,
   failedAttempts = 0,
 }) => {
   const { run, ocrProgress, ocrResult, setOcrResult } = useOCR();
@@ -34,24 +31,16 @@ const OcrModal: React.FC<Props> = ({
     "running"
   );
   const [message, setMessage] = useState<string | null>(null);
-  const dialogRef = useRef<HTMLDialogElement | null>(null);
-  const previouslyFocused = useRef<HTMLElement | null>(null);
   const titleId = useRef(`ocr-modal-title-${Date.now()}`);
   const descId = useRef(`ocr-modal-desc-${Date.now()}`);
   const retryButtonRef = useRef<HTMLButtonElement | null>(null);
   const manualButtonRef = useRef<HTMLButtonElement | null>(null);
-  const closeTimerRef = useRef<number | null>(null);
 
   // Reusable OCR runner so Retry can re-run analysis without closing modal
   const runAnalysis = async () => {
     setState("running");
     setMessage(null);
     setOcrResult(null);
-    try {
-      dialogRef.current?.showModal();
-    } catch (e) {
-      // ignore if dialog already open or not supported
-    }
     try {
       const res = await run(file);
       const verified = !!(
@@ -62,19 +51,6 @@ const OcrModal: React.FC<Props> = ({
         setMessage("Tag verificato con successo!");
         setTimeout(async () => {
           await onVerified(res, false);
-          // close dialog after 3 seconds to allow user to read the success message
-          try {
-            if (closeTimerRef.current)
-              window.clearTimeout(closeTimerRef.current);
-          } catch (e) {}
-          closeTimerRef.current = window.setTimeout(() => {
-            try {
-              dialogRef.current?.close();
-            } catch (e) {}
-            try {
-              onClose?.();
-            } catch (e) {}
-          }, 3000);
         }, 800);
       } else {
         setState("failed");
@@ -98,81 +74,8 @@ const OcrModal: React.FC<Props> = ({
     runAnalysis();
     return () => {
       mounted = false;
-      try {
-        // clear any pending close timer
-        if (closeTimerRef.current) {
-          window.clearTimeout(closeTimerRef.current);
-          closeTimerRef.current = null;
-        }
-        dialogRef.current?.close();
-      } catch (e) {}
     };
   }, [file]);
-
-  // Ensure dialog is closed when component is unmounted (extra safety)
-  useEffect(() => {
-    return () => {
-      try {
-        if (closeTimerRef.current) {
-          window.clearTimeout(closeTimerRef.current);
-          closeTimerRef.current = null;
-        }
-        dialogRef.current?.close();
-      } catch (e) {}
-    };
-  }, []);
-
-  // Focus management: trap focus inside modal and restore on unmount
-  useEffect(() => {
-    previouslyFocused.current = document.activeElement as HTMLElement | null;
-    const dialog = dialogRef.current;
-    if (dialog) {
-      // focus the dialog container to start
-      dialog.focus();
-    }
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!dialog) return;
-      if (e.key === "Tab") {
-        const focusable = dialog.querySelectorAll<HTMLElement>(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-        );
-        if (focusable.length === 0) {
-          e.preventDefault();
-          return;
-        }
-        const first = focusable[0];
-        const last = focusable[focusable.length - 1];
-        if (e.shiftKey) {
-          if (document.activeElement === first) {
-            last.focus();
-            e.preventDefault();
-          }
-        } else {
-          if (document.activeElement === last) {
-            first.focus();
-            e.preventDefault();
-          }
-        }
-      }
-      // Allow Escape to cancel when verification failed (acts like retry/close)
-      if (e.key === "Escape") {
-        if (state === "failed") {
-          e.preventDefault();
-          onRetry();
-        }
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      // restore previous focus
-      try {
-        previouslyFocused.current?.focus();
-      } catch (e) {}
-    };
-  }, [state, onRetry]);
 
   // Move focus to first actionable button (Retry) when verification failed
   useEffect(() => {
@@ -187,14 +90,12 @@ const OcrModal: React.FC<Props> = ({
   }, [state]);
 
   return (
-    <dialog
+    <UiDialog
+      open={true}
+      title="Verifica OCR"
       className="nes-dialog is-rounded p-4 max-w-md w-full"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby={titleId.current}
-      aria-describedby={descId.current}
-      ref={dialogRef}
-      tabIndex={-1}
+      ariaLabelledBy={titleId.current}
+      ariaDescribedBy={descId.current}
     >
       <p id={titleId.current} className="title">
         Verifica OCR
@@ -282,10 +183,6 @@ const OcrModal: React.FC<Props> = ({
                     },
                     true
                   );
-                  try {
-                    dialogRef.current?.close();
-                    onClose?.();
-                  } catch (e) {}
                 }}
               >
                 Verifica manuale
@@ -294,7 +191,7 @@ const OcrModal: React.FC<Props> = ({
           </>
         )}
       </div>
-    </dialog>
+    </UiDialog>
   );
 };
 

@@ -101,6 +101,7 @@ const ProfileCreationForm: React.FC<ProfileCreationFormProps> = ({ onComplete })
         <div className="grid grid-cols-4 gap-3" data-testid="avatar-picker">
           {AVATAR_PRESETS.map((avatar) => (
             <button
+              type="button"
               key={avatar.id}
               className={`w-16 h-16 border-2 flex items-center justify-center overflow-hidden transition-all duration-200 ${
                 selectedAvatar === avatar.url 
@@ -158,6 +159,7 @@ const ProfileCreationForm: React.FC<ProfileCreationFormProps> = ({ onComplete })
       {/* Action buttons */}
       <div className="flex gap-3 justify-center">
         <button 
+          type='submit'
           className={`nes-btn font-retro px-6 py-2 ${
             !displayName.trim() || nameError || isLoading 
               ? 'is-disabled' 
