@@ -1,7 +1,15 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { useGameStore } from '@/hooks/use-game-store';
 import { QRGenerator } from '@/lib/qr';
-import { QRData } from '@shared/schema';
+import { QRData, UserScan } from '@shared/schema';
+import { gameStorage } from '@/lib/storage';
+import jsQR from 'jsqr';
+import {
+  loadImage,
+  createCanvasFromImage,
+  decodeWithStrategies,
+  persistMockScan,
+} from '@/lib/qrScanner';
 
 const ScannerView: React.FC = () => {
   const { modals, closeModal, openModal, showToast, gameState } = useGameStore();
@@ -62,15 +70,27 @@ const ScannerView: React.FC = () => {
     input.click();
   };
 
-  const processImageFile = async (file: File) => {
+  const processImageFile = useCallback(async (file: File) => {
+    setScanning(true);
     try {
-      setScanning(true);
-      
-      // For demo purposes, simulate QR detection
-      // In a real implementation, this would use a QR scanning library like jsQR
+      const img = await loadImage(file);
+      const canvas = createCanvasFromImage(img);
+
+      const decoded = decodeWithStrategies(canvas);
+
+      if (decoded) {
+        if (decoded.userId === gameState.currentUser.userId) {
+          showToast('Non puoi scansionare il tuo QR', 'error');
+          return;
+        }
+        closeModal('scanner');
+        openModal('scanPreview', { qrData: decoded });
+        return;
+      }
+
+      // fallback
+      showToast('Decoding reale fallito, usando fallback', 'warning');
       await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Simulate finding a QR code - create sample data
       const sampleQRData: QRData = {
         userId: `user_${Date.now()}`,
         displayName: 'Elena Designer',
@@ -78,24 +98,21 @@ const ScannerView: React.FC = () => {
         timestamp: new Date().toISOString(),
       };
 
-      // Check if it's a self-scan
       if (sampleQRData.userId === gameState.currentUser.userId) {
         showToast('Non puoi scansionare il tuo QR', 'error');
-        setScanning(false);
         return;
       }
 
-      // Open preview modal with scanned data
+      persistMockScan(sampleQRData, gameState.currentUser.userId);
       closeModal('scanner');
       openModal('scanPreview', { qrData: sampleQRData });
-      
     } catch (error) {
       console.error('Error processing image:', error);
       showToast('QR non valido — riprova o importa immagine.', 'error');
     } finally {
       setScanning(false);
     }
-  };
+  }, [closeModal, openModal, showToast, gameState.currentUser.userId]);
 
   const captureFrame = async () => {
     if (!videoRef.current || scanning) return;
