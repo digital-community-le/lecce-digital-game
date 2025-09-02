@@ -3,8 +3,8 @@ import { useLocation } from 'wouter';
 import { useGameStore } from '@/hooks/use-game-store';
 import { MapNode } from '@/types/game';
 
-// Import atlas completo e configurazione tiles
-import atlasUrl from '@assets/d9leui9-2433ac69-5fa3-4926-9e19-a8a65212f1ac_1756763887632.png';
+// Import atlas semplificato e configurazione tiles
+import atlasUrl from '@assets/image_1756806592677.png';
 import tilesConfig from '../data/tiles.json';
 
 /**
@@ -49,10 +49,10 @@ const CanvasMap: React.FC = () => {
   const [atlasLoaded, setAtlasLoaded] = useState(false);
   const [atlasImage, setAtlasImage] = useState<HTMLImageElement | null>(null);
 
-  /** Dimensione di ogni tile in pixel - ridotta per forme più smussate */
-  const TILE_SIZE = 16;
-  /** Dimensione dei tile nei tileset sprite (16x16 pixel) */
-  const SPRITE_TILE_SIZE = 16;
+  /** Dimensione di ogni tile in pixel per il nuovo tileset */
+  const TILE_SIZE = 64;
+  /** Dimensione dei tile nei tileset sprite (64x64 pixel) */
+  const SPRITE_TILE_SIZE = 64;
   /** Larghezza griglia mappa (numero di tile orizzontali) - bilanciata per dettaglio e visibilità */
   const MAP_WIDTH = 48;
   /** Altezza griglia mappa (numero di tile verticali) - bilanciata per dettaglio e visibilità */
@@ -319,33 +319,15 @@ const CanvasMap: React.FC = () => {
       return;
     }
     
-    // Gestione multi-tile per sprite di dimensioni diverse
-    const spriteWidth = (tileData as any).width || 16;
-    const spriteHeight = (tileData as any).height || 16;
+    // Gestione sprite del nuovo tileset 64x64
+    const spriteWidth = (tileData as any).width || tilesConfig.tileSize;
+    const spriteHeight = (tileData as any).height || tilesConfig.tileSize;
     
-    // Per sprite più grandi di 16x16, centra e scala appropriatamente
-    let destX = x;
-    let destY = y;
-    let destWidth = size;
-    let destHeight = size;
-    
-    if (spriteWidth > 16 || spriteHeight > 16) {
-      // Sprite grande: calcola scaling e posizionamento
-      const scaleX = size / 16;
-      const scaleY = size / 16;
-      
-      destWidth = spriteWidth * scaleX;
-      destHeight = spriteHeight * scaleY;
-      
-      // Centra orizzontalmente, allinea al fondo verticalmente
-      destX = x + (size - destWidth) / 2;
-      destY = y + size - destHeight;
-    }
-    
+    // Disegna il tile dall'atlas scalando alla dimensione corrente
     ctx.drawImage(
       atlasImage,
-      tileData.x, tileData.y, spriteWidth, spriteHeight, // Source con dimensioni reali
-      destX, destY, destWidth, destHeight  // Destination scalata e posizionata
+      tileData.x, tileData.y, spriteWidth, spriteHeight, // Source
+      x, y, size, size  // Destination
     );
   };
 
