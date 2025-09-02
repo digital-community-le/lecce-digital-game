@@ -4,6 +4,7 @@ import { gameStorage } from '@/lib/storage';
 import { QuizState, QuizQuestion } from '@shared/schema';
 import ChallengeContentLayout from '@/components/layout/ChallengeContentLayout';
 import wisdomGem from '@assets/images/gem-of-wisdom.png';
+import GameData from '@/assets/game-data.json';
 
 const DebugDungeon: React.FC = () => {
   const { gameState, updateChallengeProgress, showToast } = useGameStore();
@@ -17,7 +18,7 @@ const DebugDungeon: React.FC = () => {
 
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  // fetch questions from game-data.json and initialize quiz state. Throws or sets loadError on failure.
+  // load questions from bundled game-data.json and initialize quiz state. Throws or sets loadError on failure.
   const fetchAndInit = async (): Promise<boolean> => {
     if (!gameState.currentUser.userId) {
       setIsLoading(false);
@@ -27,12 +28,13 @@ const DebugDungeon: React.FC = () => {
     setLoadError(null);
 
     try {
-      const res = await fetch('/game-data.json');
-      if (!res.ok) {
-        throw new Error(`Impossibile caricare game-data.json (status ${res.status})`);
+      // Use static import instead of runtime fetch. The JSON is bundled under @assets.
+      const data: any = (GameData as any) ?? null;
+
+      if (!data) {
+        throw new Error('game-data.json non è disponibile nel bundle.');
       }
 
-      const data = await res.json();
       const challenge = data.challenges?.find((c: any) => c.id === 'debug-dungeon');
 
       if (!challenge || !Array.isArray(challenge.questions) || challenge.questions.length === 0) {
@@ -64,34 +66,31 @@ const DebugDungeon: React.FC = () => {
         gameStorage.saveQuizState(gameState.currentUser.userId, state);
       }
 
-  setQuizState(state);
-  return true;
+      setQuizState(state);
+      return true;
     } catch (err: any) {
       setLoadError(err?.message ?? 'Errore durante il caricamento delle domande');
-  return false;
+      return false;
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    // fire-and-forget init
+    // fire-and-forget init when current user changes
     fetchAndInit();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameState.currentUser.userId]);
 
-  const handleAnswerSelect = (answerIndex: number) => {
-    setSelectedAnswer(answerIndex);
-  };
-
-  const handleSubmitAnswer = () => {
-    if (!quizState || selectedAnswer === null) return;
+  const submitAnswer = (answerIndex: number) => {
+    if (!quizState) return;
 
     const currentQuestion = quizState.questions[quizState.currentQuestionIndex];
-    const isCorrect = selectedAnswer === currentQuestion.correctAnswer;
-    
-    const newAnswers = [...quizState.answers, selectedAnswer];
+    const isCorrect = answerIndex === currentQuestion.correctAnswer;
+
+    const newAnswers = [...quizState.answers, answerIndex];
     const newScore = isCorrect ? quizState.score + 1 : quizState.score;
-    
+
     const updatedState: QuizState = {
       ...quizState,
       answers: newAnswers,
@@ -107,6 +106,12 @@ const DebugDungeon: React.FC = () => {
     } else {
       showToast('Risposta sbagliata', 'error');
     }
+  };
+
+  const handleAnswerSelect = (answerIndex: number) => {
+    // selecting an answer immediately submits it
+    setSelectedAnswer(answerIndex);
+    submitAnswer(answerIndex);
   };
 
   const handleNextQuestion = () => {
@@ -227,12 +232,16 @@ const DebugDungeon: React.FC = () => {
         gemTitle="La Gemma del Sapere"
         gemIcon={wisdomGem}
         description="Nel Debug Dungeon, ogni risposta corretta illumina il sentiero verso la conoscenza. Supera il quiz per conquistare la Gemma del Sapere."
-        tip={`💡 Rispondi a ${QUESTIONS_COUNT} domande. Serve almeno ${PASS_THRESHOLD}% per superare il dungeon.`}
+        tip={`Rispondi a ${QUESTIONS_COUNT} domande. Indovinane almeno il ${PASS_THRESHOLD}% per superare il dungeon.`}
         progress={quizState.score}
         total={QUESTIONS_COUNT}
         progressLabel="Progresso"
-        isCompleted={true}
-        completionMessage={passed ? 'Hai dimostrato le tue competenze! La Gemma del Sapere è tua.' : undefined}
+        isCompleted={passed}
+        completionMessage={
+          passed
+            ? 'Hai dimostrato le tue competenze! La Gemma del Sapere è tua.'
+            : 'Challenge non completata. Riprova il dungeon per conquistare la Gemma del Sapere.'
+        }
       >
         <div>
           <div className="p-4">
@@ -288,28 +297,6 @@ const DebugDungeon: React.FC = () => {
       isCompleted={false}
     >
       <div>
-        <div className="p-4">
-        {/* Progress */}
-        <div className="mb-6">
-          <div className="flex justify-between text-sm mb-2">
-            <span>Progresso</span>
-            <span data-testid="text-quiz-progress">
-              {quizState.currentQuestionIndex + 1}/{QUESTIONS_COUNT}
-            </span>
-          </div>
-          <div className="progress-custom mb-3">
-            <div 
-              className="progress-fill" 
-              style={{ width: `${progressPercentage}%` }}
-              data-testid="progress-quiz"
-            ></div>
-          </div>
-          <div className="text-xs">
-            Punteggio attuale: <span className="font-retro" data-testid="text-quiz-score">
-              {currentScore}/{quizState.currentQuestionIndex + (showExplanation ? 1 : 0)}
-            </span>
-          </div>
-        </div>
 
         {/* Question */}
         <div className="mb-6">
@@ -369,16 +356,7 @@ const DebugDungeon: React.FC = () => {
 
         {/* Action button */}
         <div className="text-center">
-          {!showExplanation ? (
-            <button 
-              className="nes-btn is-primary"
-              onClick={handleSubmitAnswer}
-              disabled={selectedAnswer === null}
-              data-testid="button-submit-answer"
-            >
-              Conferma risposta
-            </button>
-          ) : (
+          {showExplanation && (
             <button 
               className="nes-btn is-primary"
               onClick={handleNextQuestion}
@@ -392,7 +370,7 @@ const DebugDungeon: React.FC = () => {
           )}
         </div>
       </div>
-    </div>
+
     </ChallengeContentLayout>
   );
 };

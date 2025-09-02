@@ -14,6 +14,9 @@ self.addEventListener('message', async (ev: MessageEvent) => {
 
     if (type === 'recognize') {
       const file: File = msg.file;
+      const requiredTags: string[] = Array.isArray(msg.requiredTags)
+        ? msg.requiredTags.map((t: any) => String(t).trim()).filter(Boolean)
+        : [];
       const logger = (m: any) => {
         if (m && m.status && (m.progress || m.progress === 0)) {
           (self as any).postMessage({ type: 'progress', id, status: m.status, progress: m.progress });
@@ -44,16 +47,43 @@ self.addEventListener('message', async (ev: MessageEvent) => {
       let m: RegExpExecArray | null;
       while ((m = rx.exec(text))) tags.push(m[1]);
       const uniqueTags = Array.from(new Set(tags));
-      const detected = uniqueTags.some((t) => t.toLowerCase() === '@lecce_digital');
+
+      // words must be declared before we use them to build normalizedWords
+      const words = (data && (data.words as any[])) || [];
+
+      // Compute per-tag confidences for the requested tags only.
+      const normalize = (s: string) => String(s || '').toLowerCase().replace(/[^a-z0-9@_#]/g, '');
+      const normalizedWords = (words || []).map((w: any) => ({
+        text: String(w.text || '').trim(),
+        norm: normalize(String(w.text || '')),
+        confidence: Number(w.confidence || 0),
+      }));
+
+      const tagConfidences: Record<string, number | null> = {};
+      let anyDetected = false;
+      for (const tag of requiredTags) {
+        const nTag = normalize(tag);
+        // find words whose normalized text contains the normalized tag
+        const matches = normalizedWords.filter((w: { norm: string; confidence: number }) => w.norm && (w.norm === nTag || w.norm.includes(nTag)));
+        if (matches.length) {
+          const avg = Math.round(matches.reduce((s: number, m: { confidence: number }) => s + (m.confidence || 0), 0) / matches.length);
+          tagConfidences[tag] = avg;
+          anyDetected = true;
+        } else {
+          tagConfidences[tag] = null;
+        }
+      }
+
+      // detected is true if any required tag was found
+      const detected = anyDetected;
 
       let confidence = 0;
-      const words = (data && (data.words as any[])) || [];
       if (Array.isArray(words) && words.length) {
         const avg = words.reduce((s: number, w: any) => s + (w.confidence || 0), 0) / words.length;
         confidence = Math.round(avg);
       }
 
-      (self as any).postMessage({ type: 'result', id, success: true, result: { detectedTags: uniqueTags, detected, confidence, text } });
+      (self as any).postMessage({ type: 'result', id, success: true, result: { detectedTags: uniqueTags, detected, confidence, text, tagConfidences } });
       return;
     }
 

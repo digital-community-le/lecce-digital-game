@@ -16,8 +16,9 @@ function getWorker(): Promise<Worker> {
 
 export async function runOCR(
   file: File,
+  requiredTags: string[] = [],
   onProgress?: (status: string, progress: number) => void
-): Promise<{ detectedTags: string[]; detected: boolean; confidence: number; text?: string }> {
+): Promise<{ detectedTags: string[]; detected: boolean; confidence: number; text?: string; tagConfidences?: Record<string, number | null> }> {
   const worker = await getWorker();
   // initialize worker (best-effort)
   (worker as any).postMessage({ type: 'init' });
@@ -42,7 +43,7 @@ export async function runOCR(
     };
     worker.addEventListener('message', onMessage);
     try {
-      (worker as any).postMessage({ type: 'recognize', id, file });
+      (worker as any).postMessage({ type: 'recognize', id, file, requiredTags });
     } catch (err) {
       worker.removeEventListener('message', onMessage);
       reject(err);

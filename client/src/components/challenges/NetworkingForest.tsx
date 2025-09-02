@@ -1,16 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useGameStore } from '@/hooks/use-game-store';
 import { gameStorage } from '@/lib/storage';
 import { UserScan } from '@shared/schema';
+import gameData from '@/assets/game-data.json';
 import ChallengeContentLayout from '@/components/layout/ChallengeContentLayout';
-import ChallengeCompleted from '@/components/ChallengeCompleted';
 import AllianceGemIcon from '@assets/images/gem-of-alliance.png'
 
 
 const NetworkingForest: React.FC = () => {
   const { gameState, updateChallengeProgress, showToast, openModal } = useGameStore();
 
-  const REQUIRED_SCANS = 5;
+  // Load static configuration for this challenge from game-data.json
+  const challengeConfig = Array.isArray((gameData as any).challenges)
+    ? (gameData as any).challenges.find((c: any) => c.id === 'networking-forest')
+    : undefined;
+
+  const REQUIRED_SCANS = challengeConfig?.requirements?.minDistinctScans ?? 5;
 
   // Read scans from persistent storage on every render so UI reflects the latest state
   const scans = gameState.currentUser.userId
@@ -47,20 +52,21 @@ const NetworkingForest: React.FC = () => {
   const challenge = gameState.challenges.find(c => c.id === 'networking-forest');
   const progressCount = typeof challenge?.progress === 'number' ? challenge.progress : uniqueScans.length;
   const totalRequired = challenge?.total ?? REQUIRED_SCANS;
-  const progressPercentage = (progressCount / totalRequired) * 100;
 
-  // scans are loaded synchronously from persistent storage; no loading UI required
+  const description = challengeConfig?.description ?? "Nel Networking Forest, ogni connessione è un filo di luce che rafforza il tuo cammino. Scansiona i QR degli altri partecipanti per raccogliere la Gemma dell'Alleanza.";
+  const tip = challengeConfig?.tip ?? "Usa il pulsante per scansionare i QR code degli altri partecipanti. Ogni persona può essere scansionata una sola volta.";
+  const rewardBadge = challengeConfig?.rewards?.badge ?? "La Gemma dell'Alleanza";
 
   return (
     <ChallengeContentLayout
-      gemTitle="La Gemma dell'Alleanza"
+      gemTitle={rewardBadge}
       gemIcon={AllianceGemIcon}
-      description="Nel Networking Forest, ogni connessione è un filo di luce che rafforza il tuo cammino. Scansiona i QR degli altri partecipanti per raccogliere la Gemma dell'Alleanza."
-      tip="Usa il pulsante per scansionare i QR code degli altri partecipanti. Ogni persona può essere scansionata una sola volta."
-      progress={uniqueScans.length}
-      total={REQUIRED_SCANS}
+      description={description}
+      tip={tip}
+      progress={progressCount}
+      total={totalRequired}
       progressLabel="Alleati trovati"
-      isCompleted={uniqueScans.length >= REQUIRED_SCANS}
+      isCompleted={progressCount >= totalRequired}
       completionMessage="Hai raccolto tutti gli alleati! La Gemma dell'Alleanza è tua."
     >
 
@@ -110,7 +116,7 @@ const NetworkingForest: React.FC = () => {
         )}
 
         {/* Action button */}
-        {uniqueScans.length < REQUIRED_SCANS && (
+        {uniqueScans.length < totalRequired && (
           <div className="text-center">
             <button 
               className="nes-btn is-primary"
@@ -122,31 +128,7 @@ const NetworkingForest: React.FC = () => {
             </button>
           </div>
         )}
-
-        {/* Completion message */}
-        {uniqueScans.length >= REQUIRED_SCANS && (
-          <ChallengeCompleted
-            title="Challenge Completata!"
-            message="Hai raccolto tutti gli alleati! La Gemma dell'Alleanza è tua."
-            emoji="🏆"
-          />
-
-        )}
       </div>
-
-      {/* Action button */}
-      {uniqueScans.length < REQUIRED_SCANS && (
-        <div className="text-center">
-          <button 
-            className="nes-btn is-primary"
-            onClick={handleStartScanner}
-            data-testid="button-start-scanner"
-          >
-            <span className="mr-2">📱</span>
-            Scansiona QR
-          </button>
-        </div>
-      )}
     </ChallengeContentLayout>
   );
 };

@@ -5,18 +5,15 @@ import { PuzzleState, PuzzlePair } from '@shared/schema';
 import ChallengeCompleted from '@/components/ChallengeCompleted';
 import ChallengeContentLayout from '@/components/layout/ChallengeContentLayout';
 import memoryGem from '@assets/images/gem-of-memory.png';
+import gameData from '@/assets/game-data.json';
 
-// Sample puzzle data - in a real app this would come from game-data.json
-const PUZZLE_PAIRS: PuzzlePair[] = [
-  { id: '1', term: 'React', category: 'Frontend Library' },
-  { id: '2', term: 'Node.js', category: 'Backend Runtime' },
-  { id: '3', term: 'MongoDB', category: 'Database' },
-  { id: '4', term: 'TypeScript', category: 'Programming Language' },
-  { id: '5', term: 'Docker', category: 'Containerization' },
-  { id: '6', term: 'Git', category: 'Version Control' },
-  { id: '7', term: 'AWS', category: 'Cloud Platform' },
-  { id: '8', term: 'GraphQL', category: 'Query Language' },
-];
+// Load configuration for retro-puzzle from game-data.json with safe fallbacks
+const retroConfig = Array.isArray((gameData as any).challenges)
+  ? (gameData as any).challenges.find((c: any) => c.id === 'retro-puzzle')
+  : undefined;
+
+// No fallback: require configuration to be present in game-data.json
+const PAIRS_DATA: PuzzlePair[] | undefined = retroConfig?.pairs;
 
 const RetroPuzzle: React.FC = () => {
   const { gameState, updateChallengeProgress, showToast } = useGameStore();
@@ -24,9 +21,25 @@ const RetroPuzzle: React.FC = () => {
   const [selectedTerm, setSelectedTerm] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const PAIRS_COUNT = 8;
   const BASE_POINTS = 10;
   const PENALTY = 2;
+
+  // If configuration is missing, surface a clear error message and log it.
+  if (!retroConfig || !PAIRS_DATA) {
+    console.error('RetroPuzzle configuration not found in game-data.json (expected challenge id "retro-puzzle").');
+    return (
+      <div className="p-4">
+        <p className="title bg-card">Retro Puzzle — Errore</p>
+        <div className="text-center text-red-600 mt-4">
+          Configurazione della challenge "retro-puzzle" non trovata in <code>game-data.json</code>.
+          Controlla che la sezione sia presente e valida.
+        </div>
+      </div>
+    );
+  }
+
+  // Use configured pairs count
+  const PAIRS_COUNT = PAIRS_DATA.length;
 
   useEffect(() => {
     if (gameState.currentUser.userId) {
@@ -34,12 +47,12 @@ const RetroPuzzle: React.FC = () => {
       
       if (!state) {
         // Initialize new puzzle state
-        const shuffledTerms = [...PUZZLE_PAIRS.map(p => p.term)].sort(() => Math.random() - 0.5);
-        const shuffledCategories = [...PUZZLE_PAIRS.map(p => p.category)].sort(() => Math.random() - 0.5);
+  const shuffledTerms = [...PAIRS_DATA.map((p: PuzzlePair) => p.term)].sort(() => Math.random() - 0.5);
+  const shuffledCategories = [...PAIRS_DATA.map((p: PuzzlePair) => p.category)].sort(() => Math.random() - 0.5);
         
         state = {
           id: `puzzle_${Date.now()}`,
-          pairs: PUZZLE_PAIRS,
+          pairs: PAIRS_DATA,
           shuffledTerms,
           shuffledCategories,
           matches: {},
@@ -113,12 +126,12 @@ const RetroPuzzle: React.FC = () => {
   const handleRestart = () => {
     if (!gameState.currentUser.userId) return;
 
-    const shuffledTerms = [...PUZZLE_PAIRS.map(p => p.term)].sort(() => Math.random() - 0.5);
-    const shuffledCategories = [...PUZZLE_PAIRS.map(p => p.category)].sort(() => Math.random() - 0.5);
+  const shuffledTerms = [...PAIRS_DATA.map((p: PuzzlePair) => p.term)].sort(() => Math.random() - 0.5);
+  const shuffledCategories = [...PAIRS_DATA.map((p: PuzzlePair) => p.category)].sort(() => Math.random() - 0.5);
     
     const newState: PuzzleState = {
       id: `puzzle_${Date.now()}`,
-      pairs: PUZZLE_PAIRS,
+      pairs: PAIRS_DATA,
       shuffledTerms,
       shuffledCategories,
       matches: {},

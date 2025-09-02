@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { runOCR } from '@/lib/ocrWorker';
+import { runOCR } from '@/lib/ocr';
 
-type OCRResult = { detectedTags: string[]; detected: boolean; confidence: number; text?: string };
+type OCRResult = { detectedTags: string[]; detected: boolean; confidence: number; text?: string; tagConfidences?: Record<string, number | null> };
 
 export function useOCR() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -16,20 +16,14 @@ export function useOCR() {
     };
   }, []);
 
-  const run = useCallback(async (file: File) => {
+  const run = useCallback(async (file: File, requiredTags: string[] = []) => {
     setIsAnalyzing(true);
     setOcrProgress(0);
     setOcrResult(null);
-    try {
-      // Simulate progress for UI feedback
-      const progressUpdates = [25, 50, 75, 90];
-      progressUpdates.forEach((progress, index) => {
-        setTimeout(() => {
-          if (mounted.current) setOcrProgress(progress);
-        }, (index + 1) * 200);
+    try {      
+      const result = await runOCR(file, requiredTags, (status, progress) => {
+        if (mounted.current) setOcrProgress(Math.round(progress * 100));
       });
-      
-      const result = await runOCR(file);
       if (mounted.current) {
         setOcrProgress(100);
         setOcrResult(result);

@@ -7,11 +7,12 @@ type OCRResult = {
   detected: boolean;
   confidence: number;
   text?: string;
+  tagConfidences?: Record<string, number | null>;
 };
 
 type Props = {
   file: File;
-  requiredTag: string;
+  requiredTags: string[];
   confidenceThreshold: number;
   onVerified: (result: OCRResult, forced: boolean) => Promise<void>; // called when verification finishes (either auto-success or manual)
   onAttempt?: () => void; // called when an OCR attempt fails
@@ -20,7 +21,7 @@ type Props = {
 
 const OcrModal: React.FC<Props> = ({
   file,
-  requiredTag,
+  requiredTags,
   confidenceThreshold,
   onVerified,
   onAttempt,
@@ -30,6 +31,7 @@ const OcrModal: React.FC<Props> = ({
   const [state, setState] = useState<"running" | "failed" | "success" | "idle">(
     "running"
   );
+  const [ocrUnavailable, setOcrUnavailable] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const titleId = useRef(`ocr-modal-title-${Date.now()}`);
   const descId = useRef(`ocr-modal-desc-${Date.now()}`);
@@ -42,10 +44,30 @@ const OcrModal: React.FC<Props> = ({
     setMessage(null);
     setOcrResult(null);
     try {
-      const res = await run(file);
-      const verified = !!(
-        res.detected && res.confidence >= confidenceThreshold
-      );
+      const res = await run(file, requiredTags);
+      // Log detailed OCR data for debugging; do not show it in the UI
+      try {
+        // eslint-disable-next-line no-console
+        console.log('OCR result details:', {
+          detectedTags: res.detectedTags,
+          tagConfidences: res.tagConfidences,
+          confidence: res.confidence,
+          textPreview: (res.text || '').slice(0, 300),
+        });
+      } catch (e) {}
+
+      // Prefer per-tag confidences when available
+      let verified = false;
+      if (res.tagConfidences && Object.keys(res.tagConfidences).length > 0) {
+        // success if any required tag has confidence >= threshold
+        verified = Object.values(res.tagConfidences).some((c) => typeof c === 'number' && c >= confidenceThreshold);
+      } else {
+        // fallback: if worker didn't provide per-tag confidences, use detectedTags + overall confidence
+        const normalizedDetected = (res.detectedTags || []).map((t: string) => t.toLowerCase());
+        const normalizedRequired = (requiredTags || []).map((t: string) => t.toLowerCase());
+        const matched = normalizedRequired.some((r: string) => normalizedDetected.includes(r));
+        verified = !!(matched && res.confidence >= confidenceThreshold);
+      }
       if (verified) {
         setState("success");
         setMessage("Tag verificato con successo!");
@@ -54,14 +76,19 @@ const OcrModal: React.FC<Props> = ({
         }, 800);
       } else {
         setState("failed");
+        setOcrUnavailable(false);
         setMessage("Tag non rilevato o confidenza insufficiente.");
         try {
           onAttempt?.();
         } catch (e) {}
       }
     } catch (err) {
+      // OCR library failed to load or execute. Do not fabricate results.
       setState("failed");
-      setMessage("Errore durante l'analisi OCR");
+      setOcrUnavailable(true);
+      setMessage(
+        "Non è stato possibile completare la verifica automaticamente. Usa 'Verifica manuale' per confermare la Story."
+      );
       try {
         onAttempt?.();
       } catch (e) {}
@@ -83,7 +110,11 @@ const OcrModal: React.FC<Props> = ({
       // small timeout to ensure rendering
       setTimeout(() => {
         try {
-          retryButtonRef.current?.focus();
+          if (ocrUnavailable) {
+            manualButtonRef.current?.focus();
+          } else {
+            retryButtonRef.current?.focus();
+          }
         } catch (e) {}
       }, 50);
     }
@@ -92,17 +123,14 @@ const OcrModal: React.FC<Props> = ({
   return (
     <UiDialog
       open={true}
-      title="Verifica OCR"
+      title="Verifica Tags"
       className="nes-dialog is-rounded p-4 max-w-md w-full"
       ariaLabelledBy={titleId.current}
       ariaDescribedBy={descId.current}
     >
-      <p id={titleId.current} className="title">
-        Verifica OCR
-      </p>
       <div id={descId.current} className="mb-3">
         <p className="text-xs">
-          Sto cercando il tag <strong>{requiredTag}</strong> nella Story
+          Sto cercando uno dei tag <strong>{requiredTags.join(', ')}</strong> nella Story
           caricata.
         </p>
       </div>
@@ -126,17 +154,7 @@ const OcrModal: React.FC<Props> = ({
         <div className="mb-3 text-xs">Analisi in corso... attendi.</div>
       )}
 
-      {ocrResult && (
-        <div className="nes-container mb-3">
-          <p className="text-xs">
-            Tag trovati: {ocrResult.detectedTags.join(", ") || "Nessuno"}
-          </p>
-          <p className="text-xs">
-            Detected: {ocrResult.detected ? "Sì" : "No"} — Confidence:{" "}
-            {ocrResult.confidence ?? "—"}
-          </p>
-        </div>
-      )}
+  {/* Do not display tag/confidence details in the UI; log them for debugging */}
 
       {message && (
         <div
@@ -163,7 +181,7 @@ const OcrModal: React.FC<Props> = ({
             >
               Riprova
             </button>
-            {failedAttempts >= 2 && (
+            {(ocrUnavailable || failedAttempts >= 2) && (
               <button
                 ref={manualButtonRef}
                 className="nes-btn is-success"
