@@ -158,19 +158,6 @@ const ChallengeLayout: React.FC<ChallengeLayoutProps> = ({
               </div>
             )}
           </div>
-          
-          {/* Sottotitolo con gemma */}
-          <div className="flex items-center gap-3 mt-2">
-            <img 
-              src={gemInfo.image} 
-              alt={gemInfo.title}
-              className="w-8 h-8 pixelated"
-              style={{ imageRendering: 'pixelated' }}
-            />
-            <h2 className="text-lg font-retro text-muted-foreground" data-testid="gem-subtitle">
-              {gemInfo.title}
-            </h2>
-          </div>
         </div>
       </nav>
 
