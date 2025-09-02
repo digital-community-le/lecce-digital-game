@@ -2,23 +2,14 @@ import React from 'react';
 import { useLocation } from 'wouter';
 import { useGameStore } from '@/hooks/use-game-store';
 
-// Import delle immagini delle gemme generate
-import gemmaAlleanza from '@assets/generated_images/Gemma_dell\'Alleanza_verde_4f1dff68.png';
-import gemmaMemoria from '@assets/generated_images/Gemma_della_Memoria_blu_5db7713d.png';
-import gemmaSapienza from '@assets/generated_images/Gemma_della_Sapienza_rossa_3a1cc119.png';
-import gemmaComunita from '@assets/generated_images/Gemma_della_Comunità_viola_f233649e.png';
 
 interface ChallengeLayoutProps {
   /** ID della challenge per il controllo accesso */
   challengeId: string;
   /** Contenuto principale della challenge */
   children: React.ReactNode;
-  /** Mostra la barra di progresso delle gemme raccolte */
-  showProgress?: boolean;
   /** Classe CSS personalizzata per il container principale */
   className?: string;
-  /** Se true, usa uno sfondo più scuro per maggiore immersività */
-  darkMode?: boolean;
 }
 
 /**
@@ -39,49 +30,11 @@ const getChallengeTitle = (challengeId: string) => {
   }
 };
 
-/**
- * Mappa dei challenge ID alle informazioni delle gemme
- */
-const getGemInfo = (challengeId: string) => {
-  switch (challengeId) {
-    case 'networking-forest':
-      return {
-        image: gemmaAlleanza,
-        title: 'LA Gemma dell\'Alleanza',
-        description: 'Suggella i legami con la comunità'
-      };
-    case 'retro-puzzle':
-      return {
-        image: gemmaMemoria,
-        title: 'LA Gemma della Memoria',
-        description: 'Custodisce i ricordi del passato'
-      };
-    case 'debug-dungeon':
-      return {
-        image: gemmaSapienza,
-        title: 'LA Gemma della Sapienza',
-        description: 'Illumina la via della conoscenza'
-      };
-    case 'social-arena':
-      return {
-        image: gemmaComunita,
-        title: 'LA Gemma della Comunità',
-        description: 'Unisce le voci di tutti'
-      };
-    default:
-      return {
-        image: gemmaAlleanza,
-        title: 'LA Gemma',
-        description: 'Una gemma misteriosa'
-      };
-  }
-};
 
 /**
  * Layout riutilizzabile per tutte le challenge del gioco
  * 
  * Fornisce una struttura coerente con:
- * - Header comune con logo/progress
  * - Navigation bar con pulsante "Torna alla mappa"  
  * - Container responsive per il contenuto
  * - Protezione accesso (redirect se non autorizzato)
@@ -90,9 +43,7 @@ const getGemInfo = (challengeId: string) => {
 const ChallengeLayout: React.FC<ChallengeLayoutProps> = ({
   challengeId,
   children,
-  showProgress = true,
-  className = '',
-  darkMode = false
+  className = ''
 }) => {
   const [, setLocation] = useLocation();
   const { gameState } = useGameStore();
@@ -146,12 +97,6 @@ const ChallengeLayout: React.FC<ChallengeLayoutProps> = ({
         </div>
       </main>
 
-      {/* Footer stile retro opzionale per indicazioni */}
-      <footer className="mt-auto p-4 text-center">
-        <p className="text-xs text-muted-foreground font-retro">
-          Usa il pulsante 🠴 per tornare alla mappa
-        </p>
-      </footer>
     </>
   );
 };
