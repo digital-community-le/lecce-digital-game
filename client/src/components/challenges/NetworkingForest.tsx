@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useGameStore } from '@/hooks/use-game-store';
 import { gameStorage } from '@/lib/storage';
 import { UserScan } from '@shared/schema';
+import ChallengeCompleted from '@/components/ChallengeCompleted';
 
 const NetworkingForest: React.FC = () => {
   const { gameState, updateChallengeProgress, showToast, openModal } = useGameStore();
@@ -140,15 +141,11 @@ const NetworkingForest: React.FC = () => {
 
         {/* Completion message */}
         {uniqueScans.length >= REQUIRED_SCANS && (
-          <div className="text-center">
-            <div className="nes-container is-success p-4 mb-4">
-              <div className="text-4xl mb-2">🏆</div>
-              <h4 className="font-retro text-sm mb-2">Challenge Completata!</h4>
-              <p className="text-sm">
-                Hai raccolto tutti gli alleati! La Gemma dell'Alleanza è tua.
-              </p>
-            </div>
-          </div>
+          <ChallengeCompleted
+            title="Challenge Completata!"
+            message="Hai raccolto tutti gli alleati! La Gemma dell'Alleanza è tua."
+            emoji="🏆"
+          />
         )}
       </div>
     </div>

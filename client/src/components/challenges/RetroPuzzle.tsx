@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useGameStore } from '@/hooks/use-game-store';
 import { gameStorage } from '@/lib/storage';
 import { PuzzleState, PuzzlePair } from '@shared/schema';
+import ChallengeCompleted from '@/components/ChallengeCompleted';
 
 // Sample puzzle data - in a real app this would come from game-data.json
 const PUZZLE_PAIRS: PuzzlePair[] = [
@@ -257,36 +258,34 @@ const RetroPuzzle: React.FC = () => {
             </div>
           </>
         ) : (
-          /* Completion message */
-          <div className="text-center">
-            <div className="nes-container is-success p-4 mb-4">
-              <div className="text-4xl mb-2">🏆</div>
-              <h4 className="font-retro text-sm mb-2">Puzzle Completato!</h4>
-              <p className="text-sm mb-3">
-                Hai svelato tutti i misteri! La Gemma della Conoscenza è tua.
-              </p>
-              <div className="nes-container is-light p-3">
-                <div className="text-sm">
-                  <div className="flex justify-between">
-                    <span>Punteggio finale:</span>
-                    <span className="font-retro">{puzzleState.score} pts</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Tentativi totali:</span>
-                    <span>{puzzleState.attempts}</span>
-                  </div>
+          <ChallengeCompleted
+            title="Puzzle Completato!"
+            message="Hai svelato tutti i misteri! La Gemma della Conoscenza è tua."
+            emoji="🏆"
+          >
+            <div className="nes-container is-light p-3 mb-3">
+              <div className="text-sm">
+                <div className="flex justify-between">
+                  <span>Punteggio finale:</span>
+                  <span className="font-retro">{puzzleState.score} pts</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Tentativi totali:</span>
+                  <span>{puzzleState.attempts}</span>
                 </div>
               </div>
             </div>
-            
-            <button 
-              className="nes-btn is-warning"
-              onClick={handleRestart}
-              data-testid="button-play-again"
-            >
-              Gioca di nuovo
-            </button>
-          </div>
+
+            <div className="text-center">
+              <button 
+                className="nes-btn is-warning"
+                onClick={handleRestart}
+                data-testid="button-play-again"
+              >
+                Gioca di nuovo
+              </button>
+            </div>
+          </ChallengeCompleted>
         )}
       </div>
     </div>
