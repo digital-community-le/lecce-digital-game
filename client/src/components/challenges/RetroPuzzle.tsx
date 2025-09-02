@@ -3,6 +3,8 @@ import { useGameStore } from '@/hooks/use-game-store';
 import { gameStorage } from '@/lib/storage';
 import { PuzzleState, PuzzlePair } from '@shared/schema';
 import ChallengeCompleted from '@/components/ChallengeCompleted';
+import ChallengeContentLayout from '@/components/layout/ChallengeContentLayout';
+import memoryGem from '@assets/images/gem-of-memory.png';
 
 // Sample puzzle data - in a real app this would come from game-data.json
 const PUZZLE_PAIRS: PuzzlePair[] = [
@@ -144,23 +146,18 @@ const RetroPuzzle: React.FC = () => {
   const isCompleted = puzzleState.remaining === 0;
 
   return (
-    <div>
+    <ChallengeContentLayout
+      gemTitle="La Gemma della Conoscenza"
+      gemIcon={memoryGem}
+      description="Nel puzzle antico, ogni connessione rivela un frammento di saggezza. Abbina i termini alle loro categorie per raccogliere la Gemma della Conoscenza."
+      tip={`Tocca un termine a sinistra, poi tocca la categoria corrispondente a destra. Ogni errore riduce il punteggio di ${PENALTY} punti.`}
+      progress={PAIRS_COUNT - puzzleState.remaining}
+      total={PAIRS_COUNT}
+      progressLabel="Progresso"
+      isCompleted={isCompleted}
+      completionMessage="Hai svelato tutti i misteri! La Gemma della Conoscenza è tua."
+    >
       <div className="p-4">
-        {/* Challenge description */}
-        <div className="mb-6">
-          <h3 className="font-retro text-sm mb-3">La Gemma della Conoscenza</h3>
-          <p className="text-sm mb-4">
-            Nel puzzle antico, ogni connessione rivela un frammento di saggezza. 
-            Abbina i termini alle loro categorie per raccogliere la Gemma della Conoscenza.
-          </p>
-          <div className="nes-container is-dark p-3 mb-4">
-            <p className="text-xs">
-              💡 Tocca un termine a sinistra, poi tocca la categoria corrispondente a destra. 
-              Ogni errore riduce il punteggio di {PENALTY} punti.
-            </p>
-          </div>
-        </div>
-
         {/* Progress and score */}
         <div className="mb-6">
           <div className="flex justify-between text-sm mb-2">
@@ -288,7 +285,7 @@ const RetroPuzzle: React.FC = () => {
           </ChallengeCompleted>
         )}
       </div>
-    </div>
+    </ChallengeContentLayout>
   );
 };
 

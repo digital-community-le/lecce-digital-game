@@ -7,6 +7,8 @@ import { SocialProof } from "@shared/schema";
 import CameraCapture from "@/components/CameraCapture";
 import OcrModal from "@/components/OcrModal";
 import ChallengeCompleted from '@/components/ChallengeCompleted';
+import ChallengeContentLayout from '@/components/layout/ChallengeContentLayout';
+import communityGem from '@assets/images/gem-of-community.png';
 
 const SocialArena: React.FC = () => {
   const { gameState, updateChallengeProgress, showToast } = useGameStore();
@@ -297,7 +299,17 @@ const SocialArena: React.FC = () => {
   }
 
   return (
-    <div>
+    <ChallengeContentLayout
+      gemTitle="Sigillo di Lecce"
+      gemIcon={communityGem}
+      description="Davanti allo Stand, il tuo gesto diventa simbolo: cattura la foto con il gadget e attiva l'epilogo della leggenda."
+      tip={`💡 Scatta la foto al gadget nello stand; lascia che la comunità veda la tua impresa. Il sistema rileverà automaticamente il tag ${requiredTag}.`}
+      progress={currentStepNumber > 0 ? currentStepNumber : 0}
+      total={totalSteps}
+      progressLabel="Progressione"
+      isCompleted={progressPercent >= 100}
+    >
+      <div>
       {showCamera && (
         <CameraCapture
           onCapture={handleCameraCapture}
@@ -629,6 +641,7 @@ const SocialArena: React.FC = () => {
         )}
       </div>
     </div>
+    </ChallengeContentLayout>
   );
 };
 

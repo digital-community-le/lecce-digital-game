@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useGameStore } from '@/hooks/use-game-store';
 import { gameStorage } from '@/lib/storage';
 import { QuizState, QuizQuestion } from '@shared/schema';
+import ChallengeContentLayout from '@/components/layout/ChallengeContentLayout';
+import wisdomGem from '@assets/images/gem-of-wisdom.png';
 
 // Sample quiz questions - in a real app this would come from game-data.json
 const QUIZ_QUESTIONS: QuizQuestion[] = [
@@ -231,8 +233,19 @@ const DebugDungeon: React.FC = () => {
     const passed = percentage >= PASS_THRESHOLD;
     
     return (
-      <div>
-        <div className="p-4">
+      <ChallengeContentLayout
+        gemTitle="La Gemma del Sapere"
+        gemIcon={wisdomGem}
+        description="Nel Debug Dungeon, ogni risposta corretta illumina il sentiero verso la conoscenza. Supera il quiz per conquistare la Gemma del Sapere."
+        tip={`💡 Rispondi a ${QUESTIONS_COUNT} domande. Serve almeno ${PASS_THRESHOLD}% per superare il dungeon.`}
+        progress={quizState.score}
+        total={QUESTIONS_COUNT}
+        progressLabel="Progresso"
+        isCompleted={true}
+        completionMessage={passed ? 'Hai dimostrato le tue competenze! La Gemma del Sapere è tua.' : undefined}
+      >
+        <div>
+          <div className="p-4">
           <div className="text-center">
             <div className={`nes-container p-4 mb-4 ${passed ? 'is-success' : 'is-error'}`}>
               <div className="text-4xl mb-2">{passed ? '🏆' : '💀'}</div>
@@ -269,26 +282,23 @@ const DebugDungeon: React.FC = () => {
           </div>
         </div>
       </div>
+      </ChallengeContentLayout>
     );
   }
 
   return (
-    <div>
-      <div className="p-4">
-        {/* Challenge description */}
-        <div className="mb-6">
-          <h3 className="font-retro text-sm mb-3">La Gemma del Sapere</h3>
-          <p className="text-sm mb-4">
-            Nel Debug Dungeon, ogni risposta corretta illumina il sentiero verso la conoscenza. 
-            Supera il quiz per conquistare la Gemma del Sapere.
-          </p>
-          <div className="nes-container is-dark p-3 mb-4">
-            <p className="text-xs">
-              💡 Rispondi a {QUESTIONS_COUNT} domande. Serve almeno {PASS_THRESHOLD}% per superare il dungeon.
-            </p>
-          </div>
-        </div>
-
+    <ChallengeContentLayout
+      gemTitle="La Gemma del Sapere"
+      gemIcon={wisdomGem}
+      description="Nel Debug Dungeon, ogni risposta corretta illumina il sentiero verso la conoscenza. Supera il quiz per conquistare la Gemma del Sapere."
+      tip={`Rispondi a ${QUESTIONS_COUNT} domande. Serve almeno ${PASS_THRESHOLD}% per superare il dungeon.`}
+      progress={quizState.currentQuestionIndex + (showExplanation ? 1 : 0)}
+      total={QUESTIONS_COUNT}
+      progressLabel="Progresso"
+      isCompleted={false}
+    >
+      <div>
+        <div className="p-4">
         {/* Progress */}
         <div className="mb-6">
           <div className="flex justify-between text-sm mb-2">
@@ -393,6 +403,7 @@ const DebugDungeon: React.FC = () => {
         </div>
       </div>
     </div>
+    </ChallengeContentLayout>
   );
 };
 

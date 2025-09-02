@@ -1,4 +1,5 @@
 import React from 'react';
+import ChallengeCompleted from '../ChallengeCompleted';
 
 interface ChallengeContentLayoutProps {
   /** Titolo della gemma (es. "La Gemma dell'Alleanza") */
@@ -108,15 +109,11 @@ const ChallengeContentLayout: React.FC<ChallengeContentLayoutProps> = ({
           </div>
         ) : (
           /* Completion message */
-          <div className="text-center">
-            <div className="nes-container is-success p-4 mb-4">
-              <div className="text-4xl mb-2">🏆</div>
-              <h4 className="font-retro text-sm mb-2">Challenge Completata!</h4>
-              <p className="text-sm">
-                {completionMessage || `${gemTitle} è tua.`}
-              </p>
-            </div>
-          </div>
+          <ChallengeCompleted
+            title="Challenge Completata!"
+            message={completionMessage || 'Hai completato con successo questa challenge e guadagnato la gemma!'}
+            emoji="🏆"
+          />
         )}
       </div>
     </div>
