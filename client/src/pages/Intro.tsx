@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "wouter";
+import useNavigateWithTransition from '@/hooks/use-navigate-with-transition';
 import { useGameStore } from "@/hooks/use-game-store";
 import ProfileCreationForm from "@/components/ProfileCreationForm";
 import UiDialog from "@/components/UiDialog";
 
 const IntroPage: React.FC = () => {
   const [, setLocation] = useLocation();
+  const navigateWithTransition = useNavigateWithTransition();
   const { gameState } = useGameStore();
   const [textRevealed, setTextRevealed] = useState(false);
   const [showButton, setShowButton] = useState(false);
@@ -17,6 +19,7 @@ const IntroPage: React.FC = () => {
   useEffect(() => {
     // Check if user already has a profile
     if (gameState.currentUser.userId) {
+      // immediate redirect on mount if user exists
       setLocation("/game");
       return;
     }
@@ -41,10 +44,15 @@ const IntroPage: React.FC = () => {
     setShowProfileForm(true);
   };
 
-  const handleProfileComplete = () => {
-    // Close dialog then navigate
+  const handleProfileComplete = async () => {
+    // Close dialog then navigate with transition
     setShowProfileForm(false);
-    setLocation("/game");
+    try {
+      await navigateWithTransition('/game');
+    } catch (e) {
+      // fallback
+      setLocation('/game');
+    }
   };
 
   return (

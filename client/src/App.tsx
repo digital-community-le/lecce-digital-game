@@ -12,6 +12,7 @@ import RetroPuzzlePage from "@/pages/challenges/RetroPuzzle";
 import DebugDungeonPage from "@/pages/challenges/DebugDungeon";
 import SocialArenaPage from "@/pages/challenges/SocialArena";
 import NotFound from "@/pages/not-found";
+import RouteTransition from '@/components/RouteTransition';
 
 function Router() {
   return (
@@ -35,6 +36,8 @@ function App() {
       <TooltipProvider>
         <GameStoreProvider>
           <Toaster />
+          {/* Global route transition overlay */}
+          <RouteTransition />
           <Router />
           {/* Global scanner + preview mounted at app root so any page can open them */}
           <ScannerView />

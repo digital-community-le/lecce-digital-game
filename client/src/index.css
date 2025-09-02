@@ -541,6 +541,73 @@
     }
   }
 
+  /* Route transition overlay (fade to black, then reveal) */
+  .route-transition-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: #000; /* full black retro wipe */
+    pointer-events: none; /* allow interactions when hidden */
+    opacity: 0;
+    z-index: 9999; /* above modals and scanner */
+    will-change: opacity;
+  }
+
+  /* Keyframe based fades ensure the opacity animates predictably across browsers
+     and can be stepped for a pixelated feel. Animations use 'forwards' so the
+     final opacity is preserved after the animation completes. */
+  @keyframes route-fade-in {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+
+  @keyframes route-fade-out {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  .route-transition-overlay.visible {
+    pointer-events: auto; /* block input while visible */
+    animation: route-fade-in 1500ms steps(12, end) forwards;
+  }
+
+  .route-transition-overlay.hidden {
+    pointer-events: none;
+    animation: route-fade-out 1500ms steps(12, end) forwards;
+  }
+
+  /* Pixelated and scanline visual for retro wipe */
+  .route-transition-overlay.pixel {
+    /* Use a CSS image-rendering trick and a layered background to simulate scanlines */
+    image-rendering: pixelated;
+    background-image: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)),
+                      repeating-linear-gradient(transparent 0 2px, rgba(0,0,0,0.08) 2px 4px);
+    background-blend-mode: normal;
+    backdrop-filter: contrast(0.9) saturate(0.9);
+  }
+
+  /* Make the fade use stepped timing to feel more 'pixel' */
+  .route-transition-overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+    transition: opacity 1500ms steps(8, end);
+  }
+
+  .route-transition-overlay.hidden {
+    opacity: 0;
+    transition: opacity 1500ms steps(8, end);
+  }
+
+  /* Optional stronger scanline variant when we want a pronounced retro effect */
+  .route-transition-overlay.pixel.scan-strong {
+    /* Stronger scanlines and a subtle pixel grid overlay for chunky pixels */
+    background-image:
+      linear-gradient(rgba(0,0,0,0.95), rgba(0,0,0,0.95)),
+      repeating-linear-gradient(transparent 0 3px, rgba(0,0,0,0.14) 3px 6px),
+      radial-gradient(circle at 10% 10%, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-blend-mode: normal, normal, overlay;
+    image-rendering: pixelated;
+  }
+
   /* Terrain Tiles for Retro Map */
   .terrain-grid {
     position: absolute;

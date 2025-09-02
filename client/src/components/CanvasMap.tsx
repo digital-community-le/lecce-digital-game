@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 import { useLocation } from "wouter";
+import useNavigateWithTransition from '@/hooks/use-navigate-with-transition';
 import { useGameStore } from "@/hooks/use-game-store";
 import { MapNode } from "@/types/game";
 import {
@@ -49,6 +50,7 @@ interface PathSegment {
 const CanvasMap: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [, setLocation] = useLocation();
+  const navigateWithTransition = useNavigateWithTransition();
   const { gameState, showToast } = useGameStore();
 
   // Stato per l'atlas completo
@@ -266,7 +268,8 @@ const CanvasMap: React.FC = () => {
       .every((c) => gameState.gameProgress.completedChallenges.includes(c.id));
 
     if (challengeIndex === 0 || previousChallengesCompleted) {
-      setLocation(`/challenge/${node.id}`);
+      // user-initiated navigation with transition
+      navigateWithTransition(`/challenge/${node.id}`);
     } else {
       const remainingChallenges =
         challengeIndex - gameState.gameProgress.completedChallenges.length;

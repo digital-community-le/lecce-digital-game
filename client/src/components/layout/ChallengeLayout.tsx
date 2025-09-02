@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLocation } from 'wouter';
+import useNavigateWithTransition from '@/hooks/use-navigate-with-transition';
 import { useGameStore } from '@/hooks/use-game-store';
 
 
@@ -46,6 +47,7 @@ const ChallengeLayout: React.FC<ChallengeLayoutProps> = ({
   className = ''
 }) => {
   const [, setLocation] = useLocation();
+  const navigateWithTransition = useNavigateWithTransition();
   const { gameState } = useGameStore();
 
   // Protezione accesso: redirect se utente non valido
@@ -74,7 +76,7 @@ const ChallengeLayout: React.FC<ChallengeLayoutProps> = ({
           <div className="flex items-center gap-4">
             <button
               className="nes-btn is-normal"
-              onClick={() => setLocation('/game')}
+              onClick={() => navigateWithTransition('/game')}
               aria-label="Torna alla mappa"
               data-testid="button-back-to-map"
             >
