@@ -497,7 +497,6 @@ export const renderMap = (
   const roadTiles = new Set<string>();
   const usedRoadTiles = new Set<string>();
   const forbiddenForRoads: TerrainType[] = ['forest', 'mountain', 'lake'];
-  const roadPaths: PathSegment[] = []; // Store actual road segments for drawing
 
   // Calculate exact pixel coordinates for each challenge node center
   const nodePixelPositions = challenges.map(ch => {
@@ -578,45 +577,6 @@ export const renderMap = (
       roadTiles.add(key);
       usedRoadTiles.add(key);
     }
-
-    // Create smooth road segments from node centers through path
-    if (path.length >= 2) {
-      // Start from actual node center
-      let prevPixelX = nodeA.pixelX;
-      let prevPixelY = nodeA.pixelY;
-      
-      // Draw segments through path waypoints
-      for (let j = 0; j < path.length; j++) {
-        const waypoint = path[j];
-        const waypointPixelX = (waypoint.x + 0.5) * actualTileSize;
-        const waypointPixelY = (waypoint.y + 0.5) * actualTileSize;
-        
-        // Skip very short segments to reduce visual noise
-        const segmentLength = Math.sqrt(Math.pow(waypointPixelX - prevPixelX, 2) + Math.pow(waypointPixelY - prevPixelY, 2));
-        if (segmentLength > actualTileSize * 0.3) {
-          roadPaths.push({
-            fromX: prevPixelX,
-            fromY: prevPixelY,
-            toX: waypointPixelX,
-            toY: waypointPixelY
-          });
-        }
-        
-        prevPixelX = waypointPixelX;
-        prevPixelY = waypointPixelY;
-      }
-      
-      // Final segment to target node center
-      const finalSegmentLength = Math.sqrt(Math.pow(nodeB.pixelX - prevPixelX, 2) + Math.pow(nodeB.pixelY - prevPixelY, 2));
-      if (finalSegmentLength > actualTileSize * 0.3) {
-        roadPaths.push({
-          fromX: prevPixelX,
-          fromY: prevPixelY,
-          toX: nodeB.pixelX,
-          toY: nodeB.pixelY
-        });
-      }
-    }
   }
 
   // Layer 1: base grass for all visible tiles; lakes drawn above grass
@@ -667,32 +627,6 @@ export const renderMap = (
         drawTileResponsive(ctx, tile, tileX, tileY, actualTileSize, true);
       }
     }
-  }
-
-  // Layer 3: Draw smooth road segments connecting nodes
-  for (const roadSegment of roadPaths) {
-    const roadWidth = Math.max(6, Math.floor(actualTileSize * 0.3));
-    const borderWidth = roadWidth + 2;
-    
-    // Draw road border
-    ctx.strokeStyle = '#654321';
-    ctx.lineWidth = borderWidth;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.beginPath();
-    ctx.moveTo(roadSegment.fromX, roadSegment.fromY);
-    ctx.lineTo(roadSegment.toX, roadSegment.toY);
-    ctx.stroke();
-    
-    // Draw road center
-    ctx.strokeStyle = '#8B4513';
-    ctx.lineWidth = roadWidth;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.beginPath();
-    ctx.moveTo(roadSegment.fromX, roadSegment.fromY);
-    ctx.lineTo(roadSegment.toX, roadSegment.toY);
-    ctx.stroke();
   }
 
   // Layer 3: mountains and other heavy overlays. Mountains cannot overlap
