@@ -35,47 +35,50 @@ const Statistics: React.FC = () => {
 
   return (
     <GameLayout>
-      <div className="container mx-auto p-4">
+      <div className="container mx-auto p-6 max-w-2xl">
         
         {/* Sigillo Header */}
-        <div className="text-center mb-8">
-          <div className="w-48 h-48 mx-auto mb-4">
+        <div className="text-center mb-6">
+          <div className="w-40 h-40 mx-auto mb-4 flex items-center justify-center">
             <img 
               src="/assets/images/seal-with-gems.png" 
               alt="Sigillo di Lecce completato" 
-              className="w-full h-full object-contain"
-              style={{ imageRendering: 'pixelated' }}
+              className="w-full h-full object-contain drop-shadow-lg"
+              style={{ 
+                imageRendering: 'pixelated',
+                filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))'
+              }}
             />
           </div>
-          <div className="nes-container is-rounded p-4 mb-6" style={{ backgroundColor: 'var(--ldc-surface)' }}>
-            <p className="text-center font-medium" style={{ color: 'var(--ldc-contrast-yellow)' }}>
-              Hai recuperato tutte le gemme e riattivato il sigillo!
+          <div className="nes-container is-success p-4 mb-4" style={{ backgroundColor: 'var(--ldc-surface)', border: '4px solid var(--ldc-rpg-green)' }}>
+            <p className="text-center font-medium text-base" style={{ color: 'var(--ldc-on-surface)' }}>
+              🎉 Hai recuperato tutte le gemme e riattivato il sigillo!
             </p>
           </div>
-          <h2 
-            className="font-retro text-lg mb-6"
-            data-testid="statistics-title"
-            style={{ color: 'var(--ldc-contrast-yellow)' }}
-          >
-            Statistiche
-          </h2>
         </div>
 
+        {/* Statistiche Title */}
+        <h2 
+          className="font-retro text-xl mb-4 text-center"
+          data-testid="statistics-title"
+          style={{ color: 'var(--ldc-contrast-yellow)' }}
+        >
+          Statistiche
+        </h2>
+
         {/* Main Stats - Only Total Points */}
-        <div className="flex justify-center mb-8">
-          <div className="nes-container is-rounded p-6 w-full max-w-md" style={{ backgroundColor: 'var(--ldc-surface)' }}>
-            <h2 className="font-retro text-lg mb-4 text-center" style={{ color: 'var(--ldc-info)' }}>
-              Punti Totali
-            </h2>
+        <div className="mb-6">
+          <div className="nes-container with-title p-6" style={{ backgroundColor: 'var(--ldc-surface)', border: '4px solid var(--ldc-info)' }}>
+            <p className="title font-retro" style={{ color: 'var(--ldc-info)', backgroundColor: 'var(--ldc-background)' }}>Punti Totali</p>
             <div className="text-center">
               <div 
-                className="text-4xl font-retro mb-2"
+                className="text-5xl font-retro mb-2"
                 data-testid="total-points"
                 style={{ color: 'var(--ldc-info)' }}
               >
                 {totalPoints.toLocaleString('it-IT')}
               </div>
-              <div className="text-sm" style={{ color: 'var(--ldc-on-surface)' }}>
+              <div className="text-base font-medium" style={{ color: 'var(--ldc-on-surface)' }}>
                 Punti conquistati
               </div>
             </div>
@@ -84,39 +87,43 @@ const Statistics: React.FC = () => {
 
 
         {/* Challenge Details */}
-        <div className="mb-8">
-          <h2 className="font-retro text-xl mb-4 text-center" style={{ color: 'var(--ldc-contrast-yellow)' }}>
-            Dettagli Sfide
-          </h2>
-          <div className="space-y-3">
-            {completedChallenges.map((challengeId) => {
-              const challengeData = gameData.challenges.find(c => c.id === challengeId);
-              return (
-                <div 
-                  key={challengeId}
-                  className="nes-container is-rounded p-4 flex items-center justify-between"
-                  style={{ backgroundColor: 'var(--ldc-surface)' }}
-                  data-testid={`challenge-stats-${challengeId}`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="text-xl">{challengeData?.emoji}</div>
-                    <div>
-                      <h3 className="font-retro text-sm mb-1" style={{ color: 'var(--ldc-on-surface)' }}>
-                        {challengeData?.title}
-                      </h3>
-                      <div className="text-xs" style={{ color: 'var(--ldc-rpg-green)' }}>
-                        Completato
+        <div>
+          <div className="nes-container with-title" style={{ backgroundColor: 'var(--ldc-surface)', border: '4px solid var(--ldc-contrast-yellow)' }}>
+            <p className="title font-retro" style={{ color: 'var(--ldc-contrast-yellow)', backgroundColor: 'var(--ldc-background)' }}>Dettagli Sfide</p>
+            <div className="space-y-3 p-2">
+              {completedChallenges.map((challengeId, index) => {
+                const challengeData = gameData.challenges.find(c => c.id === challengeId);
+                return (
+                  <div 
+                    key={challengeId}
+                    className="flex items-center justify-between p-3 rounded"
+                    style={{ 
+                      backgroundColor: index % 2 === 0 ? 'rgba(255,255,255,0.05)' : 'transparent',
+                      border: '2px solid rgba(255,255,255,0.1)'
+                    }}
+                    data-testid={`challenge-stats-${challengeId}`}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="text-2xl">{challengeData?.emoji}</div>
+                      <div>
+                        <h3 className="font-retro text-base mb-1" style={{ color: 'var(--ldc-on-surface)' }}>
+                          {challengeData?.title}
+                        </h3>
+                        <div className="text-sm font-medium" style={{ color: 'var(--ldc-rpg-green)' }}>
+                          ✓ Completato
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-retro text-sm" style={{ color: 'var(--ldc-contrast-yellow)' }}>
-                      {challengeData?.rewards?.points || 0} pt
+                    <div className="text-right">
+                      <div className="font-retro text-xl" style={{ color: 'var(--ldc-contrast-yellow)' }}>
+                        {challengeData?.rewards?.points || 0}
+                      </div>
+                      <div className="text-sm" style={{ color: 'var(--ldc-on-surface)' }}>punti</div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
 
