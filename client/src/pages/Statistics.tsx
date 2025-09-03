@@ -45,8 +45,8 @@ const Statistics: React.FC = () => {
             />
           </div>
           <div className="nes-container is-success p-4 mb-6">
-            <p className="text-center font-retro text-base font-medium" style={{ color: 'var(--ldc-contrast-yellow)' }}>
-              🎉 Hai recuperato tutte le gemme e riattivato il sigillo! 🎉
+            <p className="text-center font-retro text-sm font-medium" style={{ color: '#000000' }}>
+              Hai recuperato tutte le gemme e riattivato il sigillo!
             </p>
           </div>
         </div>
