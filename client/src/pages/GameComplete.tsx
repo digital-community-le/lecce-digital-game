@@ -40,7 +40,7 @@ const GameComplete: React.FC = () => {
                 : 'scale-100 opacity-100 rotate-0'
             }`}
             style={{
-              animation: animationPhase !== 'seal' ? 'epicSealEntry 1.2s ease-out forwards, float 6s ease-in-out infinite 2s' : 'none'
+              animation: animationPhase !== 'seal' ? 'epicSealEntry 1.2s ease-out forwards' : 'none'
             }}
           >
             <img 
@@ -51,7 +51,7 @@ const GameComplete: React.FC = () => {
               style={{
                 imageRendering: 'pixelated',
                 filter: 'drop-shadow(0 0 30px rgba(255, 215, 0, 0.8)) drop-shadow(0 0 60px rgba(255, 255, 255, 0.4))',
-                animation: animationPhase !== 'seal' ? 'gemGlow 3s ease-in-out infinite alternate' : 'none'
+                animation: animationPhase !== 'seal' ? 'gemGlow 3s ease-in-out infinite alternate, float 6s ease-in-out infinite 2s' : 'none'
               }}
             />
           </div>
@@ -126,17 +126,34 @@ const GameComplete: React.FC = () => {
           </button>
         </div>
 
-        {/* Floating particles effect - limited to seal area */}
+        {/* Floating particles effect - distributed around and above the seal */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {Array.from({ length: 12 }).map((_, i) => {
-            // Limit particles to the area around the seal (center of the screen)
+          {Array.from({ length: 15 }).map((_, i) => {
+            // Create a more spread distribution around the seal area
             const centerX = 50;
-            const centerY = 30; // Seal is in upper part
-            const radius = 25; // Limit to 25% radius around center
-            const angle = (Math.random() * 2 * Math.PI);
-            const distance = Math.random() * radius;
-            const x = centerX + Math.cos(angle) * distance;
-            const y = centerY + Math.sin(angle) * distance;
+            const centerY = 25; // Seal is in upper part
+            
+            // Create particles in a wider area around and above the seal
+            let x, y;
+            if (i < 5) {
+              // Particles above the seal
+              x = centerX + (Math.random() - 0.5) * 40; // ±20% from center
+              y = centerY - Math.random() * 15 - 5; // 5-20% above seal
+            } else if (i < 10) {
+              // Particles around the seal
+              const angle = (Math.random() * 2 * Math.PI);
+              const distance = 20 + Math.random() * 20; // 20-40% radius
+              x = centerX + Math.cos(angle) * distance;
+              y = centerY + Math.sin(angle) * distance;
+            } else {
+              // Scattered particles in the vicinity
+              x = centerX + (Math.random() - 0.5) * 60; // ±30% from center  
+              y = centerY + (Math.random() - 0.3) * 30; // Mostly above/around
+            }
+            
+            // Keep particles within screen bounds
+            x = Math.max(5, Math.min(95, x));
+            y = Math.max(5, Math.min(70, y));
             
             return (
               <div
@@ -149,8 +166,7 @@ const GameComplete: React.FC = () => {
                   animationDuration: `${3 + Math.random() * 2}s`,
                   animationTimingFunction: 'ease-in-out',
                   animationIterationCount: 'infinite',
-                  animationDelay: `${Math.random() * 2}s`,
-                  animationDirection: Math.random() > 0.5 ? 'normal' : 'reverse'
+                  animationDelay: `${Math.random() * 2}s`
                 }}
               />
             );
