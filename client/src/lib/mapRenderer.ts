@@ -256,7 +256,7 @@ export const determineSafePositionForChallenge = (
   canvasHeight: number,
   mapWidth: number,
   mapHeight: number,
-  forbidden: TerrainType[] = ['forest', 'mountain', 'lake']
+  forbidden: TerrainType[] = ['mountain', 'lake'] // Removed forest - nodes can be on trees
 ) => {
   const leftPct = parseFloat(node.position.left.replace('%', ''));
   const topPct = parseFloat(node.position.top.replace('%', ''));
@@ -531,7 +531,7 @@ export const renderMap = (
   // A* variant `findTilePath` with a turn penalty to minimize curves.
   const roadTiles = new Set<string>();
   const usedRoadTiles = new Set<string>();
-  const forbiddenForRoads: TerrainType[] = ['forest', 'mountain', 'lake'];
+  const forbiddenForRoads: TerrainType[] = ['mountain', 'lake']; // Removed forest - roads can pass through trees
 
   // Calculate node positions for roads using EXACT coordinates from where nodes are drawn
   // This ensures perfect alignment between road endpoints and visible node positions
@@ -644,32 +644,7 @@ export const renderMap = (
       // Final fallback: direct connection if needed
       path = findTilePath(start, goal, mapWidth, mapHeight, forbiddenForRoads, new Set<string>(), new Set<string>());
     }
-    if (!path) {
-      // DEBUG: Log when pathfinding fails completely
-      try {
-        console.warn(`[mapRenderer] Pathfinding failed for ${nodeA.challenge.id} → ${nodeB.challenge.id}`, {
-          start, goal, 
-          startType: determineTileType(start.x, start.y, mapWidth, mapHeight),
-          goalType: determineTileType(goal.x, goal.y, mapWidth, mapHeight)
-        });
-      } catch(e) {}
-      
-      // FORCED fallback: create a simple straight line
-      const forcedPath = [];
-      const dx = goal.x - start.x;
-      const dy = goal.y - start.y;
-      const steps = Math.max(Math.abs(dx), Math.abs(dy));
-      
-      for (let step = 0; step <= steps; step++) {
-        const t = steps === 0 ? 0 : step / steps;
-        const x = Math.round(start.x + dx * t);
-        const y = Math.round(start.y + dy * t);
-        if (x >= 0 && y >= 0 && x < mapWidth && y < mapHeight) {
-          forcedPath.push({ x, y });
-        }
-      }
-      path = forcedPath;
-    }
+    if (!path) continue; // Skip if pathfinding still fails with reduced restrictions
 
     // Add path tiles to road sets
     for (const p of path) {
