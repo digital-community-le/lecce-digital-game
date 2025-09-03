@@ -644,7 +644,32 @@ export const renderMap = (
       // Final fallback: direct connection if needed
       path = findTilePath(start, goal, mapWidth, mapHeight, forbiddenForRoads, new Set<string>(), new Set<string>());
     }
-    if (!path) continue;
+    if (!path) {
+      // DEBUG: Log when pathfinding fails completely
+      try {
+        console.warn(`[mapRenderer] Pathfinding failed for ${nodeA.challenge.id} → ${nodeB.challenge.id}`, {
+          start, goal, 
+          startType: determineTileType(start.x, start.y, mapWidth, mapHeight),
+          goalType: determineTileType(goal.x, goal.y, mapWidth, mapHeight)
+        });
+      } catch(e) {}
+      
+      // FORCED fallback: create a simple straight line
+      const forcedPath = [];
+      const dx = goal.x - start.x;
+      const dy = goal.y - start.y;
+      const steps = Math.max(Math.abs(dx), Math.abs(dy));
+      
+      for (let step = 0; step <= steps; step++) {
+        const t = steps === 0 ? 0 : step / steps;
+        const x = Math.round(start.x + dx * t);
+        const y = Math.round(start.y + dy * t);
+        if (x >= 0 && y >= 0 && x < mapWidth && y < mapHeight) {
+          forcedPath.push({ x, y });
+        }
+      }
+      path = forcedPath;
+    }
 
     // Add path tiles to road sets
     for (const p of path) {
