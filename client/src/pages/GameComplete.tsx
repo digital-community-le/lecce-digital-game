@@ -40,7 +40,7 @@ const GameComplete: React.FC = () => {
                 : 'scale-100 opacity-100 rotate-0'
             }`}
             style={{
-              animation: animationPhase !== 'seal' ? 'epicSealEntry 1.2s ease-out forwards' : 'none'
+              animation: animationPhase !== 'seal' ? 'epicSealEntry 1.2s ease-out forwards, float 6s ease-in-out infinite 2s' : 'none'
             }}
           >
             <img 
@@ -66,7 +66,7 @@ const GameComplete: React.FC = () => {
           }`}
         >
           <h1 
-            className="font-retro text-4xl md:text-6xl text-yellow-300 mb-4"
+            className="font-retro text-3xl md:text-4xl text-yellow-300 mb-4"
             data-testid="final-completion-title"
             style={{
               textShadow: '3px 3px 0px rgba(0,0,0,0.8), 0 0 20px rgba(255, 215, 0, 0.6)',
@@ -93,30 +93,15 @@ const GameComplete: React.FC = () => {
           }`}
         >
           <div className="bg-gray-900/90 border-4 border-yellow-600 p-8 mx-4 md:mx-8">
-            <div className="bg-gradient-to-b from-yellow-600/20 to-transparent p-6 border border-yellow-600/30">
-              <p 
-                className="text-xl md:text-2xl leading-relaxed text-gray-100 font-medium"
-                data-testid="final-completion-description"
-                style={{
-                  textShadow: '1px 1px 0px rgba(0,0,0,0.8)'
-                }}
-              >
-                {finalCompletion.description}
-              </p>
-              
-              {/* Achievement Summary */}
-              <div className="mt-8 pt-6 border-t-2 border-yellow-600/50">
-                <h3 className="font-retro text-lg text-yellow-300 mb-4">Gemme Conquistate:</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {gameData.rewards.badges.map((badge, index) => (
-                    <div key={badge.id} className="text-center">
-                      <div className="text-2xl mb-1">{badge.icon}</div>
-                      <div className="text-sm text-gray-300 font-retro">{badge.name}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+            <p 
+              className="text-xl md:text-2xl leading-relaxed text-gray-100 font-medium"
+              data-testid="final-completion-description"
+              style={{
+                textShadow: '1px 1px 0px rgba(0,0,0,0.8)'
+              }}
+            >
+              {finalCompletion.description}
+            </p>
           </div>
         </div>
 
@@ -141,20 +126,35 @@ const GameComplete: React.FC = () => {
           </button>
         </div>
 
-        {/* Floating particles effect */}
+        {/* Floating particles effect - limited to seal area */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {Array.from({ length: 20 }).map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-2 h-2 bg-yellow-300 rounded-full opacity-60"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animation: `float ${3 + Math.random() * 2}s ease-in-out infinite ${Math.random() * 2}s`,
-                animationDirection: Math.random() > 0.5 ? 'normal' : 'reverse'
-              }}
-            />
-          ))}
+          {Array.from({ length: 12 }).map((_, i) => {
+            // Limit particles to the area around the seal (center of the screen)
+            const centerX = 50;
+            const centerY = 30; // Seal is in upper part
+            const radius = 25; // Limit to 25% radius around center
+            const angle = (Math.random() * 2 * Math.PI);
+            const distance = Math.random() * radius;
+            const x = centerX + Math.cos(angle) * distance;
+            const y = centerY + Math.sin(angle) * distance;
+            
+            return (
+              <div
+                key={i}
+                className="absolute w-2 h-2 bg-yellow-300 rounded-full opacity-60"
+                style={{
+                  left: `${x}%`,
+                  top: `${y}%`,
+                  animationName: 'float',
+                  animationDuration: `${3 + Math.random() * 2}s`,
+                  animationTimingFunction: 'ease-in-out',
+                  animationIterationCount: 'infinite',
+                  animationDelay: `${Math.random() * 2}s`,
+                  animationDirection: Math.random() > 0.5 ? 'normal' : 'reverse'
+                }}
+              />
+            );
+          })}
         </div>
       </div>
     </div>
