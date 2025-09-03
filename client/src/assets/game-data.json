@@ -2,9 +2,12 @@
   "gameConfig": {
     "title": "Il Sigillo di Lecce",
     "version": "1.0.0",
+    "subtitle": "Risveglio",
+    "storyText": "Un'antica forza dorme sotto le pietre della città. Solo chi saprà unire mente, coraggio e comunità potrà riaccendere il Sigillo. Accetta la chiamata e scrivi la tua leggenda.",
+    "buttonText": "Inizia la tua leggenda",
     "remoteBackend": false,
     "maxPlayers": 1000,
-    "eventDate": "2025-01-25",
+    "eventDate": "2025-08-13",
     "location": "DevFest Lecce 2025"
   },
   "challenges": [

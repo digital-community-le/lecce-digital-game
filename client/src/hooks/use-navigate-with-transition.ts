@@ -1,5 +1,6 @@
-import { useCallback } from 'react';
+import { useCallback, useRef, useEffect } from 'react';
 import { useLocation } from 'wouter';
+import { useGameStoreSafe } from '@/hooks/use-game-store';
 
 /**
  * useNavigateWithTransition
@@ -13,8 +14,21 @@ import { useLocation } from 'wouter';
 export default function useNavigateWithTransition() {
   const [, setLocation] = useLocation();
 
+  const safeStore = useGameStoreSafe();
+  const withRouteTransitionRef = useRef<boolean>(!!(safeStore && safeStore.withRouteTransition));
+  useEffect(() => {
+    withRouteTransitionRef.current = !!(safeStore && safeStore.withRouteTransition);
+  }, [safeStore && safeStore.withRouteTransition]);
+
   const navigate = useCallback((path: string) => {
     return new Promise<void>((resolve) => {
+      // If RouteTransition is not enabled in the global store, navigate normally
+      if (!withRouteTransitionRef.current) {
+        setLocation(path);
+        resolve();
+        return;
+      }
+
       const onReady = () => {
         window.removeEventListener('route-transition:ready', onReady);
         // perform actual navigation
@@ -28,11 +42,25 @@ export default function useNavigateWithTransition() {
         window.addEventListener('route-transition:finished', onFinished);
       };
 
-      window.addEventListener('route-transition:ready', onReady);
+      // safety timeout: if ready never fires, navigate after X ms
+      const TIMEOUT = 3000;
+      const timeoutId = window.setTimeout(() => {
+        window.removeEventListener('route-transition:ready', onReady);
+        setLocation(path);
+        resolve();
+      }, TIMEOUT);
+
+      const readyHandler = () => {
+        clearTimeout(timeoutId);
+        onReady();
+      };
+
+      window.addEventListener('route-transition:ready', readyHandler);
+
       // start transition
       window.dispatchEvent(new CustomEvent('route-transition:start'));
     });
-  }, [setLocation]);
+  }, [setLocation, withRouteTransitionRef]);
 
   return navigate;
 }

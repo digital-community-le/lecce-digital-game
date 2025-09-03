@@ -4,6 +4,8 @@ import useNavigateWithTransition from '@/hooks/use-navigate-with-transition';
 import { useGameStore } from "@/hooks/use-game-store";
 import ProfileCreationForm from "@/components/ProfileCreationForm";
 import UiDialog from "@/components/UiDialog";
+// Import static game data
+import gameData from '@/assets/game-data.json';
 
 const IntroPage: React.FC = () => {
   const [, setLocation] = useLocation();
@@ -13,14 +15,20 @@ const IntroPage: React.FC = () => {
   const [showButton, setShowButton] = useState(false);
   const [showProfileForm, setShowProfileForm] = useState(false);
 
+  // Prefer values from public/game-data.json, fallback to hardcoded strings
+  const cfg = gameData?.gameConfig ?? {};
   const storyText =
+    cfg.storyText ??
     "Un'antica forza dorme sotto le pietre della città. Solo chi saprà unire mente, coraggio e comunità potrà riaccendere il Sigillo. Accetta la chiamata e scrivi la tua leggenda.";
+  const titleText = cfg.title ?? "Il Sigillo di Lecce";
+  const subtitleText = cfg.subtitle ?? "Risveglio";
+  const buttonText = cfg.buttonText ?? "Inizia la tua leggenda";
 
   useEffect(() => {
     // Check if user already has a profile
     if (gameState.currentUser.userId) {
       // immediate redirect on mount if user exists
-      setLocation("/game");
+      setLocation('/game/map');
       return;
     }
 
@@ -48,10 +56,10 @@ const IntroPage: React.FC = () => {
     // Close dialog then navigate with transition
     setShowProfileForm(false);
     try {
-      await navigateWithTransition('/game');
+  await navigateWithTransition('/game/map');
     } catch (e) {
       // fallback
-      setLocation('/game');
+  setLocation('/game/map');
     }
   };
 
@@ -63,13 +71,13 @@ const IntroPage: React.FC = () => {
           className="font-retro text-xl md:text-2xl mb-4 text-yellow-400"
           data-testid="text-game-title"
         >
-          Il Sigillo di Lecce
+          {titleText}
         </h1>
         <h2
           className="font-retro text-lg text-purple-300"
           data-testid="text-game-subtitle"
         >
-          Risveglio
+          {subtitleText}
         </h2>
       </div>
 
@@ -91,7 +99,7 @@ const IntroPage: React.FC = () => {
             onClick={handleStart}
             data-testid="button-start-legend"
           >
-            Inizia la tua leggenda
+            {buttonText}
           </button>
         )}
       </div>

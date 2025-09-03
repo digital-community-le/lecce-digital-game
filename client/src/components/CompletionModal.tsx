@@ -31,7 +31,7 @@ const CompletionModal: React.FC = () => {
   if (!isOpen || !completionData) return null;
 
   return (
-    <UiDialog open={isOpen} onClose={() => closeModal('completion')} title="✨ Challenge Completata!" className="max-w-md">
+    <UiDialog open={isOpen} onClose={() => closeModal('completion')} title="Challenge Completata!" className="max-w-md">
       <div className="text-center p-4" data-testid="modal-completion">
         {/* Celebration content */}
         <div className="text-6xl mb-4" data-testid="completion-emoji">

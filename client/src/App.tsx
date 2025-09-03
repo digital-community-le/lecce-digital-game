@@ -5,30 +5,73 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import IntroPage from "@/pages/Intro";
 import GameMapPage from "@/pages/GameMap";
-import ScannerView from '@/components/ScannerView';
-import ScanPreviewModal from '@/components/ScanPreviewModal';
+import GameLayout from "@/components/layout/GameLayout";
+import ScannerView from "@/components/ScannerView";
+import ScanPreviewModal from "@/components/ScanPreviewModal";
 import NetworkingForestPage from "@/pages/challenges/NetworkingForest";
 import RetroPuzzlePage from "@/pages/challenges/RetroPuzzle";
 import DebugDungeonPage from "@/pages/challenges/DebugDungeon";
 import SocialArenaPage from "@/pages/challenges/SocialArena";
 import NotFound from "@/pages/not-found";
-import RouteTransition from '@/components/RouteTransition';
+import { GameStoreProvider } from "@/hooks/use-game-store";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={IntroPage} />
-      <Route path="/game" component={GameMapPage} />
-      <Route path="/challenge/networking-forest" component={NetworkingForestPage} />
-      <Route path="/challenge/retro-puzzle" component={RetroPuzzlePage} />
-      <Route path="/challenge/debug-dungeon" component={DebugDungeonPage} />
-      <Route path="/challenge/social-arena" component={SocialArenaPage} />
+      {/* Game routes: explicitly render GameLayout for each subroute to avoid fragile wildcard matching */}
+      <Route path="/game/map">
+        {() => (
+          <GameLayout>
+            <GameMapPage />
+          </GameLayout>
+        )}
+      </Route>
+
+      <Route path="/game/challenge/networking-forest">
+        {() => (
+          <GameLayout>
+            <NetworkingForestPage />
+          </GameLayout>
+        )}
+      </Route>
+
+      <Route path="/game/challenge/retro-puzzle">
+        {() => (
+          <GameLayout>
+            <RetroPuzzlePage />
+          </GameLayout>
+        )}
+      </Route>
+
+      <Route path="/game/challenge/debug-dungeon">
+        {() => (
+          <GameLayout>
+            <DebugDungeonPage />
+          </GameLayout>
+        )}
+      </Route>
+
+      <Route path="/game/challenge/social-arena">
+        {() => (
+          <GameLayout>
+            <SocialArenaPage />
+          </GameLayout>
+        )}
+      </Route>
+
+      {/* Default /game -> show map */}
+      <Route path="/game">
+        {() => (
+          <GameLayout>
+            <GameMapPage />
+          </GameLayout>
+        )}
+      </Route>
       <Route component={NotFound} />
     </Switch>
   );
 }
-
-import { GameStoreProvider } from '@/hooks/use-game-store';
 
 function App() {
   return (
@@ -36,8 +79,6 @@ function App() {
       <TooltipProvider>
         <GameStoreProvider>
           <Toaster />
-          {/* Global route transition overlay */}
-          <RouteTransition />
           <Router />
           {/* Global scanner + preview mounted at app root so any page can open them */}
           <ScannerView />

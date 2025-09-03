@@ -71,7 +71,7 @@ const NetworkingForest: React.FC = () => {
     >
 
       {/* Scanned users list */}
-      <div className="mb-6">
+      <div className="mb-6 flex flex-col">
         <h4 className="font-retro text-xs mb-3">Alleati scansionati</h4>
         {uniqueScans.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
@@ -81,7 +81,7 @@ const NetworkingForest: React.FC = () => {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" data-testid="scanned-users-list">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6" data-testid="scanned-users-list">
             {uniqueScans.map((scan) => (
               <div 
                 key={scan.scannedUserId} 

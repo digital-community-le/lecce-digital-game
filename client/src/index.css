@@ -552,6 +552,15 @@
     will-change: opacity;
   }
 
+  /* When rendered inside the game body we want the overlay to cover only
+     the game body (not the header). The overlay inside .game-body will be
+     positioned absolute relative to that container. */
+  .game-body .route-transition-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 60; /* above game content but below global modals */
+  }
+
   /* Keyframe based fades ensure the opacity animates predictably across browsers
      and can be stepped for a pixelated feel. Animations use 'forwards' so the
      final opacity is preserved after the animation completes. */

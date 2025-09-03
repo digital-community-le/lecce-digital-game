@@ -269,7 +269,7 @@ const CanvasMap: React.FC = () => {
 
     if (challengeIndex === 0 || previousChallengesCompleted) {
       // user-initiated navigation with transition
-      navigateWithTransition(`/challenge/${node.id}`);
+  navigateWithTransition(`/game/challenge/${node.id}`);
     } else {
       const remainingChallenges =
         challengeIndex - gameState.gameProgress.completedChallenges.length;

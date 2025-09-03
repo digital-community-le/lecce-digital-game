@@ -52,17 +52,63 @@ const ChallengeLayout: React.FC<ChallengeLayoutProps> = ({
 
   // Protezione accesso: redirect se utente non valido
   if (!gameState.currentUser.userId) {
-    setLocation('/');
-    return null;
+    // Do not navigate during render. Show a small call-to-action so the user
+    // understands they need to create a profile before accessing challenges.
+    return (
+      <div className="container mx-auto px-4 py-6">
+        <div className="nes-container is-rounded p-6">
+          <h2 className="text-lg font-retro mb-2">Profilo mancante</h2>
+          <p className="mb-4">Per partecipare a questa challenge devi prima creare un profilo.</p>
+          <div className="flex gap-2">
+            <button
+              className="nes-btn is-primary"
+              onClick={() => setLocation('/')}
+              data-testid="button-go-to-intro"
+            >
+              Crea profilo
+            </button>
+            <button
+              className="nes-btn"
+              onClick={() => setLocation('/game/map')}
+              data-testid="button-back-to-map-when-no-profile"
+            >
+              Torna alla mappa
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   // Trova la challenge corrente
   const challenge = gameState.challenges.find(c => c.id === challengeId);
   
-  // Redirect se challenge non trovata o bloccata
-  if (!challenge || challenge.status === 'locked') {
-    setLocation('/game');
-    return null;
+  // Se la challenge non esiste o è bloccata, mostra un messaggio esplicativo
+  if (!challenge) {
+    return (
+      <div className="container mx-auto px-4 py-6">
+        <div className="nes-container is-rounded p-6">
+          <h2 className="text-lg font-retro mb-2">Challenge non trovata</h2>
+          <p className="mb-4">Questa challenge non esiste.</p>
+          <button className="nes-btn" onClick={() => setLocation('/game/map')}>Torna alla mappa</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (challenge.status === 'locked') {
+    return (
+      <div className="container mx-auto px-4 py-6">
+        <div className="nes-container is-rounded p-6">
+          <h2 className="text-lg font-retro mb-2">Challenge bloccata</h2>
+          <p className="mb-4">Devi completare le challenge precedenti per sbloccare questa sfida.</p>
+          <div className="flex gap-2">
+            <button className="nes-btn" onClick={() => setLocation('/game/map')}>Torna alla mappa</button>
+            <button className="nes-btn is-disabled">In attesa</button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const challengeTitle = getChallengeTitle(challengeId);
@@ -76,7 +122,7 @@ const ChallengeLayout: React.FC<ChallengeLayoutProps> = ({
           <div className="flex items-center gap-4">
             <button
               className="nes-btn is-normal"
-              onClick={() => navigateWithTransition('/game')}
+              onClick={() => navigateWithTransition('/game/map')}
               aria-label="Torna alla mappa"
               data-testid="button-back-to-map"
             >
