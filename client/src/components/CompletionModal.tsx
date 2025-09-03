@@ -1,12 +1,12 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useGameStore } from '@/hooks/use-game-store';
-import UiDialog from '@/components/UiDialog';
 import gameData from '@/assets/game-data.json';
 
 const CompletionModal: React.FC = () => {
   const { modals, closeModal, openModal, gameState } = useGameStore();
   const isOpen = modals.completion?.isOpen;
   const completionData = modals.completion?.data;
+  const [animationPhase, setAnimationPhase] = useState<'gem' | 'title' | 'message' | 'button'>('gem');
 
   const handleClose = () => {
     closeModal('completion');
@@ -19,13 +19,24 @@ const CompletionModal: React.FC = () => {
     }
   };
 
-  const getChallengeGem = (challengeId: string) => {
+  useEffect(() => {
+    if (isOpen) {
+      setAnimationPhase('gem');
+      const timer1 = setTimeout(() => setAnimationPhase('title'), 1000);
+      const timer2 = setTimeout(() => setAnimationPhase('message'), 1500);
+      const timer3 = setTimeout(() => setAnimationPhase('button'), 2500);
+      
+      return () => {
+        clearTimeout(timer1);
+        clearTimeout(timer2);
+        clearTimeout(timer3);
+      };
+    }
+  }, [isOpen]);
+
+  const getChallengeData = (challengeId: string) => {
     // Trova i dati della challenge dal game-data.json
     const challenge = gameData.challenges.find(c => c.id === challengeId);
-    const badge = gameData.rewards.badges.find(b => 
-      b.name === challenge?.rewards.badge || 
-      (challengeId === 'social-arena' && b.id === 'social-champion')
-    );
     
     // Mappa le immagini delle gemme
     const gemImages: Record<string, string> = {
@@ -36,143 +47,131 @@ const CompletionModal: React.FC = () => {
     };
     
     return {
-      name: badge?.name || challenge?.rewards.badge || 'Gemma Misteriosa',
-      description: badge?.description || challenge?.description || '',
-      image: gemImages[challengeId] || '/assets/images/gem-of-alliance.png',
-      icon: badge?.icon || challenge?.emoji || '💎'
+      gemImage: gemImages[challengeId] || '/assets/images/gem-of-alliance.png',
+      completionTitle: challenge?.completion?.title || 'Challenge Completata',
+      completionMessage: challenge?.completion?.message || 'Hai completato la challenge!'
     };
   };
 
-  const getChallengeEmoji = (challengeId: string) => {
-    switch (challengeId) {
-      case 'networking-forest': return '🌲';
-      case 'retro-puzzle': return '🧩';
-      case 'debug-dungeon': return '⚔️';
-      case 'social-arena': return '📱';
-      default: return '🏆';
-    }
-  };
 
   if (!isOpen || !completionData) return null;
 
-  const gem = getChallengeGem(completionData.challengeId);
+  const challengeData = getChallengeData(completionData.challengeId);
 
   return (
-    <UiDialog open={isOpen} onClose={() => closeModal('completion')} title="" className="max-w-lg">
-      <div className="text-center p-6" data-testid="modal-completion">
-        {/* Magical gem reveal animation */}
-        <div className="relative mb-6">
-          <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-yellow-200 via-yellow-400 to-yellow-200 rounded-full blur-xl opacity-60"></div>
-          <div className="relative z-10">
-            {/* Gemma principale con immagine */}
-            <div className="mb-4 flex justify-center">
-              <div className="relative w-24 h-24 animate-bounce">
-                <img 
-                  src={gem.image} 
-                  alt={gem.name}
-                  className="w-full h-full object-contain pixelated drop-shadow-lg"
-                  data-testid="completion-gem-image"
-                />
-                <div className="absolute -top-2 -right-2 text-2xl animate-pulse">
-                  ✨
-                </div>
-                <div className="absolute -bottom-2 -left-2 text-2xl animate-pulse" style={{animationDelay: '0.5s'}}>
-                  ✨
-                </div>
-              </div>
-            </div>
-            
-            {/* Icona challenge */}
-            <div className="text-3xl mb-2 opacity-75" data-testid="completion-emoji">
-              {getChallengeEmoji(completionData.challengeId)}
-            </div>
+    <div 
+      className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4"
+      data-testid="modal-completion"
+      onClick={handleClose}
+    >
+      <div 
+        className="relative w-full max-w-2xl text-center text-white"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Animated Gem Entry */}
+        <div className="mb-8">
+          <div 
+            className={`w-32 h-32 mx-auto transition-all duration-1000 ${
+              animationPhase === 'gem' 
+                ? 'scale-0 opacity-0' 
+                : 'scale-100 opacity-100'
+            }`}
+            style={{
+              animation: animationPhase !== 'gem' ? 'gemZoomIn 1s ease-out forwards' : 'none'
+            }}
+          >
+            <img 
+              src={challengeData.gemImage}
+              alt="Gemma conquistata"
+              className="w-full h-full object-contain pixelated filter drop-shadow-lg"
+              data-testid="completion-gem-image"
+              style={{
+                imageRendering: 'pixelated',
+                filter: 'drop-shadow(0 0 20px rgba(255, 255, 255, 0.5))'
+              }}
+            />
           </div>
         </div>
 
-        {/* Immersive title focusing on gem */}
-        <div className="nes-container is-success p-4 mb-4">
-          <h3 className="font-retro text-lg mb-3 text-center" data-testid="completion-title">
-            🎉 {gem.name} Conquistata! 🎉
-          </h3>
-          
-          {/* Narrative description */}
-          <div className="text-sm leading-relaxed mb-3" data-testid="completion-description">
-            <div className="italic text-center mb-2">
-              "{gem.description}"
-            </div>
-            <p className="text-center">
-              La gemma brilla di una luce antica e potente. {completionData.description}
+        {/* Title - Fades in after gem */}
+        <div 
+          className={`mb-6 transition-all duration-800 ${
+            animationPhase === 'gem' || animationPhase === 'title'
+              ? 'opacity-0 translate-y-4'
+              : 'opacity-100 translate-y-0'
+          }`}
+        >
+          <h2 
+            className="font-retro text-2xl md:text-3xl text-yellow-300 mb-2"
+            data-testid="completion-title"
+            style={{
+              textShadow: '2px 2px 0px rgba(0,0,0,0.8), 0 0 10px rgba(255, 255, 0, 0.3)'
+            }}
+          >
+            {challengeData.completionTitle}
+          </h2>
+        </div>
+
+        {/* Message - Fades in after title */}
+        <div 
+          className={`mb-8 transition-all duration-800 delay-300 ${
+            ['gem', 'title', 'message'].includes(animationPhase)
+              ? 'opacity-0 translate-y-4'
+              : 'opacity-100 translate-y-0'
+          }`}
+        >
+          <div className="bg-gray-900/80 border-2 border-yellow-600 p-6 mx-4">
+            <p 
+              className="text-lg leading-relaxed text-gray-100"
+              data-testid="completion-description"
+              style={{
+                textShadow: '1px 1px 0px rgba(0,0,0,0.8)'
+              }}
+            >
+              {challengeData.completionMessage}
             </p>
-          </div>
-          
-          <div className="text-xs text-center text-muted-foreground italic border-t pt-2">
-            Il potere del {getChallengeEmoji(completionData.challengeId)} ora fluisce attraverso la {gem.name.toLowerCase()}, arricchendo il tuo viaggio verso il Sigillo di Lecce.
-          </div>
-        </div>
-
-        {/* Mystical gem power display */}
-        <div className="nes-container is-dark p-4 mb-6 relative overflow-hidden">
-          {/* Subtle background glow */}
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 to-blue-900/20 animate-pulse"></div>
-          <div className="relative z-10">
-            <div className="text-xs text-center text-yellow-300 mb-3 font-retro">
-              🌟 Potere Acquisito 🌟
-            </div>
             
-            <div className="grid grid-cols-2 gap-4 text-sm">
+            {/* Stats */}
+            <div className="mt-4 pt-4 border-t border-yellow-600/50 flex justify-center gap-8">
               <div className="text-center">
-                <div className="text-xs text-muted-foreground mb-1">Energia Magica</div>
-                <div className="font-retro text-primary text-lg" data-testid="completion-score">
+                <div className="text-sm text-gray-400">Punti</div>
+                <div className="font-retro text-xl text-yellow-300" data-testid="completion-score">
                   {completionData.score}
                 </div>
-                <div className="text-xs text-yellow-300">punti</div>
               </div>
-              
               {completionData.time && (
                 <div className="text-center">
-                  <div className="text-xs text-muted-foreground mb-1">Tempo Impiegato</div>
-                  <div className="font-retro text-accent text-lg" data-testid="completion-time">
+                  <div className="text-sm text-gray-400">Tempo</div>
+                  <div className="font-retro text-xl text-yellow-300" data-testid="completion-time">
                     {completionData.time}
                   </div>
-                  <div className="text-xs text-yellow-300">per la conquista</div>
                 </div>
               )}
             </div>
           </div>
         </div>
 
-        {/* Epic action button with gem theme */}
-        <div className="relative">
+        {/* Button - Fades in last */}
+        <div 
+          className={`transition-all duration-800 delay-500 ${
+            animationPhase !== 'button'
+              ? 'opacity-0 translate-y-4'
+              : 'opacity-100 translate-y-0'
+          }`}
+        >
           <button 
-            className="nes-btn is-success text-sm px-8 py-3 relative overflow-hidden" 
+            className="nes-btn is-success font-retro text-lg px-8 py-4 hover:scale-105 transition-transform"
             onClick={handleClose}
             data-testid="button-continue-adventure"
+            style={{
+              textShadow: '1px 1px 0px rgba(0,0,0,0.8)'
+            }}
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-green-400/20 to-emerald-400/20 animate-pulse"></div>
-            <span className="relative z-10 flex items-center gap-2">
-              <span className="animate-bounce">🗺️</span>
-              Ritorna alla Mappa del Tesoro
-              <span className="animate-bounce" style={{animationDelay: '0.3s'}}>✨</span>
-            </span>
+            Continua l'avventura
           </button>
         </div>
-        
-        {/* Mystical gem collection progress */}
-        <div className="mt-4 p-3 border border-dashed border-yellow-400/50 rounded bg-yellow-50/10">
-          <div className="text-xs text-center text-yellow-300 font-retro">
-            📜 Registro delle Gemme 📜
-          </div>
-          <div className="text-sm text-center mt-1 text-muted-foreground">
-            {gameState.gameProgress.completedChallenges.length}/4 gemme nel Sigillo
-          </div>
-          {gameState.gameProgress.completedChallenges.length === 4 && (
-            <div className="text-xs text-center mt-1 text-yellow-400 animate-pulse">
-              Il Sigillo di Lecce è completo! 🏆
-            </div>
-          )}
-        </div>
       </div>
-    </UiDialog>
+    </div>
   );
 };
 
