@@ -1,10 +1,9 @@
 import React from 'react';
-import { useLocation } from 'wouter';
 import { useGameStore } from '@/hooks/use-game-store';
+import GameLayout from '@/components/layout/GameLayout';
 import gameData from '@/assets/game-data.json';
 
 const Statistics: React.FC = () => {
-  const [, setLocation] = useLocation();
   const { gameState } = useGameStore();
   
   const { currentUser, gameProgress } = gameState;
@@ -23,9 +22,6 @@ const Statistics: React.FC = () => {
     });
   });
 
-  const handleBackToGameComplete = () => {
-    setLocation('/game-complete');
-  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('it-IT', {
@@ -38,83 +34,81 @@ const Statistics: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-blue-900 to-gray-900 text-white p-4">
-      <div className="max-w-6xl mx-auto">
+    <GameLayout>
+      <div className="container mx-auto p-4">
         
-        {/* Header */}
-        <div className="text-center mb-12">
+        {/* Sigillo Header */}
+        <div className="text-center mb-8">
+          <div className="w-32 h-32 mx-auto mb-4 bg-gray-800 border-2 border-gray-600 rounded-lg flex items-center justify-center">
+            <div className="text-4xl">🏆</div>
+          </div>
           <h1 
-            className="font-retro text-4xl md:text-5xl text-yellow-300 mb-4"
+            className="font-retro text-2xl mb-2"
             data-testid="statistics-title"
-            style={{
-              textShadow: '3px 3px 0px rgba(0,0,0,0.8), 0 0 15px rgba(255, 215, 0, 0.5)'
-            }}
+            style={{ color: 'var(--ldc-contrast-yellow)' }}
           >
             Le Tue Statistiche
           </h1>
-          <div className="text-xl text-gray-300">
-            Leggenda di <span className="text-yellow-300 font-retro">{currentUser.displayName || 'Anonimo'}</span>
+          <div className="text-sm" style={{ color: 'var(--ldc-on-surface)' }}>
+            Leggenda di <span className="font-retro" style={{ color: 'var(--ldc-contrast-yellow)' }}>{currentUser.displayName || 'Anonimo'}</span>
           </div>
         </div>
 
         {/* Main Stats Grid */}
-        <div className="grid md:grid-cols-3 gap-8 mb-12">
+        <div className="grid md:grid-cols-3 gap-4 mb-8">
           
           {/* Completion Overview */}
-          <div className="bg-gray-800/80 border-2 border-yellow-600 p-6">
-            <h2 className="font-retro text-xl text-yellow-300 mb-4 text-center">
+          <div className="nes-container is-rounded p-4">
+            <h2 className="font-retro text-lg mb-4 text-center" style={{ color: 'var(--ldc-rpg-green)' }}>
               Completamento
             </h2>
             <div className="text-center">
               <div 
-                className="text-5xl font-retro text-green-400 mb-2"
+                className="text-3xl font-retro mb-2"
                 data-testid="completion-rate"
+                style={{ color: 'var(--ldc-rpg-green)' }}
               >
                 {completionRate}%
               </div>
-              <div className="text-gray-300">
+              <div className="text-sm" style={{ color: 'var(--ldc-on-surface)' }}>
                 {completedChallenges.length} di {totalChallenges} sfide
-              </div>
-              <div className="mt-4 w-full bg-gray-700 rounded-full h-3">
-                <div 
-                  className="bg-gradient-to-r from-green-400 to-yellow-400 h-3 rounded-full transition-all duration-1000"
-                  style={{ width: `${completionRate}%` }}
-                ></div>
               </div>
             </div>
           </div>
 
           {/* Total Points */}
-          <div className="bg-gray-800/80 border-2 border-blue-600 p-6">
-            <h2 className="font-retro text-xl text-blue-300 mb-4 text-center">
+          <div className="nes-container is-rounded p-4">
+            <h2 className="font-retro text-lg mb-4 text-center" style={{ color: 'var(--ldc-info)' }}>
               Punti Totali
             </h2>
             <div className="text-center">
               <div 
-                className="text-5xl font-retro text-blue-400 mb-2"
+                className="text-3xl font-retro mb-2"
                 data-testid="total-points"
+                style={{ color: 'var(--ldc-info)' }}
               >
                 {totalPoints.toLocaleString('it-IT')}
               </div>
-              <div className="text-gray-300">
+              <div className="text-sm" style={{ color: 'var(--ldc-on-surface)' }}>
                 Punti conquistati
               </div>
             </div>
           </div>
 
           {/* Badges Count */}
-          <div className="bg-gray-800/80 border-2 border-purple-600 p-6">
-            <h2 className="font-retro text-xl text-purple-300 mb-4 text-center">
+          <div className="nes-container is-rounded p-4">
+            <h2 className="font-retro text-lg mb-4 text-center" style={{ color: 'var(--ldc-primary)' }}>
               Gemme & Badge
             </h2>
             <div className="text-center">
               <div 
-                className="text-5xl font-retro text-purple-400 mb-2"
+                className="text-3xl font-retro mb-2"
                 data-testid="badges-count"
+                style={{ color: 'var(--ldc-primary)' }}
               >
                 {earnedBadges.length}
               </div>
-              <div className="text-gray-300">
+              <div className="text-sm" style={{ color: 'var(--ldc-on-surface)' }}>
                 Gemme raccolte
               </div>
             </div>
@@ -122,22 +116,22 @@ const Statistics: React.FC = () => {
         </div>
 
         {/* Earned Badges */}
-        <div className="mb-12">
-          <h2 className="font-retro text-2xl text-yellow-300 mb-6 text-center">
+        <div className="mb-8">
+          <h2 className="font-retro text-xl mb-4 text-center" style={{ color: 'var(--ldc-contrast-yellow)' }}>
             Gemme Conquistate
           </h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             {earnedBadges.map((badge) => (
               <div 
                 key={badge.id}
-                className="bg-gray-800/80 border-2 border-yellow-600/50 p-6 text-center hover:border-yellow-600 transition-colors"
+                className="nes-container is-rounded p-4 text-center"
                 data-testid={`badge-${badge.id}`}
               >
-                <div className="text-4xl mb-3">{badge.icon}</div>
-                <h3 className="font-retro text-lg text-yellow-300 mb-2">
+                <div className="text-3xl mb-2">{badge.icon}</div>
+                <h3 className="font-retro text-sm mb-2" style={{ color: 'var(--ldc-contrast-yellow)' }}>
                   {badge.name}
                 </h3>
-                <p className="text-sm text-gray-300">
+                <p className="text-xs" style={{ color: 'var(--ldc-on-surface)' }}>
                   {badge.description}
                 </p>
               </div>
@@ -146,33 +140,33 @@ const Statistics: React.FC = () => {
         </div>
 
         {/* Challenge Details */}
-        <div className="mb-12">
-          <h2 className="font-retro text-2xl text-yellow-300 mb-6 text-center">
+        <div className="mb-8">
+          <h2 className="font-retro text-xl mb-4 text-center" style={{ color: 'var(--ldc-contrast-yellow)' }}>
             Dettagli Sfide
           </h2>
-          <div className="space-y-4">
+          <div className="space-y-3">
             {completedChallenges.map((challengeId) => {
               const challengeData = gameData.challenges.find(c => c.id === challengeId);
               return (
                 <div 
                   key={challengeId}
-                  className="bg-gray-800/80 border border-gray-600 p-6 flex items-center justify-between"
+                  className="nes-container is-rounded p-4 flex items-center justify-between"
                   data-testid={`challenge-stats-${challengeId}`}
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="text-2xl">{challengeData?.emoji}</div>
+                  <div className="flex items-center gap-3">
+                    <div className="text-xl">{challengeData?.emoji}</div>
                     <div>
-                      <h3 className="font-retro text-lg text-white mb-1">
+                      <h3 className="font-retro text-sm mb-1" style={{ color: 'var(--ldc-on-surface)' }}>
                         {challengeData?.title}
                       </h3>
-                      <div className="text-sm text-gray-400">
+                      <div className="text-xs" style={{ color: 'var(--ldc-rpg-green)' }}>
                         Completato
                       </div>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="font-retro text-xl text-yellow-300">
-                      {challengeData?.rewards?.points || 0} punti
+                    <div className="font-retro text-sm" style={{ color: 'var(--ldc-contrast-yellow)' }}>
+                      {challengeData?.rewards?.points || 0} pt
                     </div>
                   </div>
                 </div>
@@ -182,46 +176,36 @@ const Statistics: React.FC = () => {
         </div>
 
         {/* User Profile Info */}
-        <div className="bg-gray-800/80 border-2 border-gray-600 p-6 mb-8">
-          <h2 className="font-retro text-xl text-yellow-300 mb-4 text-center">
+        <div className="nes-container is-rounded p-4 mb-8">
+          <h2 className="font-retro text-lg mb-4 text-center" style={{ color: 'var(--ldc-contrast-yellow)' }}>
             Profilo Giocatore
           </h2>
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <div className="mb-4">
-                <span className="text-gray-400">Nome: </span>
-                <span className="text-white font-retro">{currentUser.displayName || 'Anonimo'}</span>
+              <div className="mb-3">
+                <span className="text-sm" style={{ color: 'var(--ldc-on-surface)' }}>Nome: </span>
+                <span className="font-retro text-sm" style={{ color: 'var(--ldc-contrast-yellow)' }}>{currentUser.displayName || 'Anonimo'}</span>
               </div>
-              <div className="mb-4">
-                <span className="text-gray-400">Avatar: </span>
-                <span className="text-white text-xl">{currentUser.avatar}</span>
+              <div className="mb-3">
+                <span className="text-sm" style={{ color: 'var(--ldc-on-surface)' }}>Avatar: </span>
+                <span className="text-lg">{currentUser.avatar}</span>
               </div>
             </div>
             <div>
-              <div className="mb-4">
-                <span className="text-gray-400">Partecipazione: </span>
-                <span className="text-white">{gameData.gameConfig.location}</span>
+              <div className="mb-3">
+                <span className="text-sm" style={{ color: 'var(--ldc-on-surface)' }}>Partecipazione: </span>
+                <span className="text-sm" style={{ color: 'var(--ldc-on-surface)' }}>{gameData.gameConfig.location}</span>
               </div>
-              <div className="mb-4">
-                <span className="text-gray-400">Data evento: </span>
-                <span className="text-white">{gameData.gameConfig.eventDate}</span>
+              <div className="mb-3">
+                <span className="text-sm" style={{ color: 'var(--ldc-on-surface)' }}>Data evento: </span>
+                <span className="text-sm" style={{ color: 'var(--ldc-on-surface)' }}>{gameData.gameConfig.eventDate}</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Back Button */}
-        <div className="text-center">
-          <button 
-            className="nes-btn is-primary font-retro text-lg px-8 py-4 hover:scale-105 transition-transform"
-            onClick={handleBackToGameComplete}
-            data-testid="button-back-to-completion"
-          >
-            Torna alla Celebrazione
-          </button>
-        </div>
       </div>
-    </div>
+    </GameLayout>
   );
 };
 
