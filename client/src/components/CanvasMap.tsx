@@ -289,7 +289,19 @@ const CanvasMap: React.FC = () => {
       }
     }
     
-    // When not animating, position avatar on the last completed challenge
+    // When not animating, position avatar on the last available (unlocked) challenge
+    // This ensures the avatar is always on the challenge the player should tackle next
+    const availableChallenges = gameState.challenges.filter(c => c.status === "available");
+    const lastAvailableChallenge = availableChallenges[availableChallenges.length - 1];
+    
+    if (lastAvailableChallenge) {
+      const position = safePositions[lastAvailableChallenge.id] || lastAvailableChallenge.position;
+      const top = parseFloat(position.top.replace("%", ""));
+      const left = parseFloat(position.left.replace("%", ""));
+      return { top: `${top}%`, left: `${left}%` };
+    }
+    
+    // Fallback: if no available challenges, position on the last completed challenge
     const lastCompletedChallengeId = gameState.gameProgress.completedChallenges[gameState.gameProgress.completedChallenges.length - 1];
     
     if (lastCompletedChallengeId) {

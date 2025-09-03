@@ -33,13 +33,19 @@ const CompletionModal: React.FC = () => {
       return;
     }
 
-    // Navigate back to map first, then start avatar animation
-    // This ensures the user sees the animation on the map, not on the challenge page
+    // Only trigger animation if this challenge was just completed (not previously completed)
     if (completionData?.challengeId) {
       const currentIndex = gameState.challenges.findIndex(c => c.id === completionData.challengeId);
       const nextChallenge = gameState.challenges[currentIndex + 1];
       
-      if (nextChallenge && nextChallenge.status === "available") {
+      // Check if this challenge was just completed by verifying it's the last one in completed array
+      const lastCompletedChallengeId = gameState.gameProgress.completedChallenges[gameState.gameProgress.completedChallenges.length - 1];
+      const isJustCompleted = lastCompletedChallengeId === completionData.challengeId;
+      
+      // Only animate if:
+      // 1. This challenge was just completed (is the most recent completion)
+      // 2. There's a next challenge available
+      if (isJustCompleted && nextChallenge && nextChallenge.status === "available") {
         // Store animation data with timestamp for delayed execution
         const animationData = {
           fromChallengeId: completionData.challengeId,
@@ -52,6 +58,8 @@ const CompletionModal: React.FC = () => {
         // Store in sessionStorage so it survives the navigation
         sessionStorage.setItem('pendingAvatarAnimation', JSON.stringify(animationData));
       }
+      // If this was a previously completed challenge, no animation is triggered
+      // The avatar will remain on the last completed challenge as per the new positioning logic
     }
   };
 
