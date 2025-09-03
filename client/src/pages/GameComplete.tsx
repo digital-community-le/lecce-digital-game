@@ -28,8 +28,8 @@ const GameComplete: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4">
-      <div className="relative w-full max-w-4xl text-center text-white">
+    <div className="min-h-screen bg-black flex items-center justify-center p-4 py-12">
+      <div className="relative w-full max-w-4xl text-center text-white my-8">
         
         {/* Epic Seal Animation */}
         <div className="mb-12">
