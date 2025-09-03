@@ -498,21 +498,53 @@ export const renderMap = (
   const usedRoadTiles = new Set<string>();
   const forbiddenForRoads: TerrainType[] = ['forest', 'mountain', 'lake'];
 
-  // Calculate exact pixel coordinates for each challenge node center
+  // Calculate exact pixel coordinates for each challenge node using SAFE positions
+  // that match what's actually rendered on screen (after terrain collision detection)
   const nodePixelPositions = challenges.map(ch => {
-    const leftPct = parseFloat(ch.position.left.replace('%', ''));
-    const topPct = parseFloat(ch.position.top.replace('%', ''));
-    const pixelX = (leftPct / 100) * containerWidth;
-    const pixelY = (topPct / 100) * containerHeight;
+    const safePos = determineSafePositionForChallenge(
+      ch,
+      containerWidth,
+      containerHeight,
+      mapWidth,
+      mapHeight,
+      ['forest', 'mountain', 'lake']
+    );
+    
+    const leftPct = parseFloat(safePos.leftPercent.replace('%', ''));
+    const topPct = parseFloat(safePos.topPercent.replace('%', ''));
     const tx = Math.floor((leftPct / 100) * mapWidth);
     const ty = Math.floor((topPct / 100) * mapHeight);
-    return { pixelX, pixelY, tx, ty, challenge: ch };
+    
+    return { 
+      pixelX: safePos.pixelX, 
+      pixelY: safePos.pixelY, 
+      tx, 
+      ty, 
+      challenge: ch 
+    };
   });
 
   // Ensure the tile directly under each node is marked as a road tile
+  // This ensures roads visually connect to where nodes are actually rendered
   for (const nodePos of nodePixelPositions) {
     if (nodePos.tx >= 0 && nodePos.ty >= 0 && nodePos.tx < mapWidth && nodePos.ty < mapHeight) {
       roadTiles.add(`${nodePos.tx},${nodePos.ty}`);
+      // Also mark adjacent tiles to ensure connection
+      const adjacentTiles = [
+        `${nodePos.tx-1},${nodePos.ty}`, 
+        `${nodePos.tx+1},${nodePos.ty}`,
+        `${nodePos.tx},${nodePos.ty-1}`, 
+        `${nodePos.tx},${nodePos.ty+1}`
+      ];
+      for (const adjTile of adjacentTiles) {
+        const [adjX, adjY] = adjTile.split(',').map(n => parseInt(n, 10));
+        if (adjX >= 0 && adjY >= 0 && adjX < mapWidth && adjY < mapHeight) {
+          const tileType = determineTileType(adjX, adjY, mapWidth, mapHeight);
+          if (!forbiddenForRoads.includes(tileType)) {
+            roadTiles.add(adjTile);
+          }
+        }
+      }
     }
   }
 
