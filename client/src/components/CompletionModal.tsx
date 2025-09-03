@@ -110,16 +110,16 @@ const CompletionModal: React.FC = () => {
 
   return (
     <div 
-      className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4 overflow-y-auto"
       data-testid="modal-completion"
       onClick={handleClose}
     >
       <div 
-        className="relative w-full max-w-2xl text-center text-white"
+        className="relative w-full max-w-2xl text-center text-white my-8 max-h-full overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Animated Gem Entry */}
-        <div className="mb-8">
+        <div className="mb-8 py-8">
           <div 
             className={`w-32 h-32 mx-auto transition-all duration-1000 ${
               animationPhase === 'gem' 
@@ -170,9 +170,10 @@ const CompletionModal: React.FC = () => {
               : 'opacity-100 translate-y-0'
           }`}
         >
-          <div className="bg-gray-900/80 border-2 border-yellow-600 p-6 mx-4">
+          <div className="nes-container with-title is-dark mx-4" style={{ borderColor: '#d97706' }}>
+            <p className="title" style={{ color: '#fbbf24' }}>Risultato</p>
             <p 
-              className="text-lg leading-relaxed text-gray-100"
+              className="text-lg leading-relaxed text-gray-100 mb-4"
               data-testid="completion-description"
               style={{
                 textShadow: '1px 1px 0px rgba(0,0,0,0.8)'
