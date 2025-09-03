@@ -1,6 +1,7 @@
 import React from 'react';
 import { useGameStore } from '@/hooks/use-game-store';
 import GameLayout from '@/components/layout/GameLayout';
+import gameData from '@/assets/game-data.json';
 import allianceGem from '@assets/images/gem-of-alliance.png';
 import memoryGem from '@assets/images/gem-of-memory.png';
 import wisdomGem from '@assets/images/gem-of-wisdom.png';
@@ -55,7 +56,8 @@ const Statistics: React.FC = () => {
               const src = gemMap[ch.id] || '';
               const collected = isCollected(ch.id);
               const badgeName = badgeMap[ch.id] || ch.title;
-              const challengePoints = ch.rewards?.points || 0;
+              const challengeData = gameData.challenges.find(c => c.id === ch.id);
+              const challengePoints = challengeData?.rewards?.points || 0;
               return (
                 <div key={ch.id} className="flex items-center gap-3 p-2 rounded justify-between">
                   <div className="flex items-center gap-3">
