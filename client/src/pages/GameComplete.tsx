@@ -1,15 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
+import { useGameStore } from '@/hooks/use-game-store';
 import gameData from '@/assets/game-data.json';
 import sealWithGemsImage from '@assets/images/seal-with-gems.png';
 
 const GameComplete: React.FC = () => {
+  const { gameState } = useGameStore();
   const [, setLocation] = useLocation();
   const [animationPhase, setAnimationPhase] = useState<'seal' | 'title' | 'description' | 'button'>('seal');
   
   const { finalCompletion } = gameData;
 
   useEffect(() => {
+    // If game not completed, redirect to main game map
+    if (!gameState.gameProgress.gameCompleted) {
+      setLocation('/game');
+      return;
+    }
+
     // Sequential animation phases
     setAnimationPhase('seal');
     const timer1 = setTimeout(() => setAnimationPhase('title'), 1200);
