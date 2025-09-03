@@ -101,13 +101,9 @@ const GameComplete: React.FC = () => {
           }`}
         >
           <button 
-            className="nes-btn is-success font-retro text-xl px-12 py-6 hover:scale-110 transition-transform duration-300"
+            className="nes-btn is-success font-retro"
             onClick={handleViewStats}
             data-testid="button-view-statistics"
-            style={{
-              textShadow: '2px 2px 0px rgba(0,0,0,0.8)',
-              boxShadow: '0 8px 0 #4a5568, 0 12px 20px rgba(0,0,0,0.3)'
-            }}
           >
             {finalCompletion.buttonText}
           </button>
