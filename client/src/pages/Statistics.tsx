@@ -55,17 +55,25 @@ const Statistics: React.FC = () => {
               const src = gemMap[ch.id] || '';
               const collected = isCollected(ch.id);
               const badgeName = badgeMap[ch.id] || ch.title;
+              const challengePoints = ch.rewards?.points || 0;
               return (
-                <div key={ch.id} className="flex items-center gap-3 p-2 rounded">
-                  <img
-                    src={src}
-                    alt={badgeName}
-                    className={`w-12 h-12 object-contain flex-shrink-0 ${collected ? '' : 'filter grayscale'}`}
-                  />
-                  <div className="text-left">
-                    <div className="font-medium text-sm">{badgeName}</div>
-                    <div className="text-xs text-muted-foreground">{ch.title}</div>
+                <div key={ch.id} className="flex items-center gap-3 p-2 rounded justify-between">
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={src}
+                      alt={badgeName}
+                      className={`w-12 h-12 object-contain flex-shrink-0 ${collected ? '' : 'filter grayscale'}`}
+                    />
+                    <div className="text-left">
+                      <div className="font-medium text-sm">{badgeName}</div>
+                      <div className="text-xs text-muted-foreground">{ch.title}</div>
+                    </div>
                   </div>
+                  {collected && (
+                    <div className="text-right">
+                      <div className="font-retro text-sm">{challengePoints} pts</div>
+                    </div>
+                  )}
                 </div>
               );
             })}
