@@ -153,9 +153,8 @@ const findNearestAllowedTileExcluding = (
 };
 
 /**
- * A simple A* pathfinder on the tile grid that minimizes turns by applying a
- * turn penalty. It avoids tiles that are forbidden, excluded, or already used
- * by existing roads.
+ * Enhanced A* pathfinder with improved turn penalty and better obstacle avoidance.
+ * Prioritizes straight paths and prevents road intersections.
  */
 const findTilePath = (
   start: { x: number; y: number },
@@ -168,7 +167,7 @@ const findTilePath = (
 ) => {
   const key = (x: number, y: number, d: number | null) => `${x},${y},${d === null ? 'n' : d}`;
   const dirs = [ [0, -1], [1, 0], [0, 1], [-1, 0] ];
-  const turnPenalty = 2;
+  const turnPenalty = 5; // Increased penalty to favor straight paths
 
   const open: Array<{ x: number; y: number; g: number; f: number; dir: number | null }>= [];
   const cameFrom = new Map<string, string | null>();
@@ -498,41 +497,37 @@ export const renderMap = (
   const roadTiles = new Set<string>();
   const usedRoadTiles = new Set<string>();
   const forbiddenForRoads: TerrainType[] = ['forest', 'mountain', 'lake'];
+  const roadPaths: PathSegment[] = []; // Store actual road segments for drawing
 
-  // Ensure the tile directly under each node is marked as a road tile so
-  // roads visually connect to nodes even if the pathfinder later routes
-  // around obstacles. We don't mark these as `usedRoadTiles` yet to allow
-  // the path algorithm to incorporate them into actual paths.
-  for (const ch of challenges) {
+  // Calculate exact pixel coordinates for each challenge node center
+  const nodePixelPositions = challenges.map(ch => {
     const leftPct = parseFloat(ch.position.left.replace('%', ''));
     const topPct = parseFloat(ch.position.top.replace('%', ''));
+    const pixelX = (leftPct / 100) * containerWidth;
+    const pixelY = (topPct / 100) * containerHeight;
     const tx = Math.floor((leftPct / 100) * mapWidth);
     const ty = Math.floor((topPct / 100) * mapHeight);
-    if (tx >= 0 && ty >= 0 && tx < mapWidth && ty < mapHeight) {
-      roadTiles.add(`${tx},${ty}`);
+    return { pixelX, pixelY, tx, ty, challenge: ch };
+  });
+
+  // Ensure the tile directly under each node is marked as a road tile
+  for (const nodePos of nodePixelPositions) {
+    if (nodePos.tx >= 0 && nodePos.ty >= 0 && nodePos.tx < mapWidth && nodePos.ty < mapHeight) {
+      roadTiles.add(`${nodePos.tx},${nodePos.ty}`);
     }
   }
 
-  for (let i = 0; i < challenges.length - 1; i++) {
-    const a = challenges[i];
-    const b = challenges[i + 1];
-    const aLeft = parseFloat(a.position.left.replace('%', ''));
-    const aTop = parseFloat(a.position.top.replace('%', ''));
-    const bLeft = parseFloat(b.position.left.replace('%', ''));
-    const bTop = parseFloat(b.position.top.replace('%', ''));
+  for (let i = 0; i < nodePixelPositions.length - 1; i++) {
+    const nodeA = nodePixelPositions[i];
+    const nodeB = nodePixelPositions[i + 1];
 
-    const aTx = Math.floor((aLeft / 100) * mapWidth);
-    const aTy = Math.floor((aTop / 100) * mapHeight);
-    const bTx = Math.floor((bLeft / 100) * mapWidth);
-    const bTy = Math.floor((bTop / 100) * mapHeight);
-
-    // Prefer the exact tile under the node as the road endpoint so roads
-    // visually connect to nodes. Only if that tile is forbidden we search
-    // for the nearest allowed tile.
-    let start = { x: aTx, y: aTy } as { x: number; y: number };
-    let goal = { x: bTx, y: bTy } as { x: number; y: number };
+    // Prefer the exact tile under the node as the road endpoint
+    let start = { x: nodeA.tx, y: nodeA.ty };
+    let goal = { x: nodeB.tx, y: nodeB.ty };
+    
     const startType = determineTileType(start.x, start.y, mapWidth, mapHeight);
     const goalType = determineTileType(goal.x, goal.y, mapWidth, mapHeight);
+    
     if (forbiddenForRoads.includes(startType)) {
       const s = findNearestAllowedTile(start.x, start.y, mapWidth, mapHeight, forbiddenForRoads);
       if (!s) continue;
@@ -544,34 +539,83 @@ export const renderMap = (
       goal = g;
     }
 
-    // Build an excluded set containing tiles adjacent to already used road tiles
-    // so new roads won't touch existing roads. This is conservative: it blocks
-    // the 8-neighborhood around any used road tile.
+    // Enhanced exclusion: prevent roads from crossing existing roads
     const excludedDueToAdjacency = new Set<string>();
+    
+    // Block tiles adjacent to used roads to prevent crossings
     for (const usedKey of Array.from(usedRoadTiles)) {
       const [ux, uy] = usedKey.split(',').map(s => parseInt(s, 10));
-      for (const k of adjacentKeys(ux, uy, mapWidth, mapHeight)) excludedDueToAdjacency.add(k);
+      // Only block adjacent tiles in cross pattern to allow parallel roads
+      const crossKeys = [`${ux-1},${uy}`, `${ux+1},${uy}`, `${ux},${uy-1}`, `${ux},${uy+1}`];
+      for (const k of crossKeys) {
+        if (k.split(',').every(coord => {
+          const c = parseInt(coord, 10);
+          return c >= 0 && c < (k.includes(',0') || k.includes(`,${mapHeight-1}`) ? mapHeight : mapWidth);
+        })) {
+          excludedDueToAdjacency.add(k);
+        }
+      }
     }
-    // Ensure we do not exclude the actual endpoints: start/goal must be allowed
-    // so roads can visibly touch nodes.
+    
+    // Always allow endpoints
     excludedDueToAdjacency.delete(`${start.x},${start.y}`);
     excludedDueToAdjacency.delete(`${goal.x},${goal.y}`);
 
     let path = findTilePath(start, goal, mapWidth, mapHeight, forbiddenForRoads, excludedDueToAdjacency, usedRoadTiles);
     if (!path) {
-      // Fallback 1: allow adjacency but still avoid used tiles
+      // Fallback: less strict adjacency rules
       path = findTilePath(start, goal, mapWidth, mapHeight, forbiddenForRoads, new Set<string>(), usedRoadTiles);
     }
     if (!path) {
-      // Fallback 2: allow overlap completely if needed to ensure connectivity
+      // Final fallback: direct connection if needed
       path = findTilePath(start, goal, mapWidth, mapHeight, forbiddenForRoads, new Set<string>(), new Set<string>());
     }
     if (!path) continue;
 
+    // Add path tiles to road sets
     for (const p of path) {
       const key = `${p.x},${p.y}`;
       roadTiles.add(key);
       usedRoadTiles.add(key);
+    }
+
+    // Create smooth road segments from node centers through path
+    if (path.length >= 2) {
+      // Start from actual node center
+      let prevPixelX = nodeA.pixelX;
+      let prevPixelY = nodeA.pixelY;
+      
+      // Draw segments through path waypoints
+      for (let j = 0; j < path.length; j++) {
+        const waypoint = path[j];
+        const waypointPixelX = (waypoint.x + 0.5) * actualTileSize;
+        const waypointPixelY = (waypoint.y + 0.5) * actualTileSize;
+        
+        // Skip very short segments to reduce visual noise
+        const segmentLength = Math.sqrt(Math.pow(waypointPixelX - prevPixelX, 2) + Math.pow(waypointPixelY - prevPixelY, 2));
+        if (segmentLength > actualTileSize * 0.3) {
+          roadPaths.push({
+            fromX: prevPixelX,
+            fromY: prevPixelY,
+            toX: waypointPixelX,
+            toY: waypointPixelY
+          });
+        }
+        
+        prevPixelX = waypointPixelX;
+        prevPixelY = waypointPixelY;
+      }
+      
+      // Final segment to target node center
+      const finalSegmentLength = Math.sqrt(Math.pow(nodeB.pixelX - prevPixelX, 2) + Math.pow(nodeB.pixelY - prevPixelY, 2));
+      if (finalSegmentLength > actualTileSize * 0.3) {
+        roadPaths.push({
+          fromX: prevPixelX,
+          fromY: prevPixelY,
+          toX: nodeB.pixelX,
+          toY: nodeB.pixelY
+        });
+      }
     }
   }
 
@@ -623,6 +667,32 @@ export const renderMap = (
         drawTileResponsive(ctx, tile, tileX, tileY, actualTileSize, true);
       }
     }
+  }
+
+  // Layer 3: Draw smooth road segments connecting nodes
+  for (const roadSegment of roadPaths) {
+    const roadWidth = Math.max(6, Math.floor(actualTileSize * 0.3));
+    const borderWidth = roadWidth + 2;
+    
+    // Draw road border
+    ctx.strokeStyle = '#654321';
+    ctx.lineWidth = borderWidth;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    ctx.moveTo(roadSegment.fromX, roadSegment.fromY);
+    ctx.lineTo(roadSegment.toX, roadSegment.toY);
+    ctx.stroke();
+    
+    // Draw road center
+    ctx.strokeStyle = '#8B4513';
+    ctx.lineWidth = roadWidth;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    ctx.moveTo(roadSegment.fromX, roadSegment.fromY);
+    ctx.lineTo(roadSegment.toX, roadSegment.toY);
+    ctx.stroke();
   }
 
   // Layer 3: mountains and other heavy overlays. Mountains cannot overlap
