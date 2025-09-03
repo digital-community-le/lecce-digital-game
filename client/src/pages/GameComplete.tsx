@@ -36,8 +36,8 @@ const GameComplete: React.FC = () => {
           <div 
             className={`w-64 h-64 mx-auto transition-all duration-1200 ${
               animationPhase === 'seal' 
-                ? 'scale-0 opacity-0 rotate-180' 
-                : 'scale-100 opacity-100 rotate-0'
+                ? 'scale-0 opacity-0' 
+                : 'scale-100 opacity-100'
             }`}
             style={{
               animation: animationPhase !== 'seal' ? 'float 6s ease-in-out infinite 2s' : 'none'
@@ -74,12 +74,6 @@ const GameComplete: React.FC = () => {
             {finalCompletion.title}
           </h1>
           
-          {/* Decorative separator */}
-          <div className="flex justify-center items-center gap-4 mb-4">
-            <div className="w-16 h-1 bg-gradient-to-r from-transparent via-yellow-300 to-transparent"></div>
-            <div className="text-yellow-300 text-2xl">⚡</div>
-            <div className="w-16 h-1 bg-gradient-to-r from-transparent via-yellow-300 to-transparent"></div>
-          </div>
         </div>
 
         {/* Epic Description */}
