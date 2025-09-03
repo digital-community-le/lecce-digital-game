@@ -44,9 +44,11 @@ const Statistics: React.FC = () => {
               style={{ imageRendering: 'pixelated' }}
             />
           </div>
-          <p className="text-center text-sm mb-4">
-            Hai recuperato tutte le gemme e riattivato il sigillo!
-          </p>
+          <div className="nes-container is-success p-4 mb-6">
+            <p className="text-center font-retro text-base font-medium" style={{ color: 'var(--ldc-contrast-yellow)' }}>
+              🎉 Hai recuperato tutte le gemme e riattivato il sigillo! 🎉
+            </p>
+          </div>
         </div>
 
         {/* Gemme Raccolte - Same style as StatisticsModal */}
