@@ -578,22 +578,7 @@ export const renderMap = (
       roadTiles.add(nodeTileKey);
       nodeTiles.add(nodeTileKey); // Mark this as a node tile where overlaps are allowed
       
-      // Also mark adjacent tiles to ensure connection
-      const adjacentTiles = [
-        `${nodePos.tx-1},${nodePos.ty}`, 
-        `${nodePos.tx+1},${nodePos.ty}`,
-        `${nodePos.tx},${nodePos.ty-1}`, 
-        `${nodePos.tx},${nodePos.ty+1}`
-      ];
-      for (const adjTile of adjacentTiles) {
-        const [adjX, adjY] = adjTile.split(',').map(n => parseInt(n, 10));
-        if (adjX >= 0 && adjY >= 0 && adjX < mapWidth && adjY < mapHeight) {
-          const tileType = determineTileType(adjX, adjY, mapWidth, mapHeight);
-          if (!forbiddenForRoads.includes(tileType)) {
-            roadTiles.add(adjTile);
-          }
-        }
-      }
+      // NO adjacent tiles - this was creating the crosses around nodes!
     }
   }
 
@@ -650,7 +635,7 @@ export const renderMap = (
 
     // Create modified usedRoadTiles that excludes node tiles (where overlaps are allowed)
     const restrictedUsedRoadTiles = new Set<string>();
-    for (const usedTile of usedRoadTiles) {
+    for (const usedTile of Array.from(usedRoadTiles)) {
       if (!nodeTiles.has(usedTile)) {
         restrictedUsedRoadTiles.add(usedTile);
       }
