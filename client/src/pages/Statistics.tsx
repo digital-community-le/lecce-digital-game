@@ -1,132 +1,92 @@
 import React from 'react';
 import { useGameStore } from '@/hooks/use-game-store';
 import GameLayout from '@/components/layout/GameLayout';
-import gameData from '@/assets/game-data.json';
+import allianceGem from '@assets/images/gem-of-alliance.png';
+import memoryGem from '@assets/images/gem-of-memory.png';
+import wisdomGem from '@assets/images/gem-of-wisdom.png';
+import communityGem from '@assets/images/gem-of-community.png';
 
 const Statistics: React.FC = () => {
   const { gameState } = useGameStore();
   
-  const { currentUser, gameProgress } = gameState;
-  const completedChallenges = gameProgress.completedChallenges;
-  const totalPoints = gameProgress.totalScore;
-  
-  // Calculate completion stats
-  const totalChallenges = gameData.challenges.length;
-  const completionRate = Math.round((completedChallenges.length / totalChallenges) * 100);
-  
-  // Get earned badges - completedChallenges is string[] not object[]
-  const earnedBadges = gameData.rewards.badges.filter(badge => {
-    return completedChallenges.some(challengeId => {
-      const challengeData = gameData.challenges.find(c => c.id === challengeId);
-      return challengeData?.rewards.badge === badge.name;
-    });
-  });
+  const totalGems = gameState.gameProgress.completedChallenges.length;
+  const totalScore = gameState.gameProgress.totalScore || 0;
+  const challengesCompleted = totalGems;
 
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('it-IT', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+  const gemMap: Record<string, string> = {
+    'networking-forest': allianceGem,
+    'retro-puzzle': memoryGem,
+    'debug-dungeon': wisdomGem,
+    'social-arena': communityGem,
   };
+
+  const badgeMap: Record<string, string> = {
+    'networking-forest': "Gemma dell'Alleanza",
+    'retro-puzzle': "Gemma della Conoscenza",
+    'debug-dungeon': "Gemma del Sapere",
+    'social-arena': "Sigillo di Lecce",
+  };
+
+  const isCollected = (id: string) => gameState.gameProgress.completedChallenges.includes(id);
 
   return (
     <GameLayout>
-      <div className="container mx-auto p-6 max-w-2xl">
+      <div className="container mx-auto p-4 max-w-md">
         
         {/* Sigillo Header */}
         <div className="text-center mb-6">
-          <div className="w-40 h-40 mx-auto mb-4 flex items-center justify-center">
+          <div className="w-32 h-32 mx-auto mb-4">
             <img 
               src="/assets/images/seal-with-gems.png" 
               alt="Sigillo di Lecce completato" 
-              className="w-full h-full object-contain drop-shadow-lg"
-              style={{ 
-                imageRendering: 'pixelated',
-                filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))'
-              }}
+              className="w-full h-full object-contain"
+              style={{ imageRendering: 'pixelated' }}
             />
           </div>
-          <div className="nes-container is-success p-4 mb-4" style={{ backgroundColor: 'var(--ldc-surface)', border: '4px solid var(--ldc-rpg-green)' }}>
-            <p className="text-center font-medium text-base" style={{ color: 'var(--ldc-on-surface)' }}>
-              🎉 Hai recuperato tutte le gemme e riattivato il sigillo!
-            </p>
-          </div>
+          <p className="text-center text-sm mb-4">
+            Hai recuperato tutte le gemme e riattivato il sigillo!
+          </p>
         </div>
 
-        {/* Statistiche Title */}
-        <h2 
-          className="font-retro text-xl mb-4 text-center"
-          data-testid="statistics-title"
-          style={{ color: 'var(--ldc-contrast-yellow)' }}
-        >
-          Statistiche
-        </h2>
-
-        {/* Main Stats - Only Total Points */}
-        <div className="mb-6">
-          <div className="nes-container with-title p-6" style={{ backgroundColor: 'var(--ldc-surface)', border: '4px solid var(--ldc-info)' }}>
-            <p className="title font-retro" style={{ color: 'var(--ldc-info)', backgroundColor: 'var(--ldc-background)' }}>Punti Totali</p>
-            <div className="text-center">
-              <div 
-                className="text-5xl font-retro mb-2"
-                data-testid="total-points"
-                style={{ color: 'var(--ldc-info)' }}
-              >
-                {totalPoints.toLocaleString('it-IT')}
-              </div>
-              <div className="text-base font-medium" style={{ color: 'var(--ldc-on-surface)' }}>
-                Punti conquistati
-              </div>
-            </div>
-          </div>
-        </div>
-
-
-        {/* Challenge Details */}
-        <div>
-          <div className="nes-container with-title" style={{ backgroundColor: 'var(--ldc-surface)', border: '4px solid var(--ldc-contrast-yellow)' }}>
-            <p className="title font-retro" style={{ color: 'var(--ldc-contrast-yellow)', backgroundColor: 'var(--ldc-background)' }}>Dettagli Sfide</p>
-            <div className="space-y-3 p-2">
-              {completedChallenges.map((challengeId, index) => {
-                const challengeData = gameData.challenges.find(c => c.id === challengeId);
-                return (
-                  <div 
-                    key={challengeId}
-                    className="flex items-center justify-between p-3 rounded"
-                    style={{ 
-                      backgroundColor: index % 2 === 0 ? 'rgba(255,255,255,0.05)' : 'transparent',
-                      border: '2px solid rgba(255,255,255,0.1)'
-                    }}
-                    data-testid={`challenge-stats-${challengeId}`}
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="text-2xl">{challengeData?.emoji}</div>
-                      <div>
-                        <h3 className="font-retro text-base mb-1" style={{ color: 'var(--ldc-on-surface)' }}>
-                          {challengeData?.title}
-                        </h3>
-                        <div className="text-sm font-medium" style={{ color: 'var(--ldc-rpg-green)' }}>
-                          ✓ Completato
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-retro text-xl" style={{ color: 'var(--ldc-contrast-yellow)' }}>
-                        {challengeData?.rewards?.points || 0}
-                      </div>
-                      <div className="text-sm" style={{ color: 'var(--ldc-on-surface)' }}>punti</div>
-                    </div>
+        {/* Gemme Raccolte - Same style as StatisticsModal */}
+        <div className="mb-4">
+          <div className="space-y-2">
+            {gameState.challenges.map(ch => {
+              const src = gemMap[ch.id] || '';
+              const collected = isCollected(ch.id);
+              const badgeName = badgeMap[ch.id] || ch.title;
+              return (
+                <div key={ch.id} className="flex items-center gap-3 p-2 rounded">
+                  <img
+                    src={src}
+                    alt={badgeName}
+                    className={`w-12 h-12 object-contain flex-shrink-0 ${collected ? '' : 'filter grayscale'}`}
+                  />
+                  <div className="text-left">
+                    <div className="font-medium text-sm">{badgeName}</div>
+                    <div className="text-xs text-muted-foreground">{ch.title}</div>
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
+        {/* Statistiche Finali - Same style as StatisticsModal */}
+        <div className="nes-container is-light p-3 mb-4">
+          <div className="text-sm">
+            <div className="flex justify-between">
+              <span>Raccolte:</span>
+              <span className="font-retro" data-testid="stats-completed">
+                {challengesCompleted}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span>Punteggio totale:</span>
+              <span data-testid="stats-score">{totalScore} pts</span>
+            </div>
+          </div>
+        </div>
 
       </div>
     </GameLayout>
