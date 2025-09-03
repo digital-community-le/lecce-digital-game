@@ -33,6 +33,7 @@
           "retro-puzzle"
         ]
       },
+      "gemImage": "@assets/images/gem-of-alliance.png",
       "completion": {
         "title": "Gemma dell'Alleanza Conquistata",
         "message": "I legami forgiati nel Networking Forest brillano ora nella gemma verde. Ogni connessione e un filo di luce che rafforza il tuo cammino verso il Sigillo."
@@ -106,6 +107,7 @@
           "debug-dungeon"
         ]
       },
+      "gemImage": "@assets/images/gem-of-memory.png",
       "completion": {
         "title": "Gemma della Conoscenza Conquistata",
         "message": "La saggezza antica risuona nella gemma blu. Ogni connessione mentale tracciata nel puzzle rivela ora i segreti nascosti del sapere tecnologico."
@@ -268,6 +270,7 @@
           "social-arena"
         ]
       },
+      "gemImage": "@assets/images/gem-of-wisdom.png",
       "completion": {
         "title": "Gemma del Sapere Conquistata",
         "message": "La gemma rossa pulsa con la forza del guerriero che ha affrontato le tenebre del Debug Dungeon. Ogni risposta corretta ha acceso una nuova fiamma di conoscenza."
@@ -285,7 +288,9 @@
         "left": "40%"
       },
       "settings": {
-        "requiredTags": ["@lecce_digital_community"],
+        "requiredTags": [
+          "@lecce_digital_community"
+        ],
         "confidenceThreshold": 40,
         "verificationMode": "ocr-client",
         "allowManualProof": true,
@@ -298,6 +303,7 @@
         "badge": "Sigillo di Lecce",
         "unlocks": []
       },
+      "gemImage": "@assets/images/gem-of-community.png",
       "completion": {
         "title": "Sigillo di Lecce Completato",
         "message": "La gemma finale brilla di luce dorata. Il tuo gesto davanti allo Stand ha risvegliato l'antica magia. Il Sigillo di Lecce e ora completo e la leggenda e scritta."
