@@ -567,11 +567,17 @@ export const renderMap = (
     return { pixelX, pixelY, tx, ty, challenge: ch };
   });
 
+  // Track node tiles where road overlaps are allowed (for convergence at nodes)
+  const nodeTiles = new Set<string>();
+  
   // Ensure the tile directly under each node is marked as a road tile
   // This ensures roads visually connect to where nodes are actually rendered
   for (const nodePos of nodePixelPositions) {
     if (nodePos.tx >= 0 && nodePos.ty >= 0 && nodePos.tx < mapWidth && nodePos.ty < mapHeight) {
-      roadTiles.add(`${nodePos.tx},${nodePos.ty}`);
+      const nodeTileKey = `${nodePos.tx},${nodePos.ty}`;
+      roadTiles.add(nodeTileKey);
+      nodeTiles.add(nodeTileKey); // Mark this as a node tile where overlaps are allowed
+      
       // Also mark adjacent tiles to ensure connection
       const adjacentTiles = [
         `${nodePos.tx-1},${nodePos.ty}`, 
@@ -614,14 +620,21 @@ export const renderMap = (
     }
 
     // Enhanced exclusion: prevent roads from crossing existing roads
+    // EXCEPT on node tiles where convergence is allowed
     const excludedDueToAdjacency = new Set<string>();
     
     // Block tiles adjacent to used roads to prevent crossings
     for (const usedKey of Array.from(usedRoadTiles)) {
+      // Skip anti-crossing logic if this is a node tile (overlaps allowed)
+      if (nodeTiles.has(usedKey)) continue;
+      
       const [ux, uy] = usedKey.split(',').map(s => parseInt(s, 10));
       // Only block adjacent tiles in cross pattern to allow parallel roads
       const crossKeys = [`${ux-1},${uy}`, `${ux+1},${uy}`, `${ux},${uy-1}`, `${ux},${uy+1}`];
       for (const k of crossKeys) {
+        // Don't block node tiles - roads can converge there
+        if (nodeTiles.has(k)) continue;
+        
         if (k.split(',').every(coord => {
           const c = parseInt(coord, 10);
           return c >= 0 && c < (k.includes(',0') || k.includes(`,${mapHeight-1}`) ? mapHeight : mapWidth);
@@ -635,10 +648,18 @@ export const renderMap = (
     excludedDueToAdjacency.delete(`${start.x},${start.y}`);
     excludedDueToAdjacency.delete(`${goal.x},${goal.y}`);
 
-    let path = findTilePath(start, goal, mapWidth, mapHeight, forbiddenForRoads, excludedDueToAdjacency, usedRoadTiles);
+    // Create modified usedRoadTiles that excludes node tiles (where overlaps are allowed)
+    const restrictedUsedRoadTiles = new Set<string>();
+    for (const usedTile of usedRoadTiles) {
+      if (!nodeTiles.has(usedTile)) {
+        restrictedUsedRoadTiles.add(usedTile);
+      }
+    }
+    
+    let path = findTilePath(start, goal, mapWidth, mapHeight, forbiddenForRoads, excludedDueToAdjacency, restrictedUsedRoadTiles);
     if (!path) {
-      // Fallback: less strict adjacency rules
-      path = findTilePath(start, goal, mapWidth, mapHeight, forbiddenForRoads, new Set<string>(), usedRoadTiles);
+      // Fallback: less strict adjacency rules but still respect node-only overlaps
+      path = findTilePath(start, goal, mapWidth, mapHeight, forbiddenForRoads, new Set<string>(), restrictedUsedRoadTiles);
     }
     if (!path) {
       // Final fallback: direct connection if needed
