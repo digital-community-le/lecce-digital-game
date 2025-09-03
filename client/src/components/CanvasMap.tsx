@@ -229,26 +229,29 @@ const CanvasMap: React.FC = () => {
   };
 
   const getCurrentAvatarPosition = () => {
-    const completedCount = gameState.gameProgress.completedChallenges.length;
-    if (completedCount === 0) {
-      return { top: "32%", left: "17%" }; // Near first challenge
-    }
-
-    const lastCompletedChallenge = gameState.challenges.find(
-      (c) =>
-        c.id === gameState.gameProgress.completedChallenges[completedCount - 1],
+    // Find the next available challenge (the one the player should tackle next)
+    const nextAvailableChallenge = gameState.challenges.find(
+      (c) => c.status === "available"
     );
-
-    if (lastCompletedChallenge) {
-      // Position avatar near the last completed challenge
-      const top =
-        parseFloat(lastCompletedChallenge.position.top.replace("%", "")) + 2;
-      const left =
-        parseFloat(lastCompletedChallenge.position.left.replace("%", "")) + 2;
+    
+    if (nextAvailableChallenge) {
+      // Position avatar on the next available challenge
+      const position = safePositions[nextAvailableChallenge.id] || nextAvailableChallenge.position;
+      const top = parseFloat(position.top.replace("%", ""));
+      const left = parseFloat(position.left.replace("%", ""));
       return { top: `${top}%`, left: `${left}%` };
     }
 
-    return { top: "62%", left: "42%" }; // Default position
+    // If no available challenges (shouldn't happen), position on first challenge
+    const firstChallenge = gameState.challenges[0];
+    if (firstChallenge) {
+      const position = safePositions[firstChallenge.id] || firstChallenge.position;
+      const top = parseFloat(position.top.replace("%", ""));
+      const left = parseFloat(position.left.replace("%", ""));
+      return { top: `${top}%`, left: `${left}%` };
+    }
+
+    return { top: "32%", left: "17%" }; // Fallback position
   };
 
   const handleChallengeClick = (node: MapNode) => {
