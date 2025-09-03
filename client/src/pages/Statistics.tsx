@@ -23,8 +23,8 @@ const Statistics: React.FC = () => {
     });
   });
 
-  const handleBackToMap = () => {
-    setLocation('/game');
+  const handleBackToGameComplete = () => {
+    setLocation('/game-complete');
   };
 
   const formatDate = (dateString: string) => {
@@ -214,10 +214,10 @@ const Statistics: React.FC = () => {
         <div className="text-center">
           <button 
             className="nes-btn is-primary font-retro text-lg px-8 py-4 hover:scale-105 transition-transform"
-            onClick={handleBackToMap}
-            data-testid="button-back-to-map"
+            onClick={handleBackToGameComplete}
+            data-testid="button-back-to-completion"
           >
-            Torna alla Mappa
+            Torna alla Celebrazione
           </button>
         </div>
       </div>

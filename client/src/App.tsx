@@ -16,6 +16,7 @@ import DebugDungeonPage from "@/pages/challenges/DebugDungeon";
 import SocialArenaPage from "@/pages/challenges/SocialArena";
 import NotFound from "@/pages/not-found";
 import { GameStoreProvider } from "@/hooks/use-game-store";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 function Router() {
   return (
@@ -25,7 +26,9 @@ function Router() {
       <Route path="/game/map">
         {() => (
           <GameLayout>
-            <GameMapPage />
+            <ProtectedRoute>
+              <GameMapPage />
+            </ProtectedRoute>
           </GameLayout>
         )}
       </Route>
@@ -33,7 +36,9 @@ function Router() {
       <Route path="/game/challenge/networking-forest">
         {() => (
           <GameLayout>
-            <NetworkingForestPage />
+            <ProtectedRoute>
+              <NetworkingForestPage />
+            </ProtectedRoute>
           </GameLayout>
         )}
       </Route>
@@ -41,7 +46,9 @@ function Router() {
       <Route path="/game/challenge/retro-puzzle">
         {() => (
           <GameLayout>
-            <RetroPuzzlePage />
+            <ProtectedRoute>
+              <RetroPuzzlePage />
+            </ProtectedRoute>
           </GameLayout>
         )}
       </Route>
@@ -49,7 +56,9 @@ function Router() {
       <Route path="/game/challenge/debug-dungeon">
         {() => (
           <GameLayout>
-            <DebugDungeonPage />
+            <ProtectedRoute>
+              <DebugDungeonPage />
+            </ProtectedRoute>
           </GameLayout>
         )}
       </Route>
@@ -57,7 +66,9 @@ function Router() {
       <Route path="/game/challenge/social-arena">
         {() => (
           <GameLayout>
-            <SocialArenaPage />
+            <ProtectedRoute>
+              <SocialArenaPage />
+            </ProtectedRoute>
           </GameLayout>
         )}
       </Route>
@@ -70,7 +81,9 @@ function Router() {
       <Route path="/game">
         {() => (
           <GameLayout>
-            <GameMapPage />
+            <ProtectedRoute>
+              <GameMapPage />
+            </ProtectedRoute>
           </GameLayout>
         )}
       </Route>

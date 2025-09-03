@@ -10,15 +10,25 @@ const GameMapPage: React.FC = () => {
     
 
   // Redirect to intro if no user profile
+  // Redirect to game-complete if game is completed (all challenges done)
   useEffect(() => {
     if (!gameState.currentUser.userId) {
       setLocation('/');
+      return;
     }
-  // When the map mounts, surface any pending completion modal queued by store
-  acknowledgeCompletion();
-  }, [gameState.currentUser.userId, setLocation]);
+    
+    // Check if all challenges are completed - redirect to final page
+    if (gameState.gameProgress.completedChallenges.length === 4) {
+      setLocation('/game-complete');
+      return;
+    }
+    
+    // When the map mounts, surface any pending completion modal queued by store
+    acknowledgeCompletion();
+  }, [gameState.currentUser.userId, gameState.gameProgress.completedChallenges.length, setLocation, acknowledgeCompletion]);
 
-  if (!gameState.currentUser.userId) {
+  // Prevent rendering if redirecting
+  if (!gameState.currentUser.userId || gameState.gameProgress.completedChallenges.length === 4) {
     return null; // Will redirect
   }
 
