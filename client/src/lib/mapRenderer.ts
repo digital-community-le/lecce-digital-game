@@ -153,9 +153,8 @@ const findNearestAllowedTileExcluding = (
 };
 
 /**
- * A simple A* pathfinder on the tile grid that minimizes turns by applying a
- * turn penalty. It avoids tiles that are forbidden, excluded, or already used
- * by existing roads.
+ * Enhanced A* pathfinder with improved turn penalty and better obstacle avoidance.
+ * Prioritizes straight paths and prevents road intersections.
  */
 const findTilePath = (
   start: { x: number; y: number },
@@ -168,7 +167,7 @@ const findTilePath = (
 ) => {
   const key = (x: number, y: number, d: number | null) => `${x},${y},${d === null ? 'n' : d}`;
   const dirs = [ [0, -1], [1, 0], [0, 1], [-1, 0] ];
-  const turnPenalty = 2;
+  const turnPenalty = 5; // Increased penalty to favor straight paths
 
   const open: Array<{ x: number; y: number; g: number; f: number; dir: number | null }>= [];
   const cameFrom = new Map<string, string | null>();
@@ -257,7 +256,7 @@ export const determineSafePositionForChallenge = (
   canvasHeight: number,
   mapWidth: number,
   mapHeight: number,
-  forbidden: TerrainType[] = ['forest', 'mountain', 'lake']
+  forbidden: TerrainType[] = ['mountain', 'lake'] // Removed forest - nodes can be on trees
 ) => {
   const leftPct = parseFloat(node.position.left.replace('%', ''));
   const topPct = parseFloat(node.position.top.replace('%', ''));
@@ -463,6 +462,41 @@ export const renderMap = (
 
   const { ctx, containerWidth, containerHeight, actualTileSize } = prepared;
 
+  // If nodeRects is not provided, compute it here for road calculations
+  let actualNodeRects = nodeRects;
+  if (!actualNodeRects) {
+    actualNodeRects = {};
+    challenges.forEach((node) => {
+      const safe = determineSafePositionForChallenge(
+        node,
+        containerWidth,
+        containerHeight,
+        mapWidth,
+        mapHeight,
+      );
+      const left = (parseFloat(safe.leftPercent.replace('%', '')) / 100) * containerWidth;
+      const top = (parseFloat(safe.topPercent.replace('%', '')) / 100) * containerHeight;
+      const w = 64; // default visual size
+      const h = 64;
+      const colorMap: Record<string, string> = {
+        'networking-forest': '#16a34a',
+        'retro-puzzle': '#f59e0b',
+        'debug-dungeon': '#7c3aed',
+        'social-arena': '#f97316',
+      };
+      const bg = colorMap[node.id] || '#9ca3af';
+      actualNodeRects![node.id] = {
+        cx: left,
+        cy: top,
+        w,
+        h,
+        bgColor: bg,
+        title: node.title,
+        emoji: node.emoji,
+      };
+    });
+  }
+
   // Compute visible tile range and draw only tiles within viewport
   const cols = mapWidth;
   const rows = mapHeight;
@@ -497,42 +531,68 @@ export const renderMap = (
   // A* variant `findTilePath` with a turn penalty to minimize curves.
   const roadTiles = new Set<string>();
   const usedRoadTiles = new Set<string>();
-  const forbiddenForRoads: TerrainType[] = ['forest', 'mountain', 'lake'];
+  const forbiddenForRoads: TerrainType[] = ['mountain', 'lake']; // Removed forest - roads can pass through trees
 
-  // Ensure the tile directly under each node is marked as a road tile so
-  // roads visually connect to nodes even if the pathfinder later routes
-  // around obstacles. We don't mark these as `usedRoadTiles` yet to allow
-  // the path algorithm to incorporate them into actual paths.
-  for (const ch of challenges) {
-    const leftPct = parseFloat(ch.position.left.replace('%', ''));
-    const topPct = parseFloat(ch.position.top.replace('%', ''));
-    const tx = Math.floor((leftPct / 100) * mapWidth);
-    const ty = Math.floor((topPct / 100) * mapHeight);
-    if (tx >= 0 && ty >= 0 && tx < mapWidth && ty < mapHeight) {
-      roadTiles.add(`${tx},${ty}`);
+  // Calculate node positions for roads using EXACT coordinates from where nodes are drawn
+  // This ensures perfect alignment between road endpoints and visible node positions
+  const nodePixelPositions = challenges.map(ch => {
+    let pixelX, pixelY, tx, ty;
+    
+    if (actualNodeRects && actualNodeRects[ch.id]) {
+      // Use exact coordinates from where the node is actually drawn
+      const nr = actualNodeRects[ch.id];
+      pixelX = nr.cx;
+      pixelY = nr.cy;
+      // Convert pixel coordinates back to tile coordinates
+      tx = Math.floor(pixelX / actualTileSize);
+      ty = Math.floor(pixelY / actualTileSize);
+    } else {
+      // Fallback to safe position calculation
+      const safePos = determineSafePositionForChallenge(
+        ch,
+        containerWidth,
+        containerHeight,
+        mapWidth,
+        mapHeight,
+        ['forest', 'mountain', 'lake']
+      );
+      pixelX = safePos.pixelX;
+      pixelY = safePos.pixelY;
+      const leftPct = parseFloat(safePos.leftPercent.replace('%', ''));
+      const topPct = parseFloat(safePos.topPercent.replace('%', ''));
+      tx = Math.floor((leftPct / 100) * mapWidth);
+      ty = Math.floor((topPct / 100) * mapHeight);
+    }
+    
+    return { pixelX, pixelY, tx, ty, challenge: ch };
+  });
+
+  // Track node tiles where road overlaps are allowed (for convergence at nodes)
+  const nodeTiles = new Set<string>();
+  
+  // Ensure the tile directly under each node is marked as a road tile
+  // This ensures roads visually connect to where nodes are actually rendered
+  for (const nodePos of nodePixelPositions) {
+    if (nodePos.tx >= 0 && nodePos.ty >= 0 && nodePos.tx < mapWidth && nodePos.ty < mapHeight) {
+      const nodeTileKey = `${nodePos.tx},${nodePos.ty}`;
+      roadTiles.add(nodeTileKey);
+      nodeTiles.add(nodeTileKey); // Mark this as a node tile where overlaps are allowed
+      
+      // NO adjacent tiles - this was creating the crosses around nodes!
     }
   }
 
-  for (let i = 0; i < challenges.length - 1; i++) {
-    const a = challenges[i];
-    const b = challenges[i + 1];
-    const aLeft = parseFloat(a.position.left.replace('%', ''));
-    const aTop = parseFloat(a.position.top.replace('%', ''));
-    const bLeft = parseFloat(b.position.left.replace('%', ''));
-    const bTop = parseFloat(b.position.top.replace('%', ''));
+  for (let i = 0; i < nodePixelPositions.length - 1; i++) {
+    const nodeA = nodePixelPositions[i];
+    const nodeB = nodePixelPositions[i + 1];
 
-    const aTx = Math.floor((aLeft / 100) * mapWidth);
-    const aTy = Math.floor((aTop / 100) * mapHeight);
-    const bTx = Math.floor((bLeft / 100) * mapWidth);
-    const bTy = Math.floor((bTop / 100) * mapHeight);
-
-    // Prefer the exact tile under the node as the road endpoint so roads
-    // visually connect to nodes. Only if that tile is forbidden we search
-    // for the nearest allowed tile.
-    let start = { x: aTx, y: aTy } as { x: number; y: number };
-    let goal = { x: bTx, y: bTy } as { x: number; y: number };
+    // Prefer the exact tile under the node as the road endpoint
+    let start = { x: nodeA.tx, y: nodeA.ty };
+    let goal = { x: nodeB.tx, y: nodeB.ty };
+    
     const startType = determineTileType(start.x, start.y, mapWidth, mapHeight);
     const goalType = determineTileType(goal.x, goal.y, mapWidth, mapHeight);
+    
     if (forbiddenForRoads.includes(startType)) {
       const s = findNearestAllowedTile(start.x, start.y, mapWidth, mapHeight, forbiddenForRoads);
       if (!s) continue;
@@ -544,30 +604,55 @@ export const renderMap = (
       goal = g;
     }
 
-    // Build an excluded set containing tiles adjacent to already used road tiles
-    // so new roads won't touch existing roads. This is conservative: it blocks
-    // the 8-neighborhood around any used road tile.
+    // Enhanced exclusion: prevent roads from crossing existing roads
+    // EXCEPT on node tiles where convergence is allowed
     const excludedDueToAdjacency = new Set<string>();
+    
+    // Block tiles adjacent to used roads to prevent crossings
     for (const usedKey of Array.from(usedRoadTiles)) {
+      // Skip anti-crossing logic if this is a node tile (overlaps allowed)
+      if (nodeTiles.has(usedKey)) continue;
+      
       const [ux, uy] = usedKey.split(',').map(s => parseInt(s, 10));
-      for (const k of adjacentKeys(ux, uy, mapWidth, mapHeight)) excludedDueToAdjacency.add(k);
+      // Only block adjacent tiles in cross pattern to allow parallel roads
+      const crossKeys = [`${ux-1},${uy}`, `${ux+1},${uy}`, `${ux},${uy-1}`, `${ux},${uy+1}`];
+      for (const k of crossKeys) {
+        // Don't block node tiles - roads can converge there
+        if (nodeTiles.has(k)) continue;
+        
+        if (k.split(',').every(coord => {
+          const c = parseInt(coord, 10);
+          return c >= 0 && c < (k.includes(',0') || k.includes(`,${mapHeight-1}`) ? mapHeight : mapWidth);
+        })) {
+          excludedDueToAdjacency.add(k);
+        }
+      }
     }
-    // Ensure we do not exclude the actual endpoints: start/goal must be allowed
-    // so roads can visibly touch nodes.
+    
+    // Always allow endpoints
     excludedDueToAdjacency.delete(`${start.x},${start.y}`);
     excludedDueToAdjacency.delete(`${goal.x},${goal.y}`);
 
-    let path = findTilePath(start, goal, mapWidth, mapHeight, forbiddenForRoads, excludedDueToAdjacency, usedRoadTiles);
+    // Create modified usedRoadTiles that excludes node tiles (where overlaps are allowed)
+    const restrictedUsedRoadTiles = new Set<string>();
+    for (const usedTile of Array.from(usedRoadTiles)) {
+      if (!nodeTiles.has(usedTile)) {
+        restrictedUsedRoadTiles.add(usedTile);
+      }
+    }
+    
+    let path = findTilePath(start, goal, mapWidth, mapHeight, forbiddenForRoads, excludedDueToAdjacency, restrictedUsedRoadTiles);
     if (!path) {
-      // Fallback 1: allow adjacency but still avoid used tiles
-      path = findTilePath(start, goal, mapWidth, mapHeight, forbiddenForRoads, new Set<string>(), usedRoadTiles);
+      // Fallback: less strict adjacency rules but still respect node-only overlaps
+      path = findTilePath(start, goal, mapWidth, mapHeight, forbiddenForRoads, new Set<string>(), restrictedUsedRoadTiles);
     }
     if (!path) {
-      // Fallback 2: allow overlap completely if needed to ensure connectivity
+      // Final fallback: direct connection if needed
       path = findTilePath(start, goal, mapWidth, mapHeight, forbiddenForRoads, new Set<string>(), new Set<string>());
     }
-    if (!path) continue;
+    if (!path) continue; // Skip if pathfinding still fails with reduced restrictions
 
+    // Add path tiles to road sets
     for (const p of path) {
       const key = `${p.x},${p.y}`;
       roadTiles.add(key);
@@ -644,9 +729,9 @@ export const renderMap = (
   // Currently handled elsewhere by the Canvas component; kept here as a placeholder.
   // Draw nodes on layer 4 if nodeRects information is available. This renders
   // node boxes directly on the canvas so roads can visibly connect beneath.
-  if (nodeRects) {
+  if (actualNodeRects) {
     for (const ch of challenges) {
-      const nr = nodeRects[ch.id];
+      const nr = actualNodeRects[ch.id];
       if (!nr) continue;
       const boxW = Math.max(24, nr.w);
       const boxH = Math.max(24, nr.h);
@@ -763,8 +848,8 @@ export const renderMap = (
     let nodeCenterX = (ntx + 0.5) * actualTileSize;
     let nodeCenterY = (nty + 0.5) * actualTileSize;
     let nodeRadius = Math.min(actualTileSize, actualTileSize) * 0.5; // fallback
-    if (nodeRects && nodeRects[ch.id]) {
-      const nr = nodeRects[ch.id];
+    if (actualNodeRects && actualNodeRects[ch.id]) {
+      const nr = actualNodeRects[ch.id];
       nodeCenterX = nr.cx;
       nodeCenterY = nr.cy;
       nodeRadius = Math.min(nr.w, nr.h) * 0.5;
