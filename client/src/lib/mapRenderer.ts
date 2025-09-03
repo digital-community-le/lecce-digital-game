@@ -462,6 +462,41 @@ export const renderMap = (
 
   const { ctx, containerWidth, containerHeight, actualTileSize } = prepared;
 
+  // If nodeRects is not provided, compute it here for road calculations
+  let actualNodeRects = nodeRects;
+  if (!actualNodeRects) {
+    actualNodeRects = {};
+    challenges.forEach((node) => {
+      const safe = determineSafePositionForChallenge(
+        node,
+        containerWidth,
+        containerHeight,
+        mapWidth,
+        mapHeight,
+      );
+      const left = (parseFloat(safe.leftPercent.replace('%', '')) / 100) * containerWidth;
+      const top = (parseFloat(safe.topPercent.replace('%', '')) / 100) * containerHeight;
+      const w = 64; // default visual size
+      const h = 64;
+      const colorMap: Record<string, string> = {
+        'networking-forest': '#16a34a',
+        'retro-puzzle': '#f59e0b',
+        'debug-dungeon': '#7c3aed',
+        'social-arena': '#f97316',
+      };
+      const bg = colorMap[node.id] || '#9ca3af';
+      actualNodeRects![node.id] = {
+        cx: left,
+        cy: top,
+        w,
+        h,
+        bgColor: bg,
+        title: node.title,
+        emoji: node.emoji,
+      };
+    });
+  }
+
   // Compute visible tile range and draw only tiles within viewport
   const cols = mapWidth;
   const rows = mapHeight;
@@ -498,30 +533,38 @@ export const renderMap = (
   const usedRoadTiles = new Set<string>();
   const forbiddenForRoads: TerrainType[] = ['forest', 'mountain', 'lake'];
 
-  // Calculate exact pixel coordinates for each challenge node using SAFE positions
-  // that match what's actually rendered on screen (after terrain collision detection)
+  // Calculate node positions for roads using EXACT coordinates from where nodes are drawn
+  // This ensures perfect alignment between road endpoints and visible node positions
   const nodePixelPositions = challenges.map(ch => {
-    const safePos = determineSafePositionForChallenge(
-      ch,
-      containerWidth,
-      containerHeight,
-      mapWidth,
-      mapHeight,
-      ['forest', 'mountain', 'lake']
-    );
+    let pixelX, pixelY, tx, ty;
     
-    const leftPct = parseFloat(safePos.leftPercent.replace('%', ''));
-    const topPct = parseFloat(safePos.topPercent.replace('%', ''));
-    const tx = Math.floor((leftPct / 100) * mapWidth);
-    const ty = Math.floor((topPct / 100) * mapHeight);
+    if (actualNodeRects && actualNodeRects[ch.id]) {
+      // Use exact coordinates from where the node is actually drawn
+      const nr = actualNodeRects[ch.id];
+      pixelX = nr.cx;
+      pixelY = nr.cy;
+      // Convert pixel coordinates back to tile coordinates
+      tx = Math.floor(pixelX / actualTileSize);
+      ty = Math.floor(pixelY / actualTileSize);
+    } else {
+      // Fallback to safe position calculation
+      const safePos = determineSafePositionForChallenge(
+        ch,
+        containerWidth,
+        containerHeight,
+        mapWidth,
+        mapHeight,
+        ['forest', 'mountain', 'lake']
+      );
+      pixelX = safePos.pixelX;
+      pixelY = safePos.pixelY;
+      const leftPct = parseFloat(safePos.leftPercent.replace('%', ''));
+      const topPct = parseFloat(safePos.topPercent.replace('%', ''));
+      tx = Math.floor((leftPct / 100) * mapWidth);
+      ty = Math.floor((topPct / 100) * mapHeight);
+    }
     
-    return { 
-      pixelX: safePos.pixelX, 
-      pixelY: safePos.pixelY, 
-      tx, 
-      ty, 
-      challenge: ch 
-    };
+    return { pixelX, pixelY, tx, ty, challenge: ch };
   });
 
   // Ensure the tile directly under each node is marked as a road tile
@@ -680,9 +723,9 @@ export const renderMap = (
   // Currently handled elsewhere by the Canvas component; kept here as a placeholder.
   // Draw nodes on layer 4 if nodeRects information is available. This renders
   // node boxes directly on the canvas so roads can visibly connect beneath.
-  if (nodeRects) {
+  if (actualNodeRects) {
     for (const ch of challenges) {
-      const nr = nodeRects[ch.id];
+      const nr = actualNodeRects[ch.id];
       if (!nr) continue;
       const boxW = Math.max(24, nr.w);
       const boxH = Math.max(24, nr.h);
@@ -799,8 +842,8 @@ export const renderMap = (
     let nodeCenterX = (ntx + 0.5) * actualTileSize;
     let nodeCenterY = (nty + 0.5) * actualTileSize;
     let nodeRadius = Math.min(actualTileSize, actualTileSize) * 0.5; // fallback
-    if (nodeRects && nodeRects[ch.id]) {
-      const nr = nodeRects[ch.id];
+    if (actualNodeRects && actualNodeRects[ch.id]) {
+      const nr = actualNodeRects[ch.id];
       nodeCenterX = nr.cx;
       nodeCenterY = nr.cy;
       nodeRadius = Math.min(nr.w, nr.h) * 0.5;
