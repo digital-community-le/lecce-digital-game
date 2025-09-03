@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import IntroPage from "@/pages/Intro";
 import GameMapPage from "@/pages/GameMap";
+import GameCompletePage from "@/pages/GameComplete";
+import StatisticsPage from "@/pages/Statistics";
 import GameLayout from "@/components/layout/GameLayout";
 import ScannerView from "@/components/ScannerView";
 import ScanPreviewModal from "@/components/ScanPreviewModal";
@@ -60,6 +62,10 @@ function Router() {
         )}
       </Route>
 
+      {/* Final completion pages */}
+      <Route path="/game-complete" component={GameCompletePage} />
+      <Route path="/statistics" component={StatisticsPage} />
+      
       {/* Default /game -> show map */}
       <Route path="/game">
         {() => (

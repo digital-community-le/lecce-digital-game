@@ -3,6 +3,7 @@ import Header from '@/components/Header';
 import FloatingActionButton from '../FloatingActionButton';
 import ScanPreviewModal from '../ScanPreviewModal';
 import CompletionModal from '../CompletionModal';
+import EpilogueModal from '../EpilogueModal';
 import StatisticsModal from '../StatisticsModal';
 import QRModal from '../QRModal';
 import { useGameStore } from '@/hooks/use-game-store';
@@ -57,6 +58,7 @@ const GameLayout: React.FC<GameLayoutProps> = ({
       <ScannerView />
       <ScanPreviewModal />
       <CompletionModal />
+      <EpilogueModal />
       <StatisticsModal />
       <QRModal />
       

@@ -338,6 +338,12 @@
       }
     ]
   },
+  "finalCompletion": {
+    "title": "Il Sigillo di Lecce è Completo",
+    "description": "Le quattro gemme brillano ora unite nel Sigillo di Lecce. La tua leggenda è stata scritta nelle pietre antiche della città. Hai dimostrato saggezza, coraggio, alleanza e spirito di comunità. Il risveglio è compiuto.",
+    "image": "/assets/images/seal-with-gems.png",
+    "buttonText": "Vedi le tue statistiche"
+  },
   "avatars": [
     "/assets/avatars/female_developer.png",
     "/assets/avatars/female_designer.png",
