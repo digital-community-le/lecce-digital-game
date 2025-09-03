@@ -30,6 +30,22 @@ export interface GameState {
     totalScore: number;
     gameCompleted: boolean;
   };
+  /** Feature flag: if true the app is in test mode (set via ?test=1) */
+  test?: boolean;
+  /** Authentication state */
+  auth: {
+    isAuthenticated: boolean;
+    token: string | null;
+    error: string | null;
+  };
+  /** Avatar animation state for map movement */
+  avatarAnimation: {
+    isAnimating: boolean;
+    fromChallengeId: string | null;
+    toChallengeId: string | null;
+    progress: number; // 0-1
+    duration: number; // milliseconds
+  };
 }
 
 export interface Toast {

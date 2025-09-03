@@ -51,7 +51,7 @@ const CanvasMap: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [, setLocation] = useLocation();
   const navigateWithTransition = useNavigateWithTransition();
-  const { gameState, showToast } = useGameStore();
+  const { gameState, showToast, startAvatarAnimation } = useGameStore();
 
   // Stato per l'atlas completo
   const [atlasLoaded, setAtlasLoaded] = useState(false);
@@ -60,6 +60,37 @@ const CanvasMap: React.FC = () => {
   const [nodeRectsState, setNodeRectsState] = useState<
     Record<string, NodeRect> | undefined
   >(undefined);
+  
+  // Check for pending avatar animation when map loads
+  useEffect(() => {
+    const pendingAnimation = sessionStorage.getItem('pendingAvatarAnimation');
+    if (pendingAnimation) {
+      try {
+        const animationData = JSON.parse(pendingAnimation);
+        if (animationData.shouldAnimate && animationData.fromChallengeId && animationData.toChallengeId) {
+          // Clear the stored data first
+          sessionStorage.removeItem('pendingAvatarAnimation');
+          
+          // Calculate delay: 1 second from modal close + time for map to render
+          const elapsedSinceModalClose = Date.now() - (animationData.closedAt || Date.now());
+          const targetDelay = animationData.delayMs || 1000; // Default 1 second
+          const remainingDelay = Math.max(targetDelay - elapsedSinceModalClose, 0);
+          const mapRenderDelay = 500; // Additional delay for map rendering
+          
+          const totalDelay = remainingDelay + mapRenderDelay;
+          
+          // Start the animation after the calculated delay
+          setTimeout(() => {
+            startAvatarAnimation(animationData.fromChallengeId, animationData.toChallengeId, 3000);
+          }, totalDelay);
+        }
+      } catch (e) {
+        console.error('Failed to parse pending avatar animation:', e);
+        sessionStorage.removeItem('pendingAvatarAnimation');
+      }
+    }
+  }, []); // Run only once when component mounts
+
   /** Dimensione di ogni tile in pixel - ridotta per forme più smussate */
   // Map grid configuration - kept as small configuration on the component
   const MAP_WIDTH = 48;
@@ -229,20 +260,49 @@ const CanvasMap: React.FC = () => {
   };
 
   const getCurrentAvatarPosition = () => {
-    // Find the next available challenge (the one the player should tackle next)
-    const nextAvailableChallenge = gameState.challenges.find(
-      (c) => c.status === "available"
-    );
-    
-    if (nextAvailableChallenge) {
-      // Position avatar on the next available challenge
-      const position = safePositions[nextAvailableChallenge.id] || nextAvailableChallenge.position;
-      const top = parseFloat(position.top.replace("%", ""));
-      const left = parseFloat(position.left.replace("%", ""));
-      return { top: `${top}%`, left: `${left}%` };
+    // If animation is in progress, interpolate between start and end positions
+    if (gameState.avatarAnimation.isAnimating) {
+      const { fromChallengeId, toChallengeId, progress } = gameState.avatarAnimation;
+      
+      if (fromChallengeId && toChallengeId) {
+        const fromChallenge = gameState.challenges.find(c => c.id === fromChallengeId);
+        const toChallenge = gameState.challenges.find(c => c.id === toChallengeId);
+        
+        if (fromChallenge && toChallenge) {
+          const fromPos = safePositions[fromChallengeId] || fromChallenge.position;
+          const toPos = safePositions[toChallengeId] || toChallenge.position;
+          
+          const fromTop = parseFloat(fromPos.top.replace("%", ""));
+          const fromLeft = parseFloat(fromPos.left.replace("%", ""));
+          const toTop = parseFloat(toPos.top.replace("%", ""));
+          const toLeft = parseFloat(toPos.left.replace("%", ""));
+          
+          // Smooth easing (ease-in-out)
+          const easeInOut = (t: number) => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+          const easedProgress = easeInOut(progress);
+          
+          const currentTop = fromTop + (toTop - fromTop) * easedProgress;
+          const currentLeft = fromLeft + (toLeft - fromLeft) * easedProgress;
+          
+          return { top: `${currentTop}%`, left: `${currentLeft}%` };
+        }
+      }
     }
-
-    // If no available challenges (shouldn't happen), position on first challenge
+    
+    // When not animating, position avatar on the last completed challenge
+    const lastCompletedChallengeId = gameState.gameProgress.completedChallenges[gameState.gameProgress.completedChallenges.length - 1];
+    
+    if (lastCompletedChallengeId) {
+      const lastCompletedChallenge = gameState.challenges.find(c => c.id === lastCompletedChallengeId);
+      if (lastCompletedChallenge) {
+        const position = safePositions[lastCompletedChallengeId] || lastCompletedChallenge.position;
+        const top = parseFloat(position.top.replace("%", ""));
+        const left = parseFloat(position.left.replace("%", ""));
+        return { top: `${top}%`, left: `${left}%` };
+      }
+    }
+    
+    // If no challenges completed yet, position on first challenge (start position)
     const firstChallenge = gameState.challenges[0];
     if (firstChallenge) {
       const position = safePositions[firstChallenge.id] || firstChallenge.position;

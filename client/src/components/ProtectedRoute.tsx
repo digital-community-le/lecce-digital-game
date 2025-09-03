@@ -2,12 +2,16 @@ import React, { useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { useGameStore } from '@/hooks/use-game-store';
 
-interface ProtectedRouteProps {
+interface GameCompletionProtectedRouteProps {
   children: React.ReactNode;
   redirectPath?: string;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
+/**
+ * GameCompletionProtectedRoute - Redirects completed games to completion page
+ * This is separate from auth protection and handles only game completion state
+ */
+const GameCompletionProtectedRoute: React.FC<GameCompletionProtectedRouteProps> = ({ 
   children, 
   redirectPath = '/game-complete' 
 }) => {
@@ -29,4 +33,4 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   return <>{children}</>;
 };
 
-export default ProtectedRoute;
+export default GameCompletionProtectedRoute;

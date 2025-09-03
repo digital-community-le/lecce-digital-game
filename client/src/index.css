@@ -223,6 +223,17 @@
     color: black !important;
   }
 
+  /* Fix nes.css border-image-repeat issue on Safari/WebKit */
+  @media (-webkit-min-device-pixel-ratio: 0) and (min-resolution: 0.001dpcm) {
+    .nes-container.is-rounded {
+      border-image-repeat: stretch !important;
+    }
+    
+    .nes-btn {
+      border-image-repeat: stretch !important;
+    }
+  }
+
   /* Header styling */
   .ldc-header {
     height: var(--ldc-header-height);
@@ -277,6 +288,41 @@
     height: 48px;
     transition: all var(--ldc-transition-medium) steps(8, end);
     z-index: 20;
+    transform: translate(-50%, -50%);
+    will-change: top, left;
+  }
+
+  .player-avatar.avatar-animating {
+    z-index: 25;
+    filter: brightness(1.2) drop-shadow(0 0 8px rgba(59, 130, 246, 0.6));
+  }
+
+  @keyframes avatar-glow {
+    0%, 100% { 
+      box-shadow: 0 0 4px rgba(59, 130, 246, 0.4);
+    }
+    50% { 
+      box-shadow: 0 0 16px rgba(59, 130, 246, 0.8);
+    }
+  }
+
+  .avatar-animating .w-full {
+    animation: avatar-glow 1s ease-in-out infinite;
+  }
+
+  @keyframes trail-sparkle {
+    0% { 
+      opacity: 1; 
+      transform: scale(1) rotate(0deg); 
+    }
+    100% { 
+      opacity: 0; 
+      transform: scale(0.3) rotate(180deg); 
+    }
+  }
+
+  .avatar-animating .animate-ping {
+    animation: trail-sparkle 0.8s ease-out infinite;
   }
 
   /* Modal and overlay styles */

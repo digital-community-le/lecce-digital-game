@@ -8,7 +8,11 @@
     "remoteBackend": false,
     "maxPlayers": 1000,
     "eventDate": "2025-08-13",
-    "location": "DevFest Lecce 2025"
+    "location": "DevFest Lecce 2025",
+    "api": {
+      "badgeEndpoint": "https://api.devfest.gdglecce.it/badges/@scan",
+      "gameCompletionSecret": "LECCE_DIGITAL_QUEST_2025_SIGILLO_MASTER_KEY_DEVFEST_COMPLETION_BADGE_ULTIMATE_SEAL"
+    }
   },
   "challenges": [
     {

@@ -2,8 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { useGameStore } from '@/hooks/use-game-store';
 import gameData from '@/assets/game-data.json';
 
+// Import static gem images as URL strings
+const gemOfWisdom = '/assets/images/gem-of-wisdom.png';
+const gemOfMemory = '/assets/images/gem-of-memory.png';
+const gemOfCommunity = '/assets/images/gem-of-community.png';
+const gemOfAlliance = '/assets/images/gem-of-alliance.png';
+
+// Map challenge IDs to their corresponding gem images
+const GEM_IMAGES = {
+  'debug-dungeon': gemOfWisdom,
+  'retro-puzzle': gemOfMemory,
+  'networking-forest': gemOfCommunity,
+  'social-arena': gemOfAlliance,
+} as const;
+
 const CompletionModal: React.FC = () => {
-  const { modals, closeModal, openModal, gameState } = useGameStore();
+  const { modals, closeModal, openModal, gameState, startAvatarAnimation } = useGameStore();
   const isOpen = modals.completion?.isOpen;
   const completionData = modals.completion?.data;
   const [animationPhase, setAnimationPhase] = useState<'gem' | 'title' | 'message' | 'button'>('gem');
@@ -16,6 +30,28 @@ const CompletionModal: React.FC = () => {
       setTimeout(() => {
         openModal('epilogue');
       }, 500);
+      return;
+    }
+
+    // Navigate back to map first, then start avatar animation
+    // This ensures the user sees the animation on the map, not on the challenge page
+    if (completionData?.challengeId) {
+      const currentIndex = gameState.challenges.findIndex(c => c.id === completionData.challengeId);
+      const nextChallenge = gameState.challenges[currentIndex + 1];
+      
+      if (nextChallenge && nextChallenge.status === "available") {
+        // Store animation data with timestamp for delayed execution
+        const animationData = {
+          fromChallengeId: completionData.challengeId,
+          toChallengeId: nextChallenge.id,
+          shouldAnimate: true,
+          delayMs: 1000, // Start animation 1 second after modal closes
+          closedAt: Date.now(), // Timestamp when modal was closed
+        };
+        
+        // Store in sessionStorage so it survives the navigation
+        sessionStorage.setItem('pendingAvatarAnimation', JSON.stringify(animationData));
+      }
     }
   };
 
@@ -56,8 +92,8 @@ const CompletionModal: React.FC = () => {
       throw new Error('MISSING_GAME_DATA');
     }
 
-    if (!challenge.completion || !(challenge as any).gemImage) {
-      console.error(`CompletionModal: incomplete challenge entry for id=${challengeId} (missing completion or gemImage) in game-data.json`);
+    if (!challenge.completion) {
+      console.error(`CompletionModal: incomplete challenge entry for id=${challengeId} (missing completion) in game-data.json`);
       closeModal('completion');
       throw new Error('MISSING_GAME_DATA');
     }
@@ -65,22 +101,10 @@ const CompletionModal: React.FC = () => {
     const completionTitle = challenge.completion.title || 'Challenge Completata';
     const completionMessage = challenge.completion.message || 'Hai completato la challenge!';
 
-    // Build import path using @assets alias which points to /public/assets
-    // strip leading slash if present and ensure path starts with @assets
-    const importPath: string = (challenge as any).gemImage || '';
+    // Get gem image from static imports based on challenge ID
+    const gemImage = GEM_IMAGES[challengeId as keyof typeof GEM_IMAGES] || gemOfAlliance;
 
-    try {
-      // dynamic import - Vite may complain for dynamic strings, using vite-ignore to allow runtime import
-      // @ts-ignore
-      const mod = await import(/* @vite-ignore */ importPath);
-      const src = mod?.default || mod;
-      return { gemImage: src, completionTitle, completionMessage };
-    } catch (e) {
-      console.error(`CompletionModal: failed to import gem image module for id=${challengeId} path=${importPath}`, e);
-      // Close modal as the assets are expected to be present under @assets
-      closeModal('completion');
-      throw new Error('MISSING_GAME_ASSET');
-    }
+    return { gemImage, completionTitle, completionMessage };
   };
 
 
@@ -93,7 +117,7 @@ const CompletionModal: React.FC = () => {
       setLoadingGem(true);
       getChallengeData(completionData.challengeId)
         .then((d) => { if (mounted) setChallengeData(d); })
-        .catch(() => { if (mounted) setChallengeData({ gemImage: '@assets/images/gem-of-alliance.png', completionTitle: 'Challenge Completata', completionMessage: 'Hai completato la challenge!' }); })
+        .catch(() => { if (mounted) setChallengeData({ gemImage: gemOfAlliance, completionTitle: 'Challenge Completata', completionMessage: 'Hai completato la challenge!' }); })
         .finally(() => { if (mounted) setLoadingGem(false); });
     }
     return () => { mounted = false; };

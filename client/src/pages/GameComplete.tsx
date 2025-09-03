@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { useGameStore } from '@/hooks/use-game-store';
+import { submitGameCompletion } from '@/services/completionService';
 import gameData from '@/assets/game-data.json';
 import sealWithGemsImage from '@assets/images/seal-with-gems.png';
 
@@ -8,6 +9,7 @@ const GameComplete: React.FC = () => {
   const { gameState } = useGameStore();
   const [, setLocation] = useLocation();
   const [animationPhase, setAnimationPhase] = useState<'seal' | 'title' | 'description' | 'button'>('seal');
+  const [badgeInfo, setBadgeInfo] = useState<any>(null);
   
   const { finalCompletion } = gameData;
 
@@ -17,6 +19,23 @@ const GameComplete: React.FC = () => {
       setLocation('/game');
       return;
     }
+
+    // Submit completion to DevFest API
+    (async () => {
+      try {
+        console.log('🚀 Submitting game completion to DevFest API...');
+        const result = await submitGameCompletion();
+        
+        if (result.success && result.badge) {
+          console.log('🏆 DevFest badge received:', result.badge);
+          setBadgeInfo(result.badge);
+        } else {
+          console.error('❌ Game completion failed:', result.error);
+        }
+      } catch (e) {
+        console.warn('💥 Game completion submission error:', e);
+      }
+    })();
 
     // Sequential animation phases
     setAnimationPhase('seal');
@@ -86,7 +105,7 @@ const GameComplete: React.FC = () => {
 
         {/* Epic Description */}
         <div 
-          className={`mb-12 transition-all duration-1000 delay-300 ${
+          className={`mb-8 transition-all duration-1000 delay-300 ${
             ['seal', 'title', 'description'].includes(animationPhase)
               ? 'opacity-0 translate-y-8'
               : 'opacity-100 translate-y-0'
@@ -100,9 +119,41 @@ const GameComplete: React.FC = () => {
           </p>
         </div>
 
+        {/* DevFest Badge Section */}
+        {badgeInfo && (
+          <div 
+            className={`mb-8 transition-all duration-1000 delay-500 ${
+              ['seal', 'title', 'description'].includes(animationPhase)
+                ? 'opacity-0 translate-y-8'
+                : 'opacity-100 translate-y-0'
+            }`}
+          >
+            <div className="nes-container is-rounded is-success mx-4 md:mx-8">
+              <div className="flex flex-col items-center text-center">
+                <div className="mb-3">
+                  <img 
+                    src={badgeInfo.picture} 
+                    alt={badgeInfo.name}
+                    className="w-16 h-16 object-contain"
+                    style={{ imageRendering: 'pixelated' }}
+                  />
+                </div>
+                <h3 className="font-retro text-sm mb-2" style={{ color: 'var(--ldc-success)' }}>
+                  🏆 BADGE DEVFEST OTTENUTO!
+                </h3>
+                <p className="font-retro text-xs mb-1">{badgeInfo.name}</p>
+                <p className="text-xs opacity-75">{badgeInfo.description}</p>
+                <p className="text-xs opacity-50 mt-2">
+                  Ottenuto: {new Date(badgeInfo.owned).toLocaleDateString('it-IT')}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Epic Button */}
         <div 
-          className={`transition-all duration-1000 delay-700 ${
+          className={`mb-8 transition-all duration-1000 delay-700 ${
             animationPhase !== 'button'
               ? 'opacity-0 translate-y-8'
               : 'opacity-100 translate-y-0'

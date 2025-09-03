@@ -9,6 +9,7 @@ const STORAGE_KEYS = {
   PUZZLE_STATE: (userId: string) => `ldc:puzzle:${userId}`,
   QUIZ_STATE: (userId: string) => `ldc:quiz:${userId}`,
   SOCIAL: (userId: string) => `ldc:social:${userId}`,
+  AUTH_TOKEN: (userId: string) => `ldc:auth:${userId}`,
   SYNC_QUEUE: 'ldc:sync-queue',
 };
 
@@ -27,6 +28,15 @@ class GameStorage {
   getLastProfile(): UserProfile | null {
     const lastUserId = localStorage.getItem(STORAGE_KEYS.PROFILE_LAST);
     return lastUserId ? this.getProfile(lastUserId) : null;
+  }
+
+  // Auth token methods
+  saveAuthToken(userId: string, token: string): void {
+    localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN(userId), token);
+  }
+
+  getAuthToken(userId: string): string | null {
+    return localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN(userId));
   }
 
   // QR methods

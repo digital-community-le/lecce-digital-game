@@ -16,7 +16,9 @@ import DebugDungeonPage from "@/pages/challenges/DebugDungeon";
 import SocialArenaPage from "@/pages/challenges/SocialArena";
 import NotFound from "@/pages/not-found";
 import { GameStoreProvider } from "@/hooks/use-game-store";
-import ProtectedRoute from "@/components/ProtectedRoute";
+import GameCompletionProtectedRoute from "@/components/ProtectedRoute";
+import AuthProtectedRoute from "@/components/AuthProtectedRoute";
+import AuthWrapper from "@/components/AuthWrapper";
 
 function Router() {
   return (
@@ -25,66 +27,91 @@ function Router() {
       {/* Game routes: explicitly render GameLayout for each subroute to avoid fragile wildcard matching */}
       <Route path="/game/map">
         {() => (
-          <GameLayout>
-            <ProtectedRoute>
-              <GameMapPage />
-            </ProtectedRoute>
-          </GameLayout>
+          <AuthProtectedRoute>
+            <GameLayout>
+              <GameCompletionProtectedRoute>
+                <GameMapPage />
+              </GameCompletionProtectedRoute>
+            </GameLayout>
+          </AuthProtectedRoute>
         )}
       </Route>
 
       <Route path="/game/challenge/networking-forest">
         {() => (
-          <GameLayout>
-            <ProtectedRoute>
-              <NetworkingForestPage />
-            </ProtectedRoute>
-          </GameLayout>
+          <AuthProtectedRoute>
+            <GameLayout>
+              <GameCompletionProtectedRoute>
+                <NetworkingForestPage />
+              </GameCompletionProtectedRoute>
+            </GameLayout>
+          </AuthProtectedRoute>
         )}
       </Route>
 
       <Route path="/game/challenge/retro-puzzle">
         {() => (
-          <GameLayout>
-            <ProtectedRoute>
-              <RetroPuzzlePage />
-            </ProtectedRoute>
-          </GameLayout>
+          <AuthProtectedRoute>
+            <GameLayout>
+              <GameCompletionProtectedRoute>
+                <RetroPuzzlePage />
+              </GameCompletionProtectedRoute>
+            </GameLayout>
+          </AuthProtectedRoute>
         )}
       </Route>
 
       <Route path="/game/challenge/debug-dungeon">
         {() => (
-          <GameLayout>
-            <ProtectedRoute>
-              <DebugDungeonPage />
-            </ProtectedRoute>
-          </GameLayout>
+          <AuthProtectedRoute>
+            <GameLayout>
+              <GameCompletionProtectedRoute>
+                <DebugDungeonPage />
+              </GameCompletionProtectedRoute>
+            </GameLayout>
+          </AuthProtectedRoute>
         )}
       </Route>
 
       <Route path="/game/challenge/social-arena">
         {() => (
-          <GameLayout>
-            <ProtectedRoute>
-              <SocialArenaPage />
-            </ProtectedRoute>
-          </GameLayout>
+          <AuthProtectedRoute>
+            <GameLayout>
+              <GameCompletionProtectedRoute>
+                <SocialArenaPage />
+              </GameCompletionProtectedRoute>
+            </GameLayout>
+          </AuthProtectedRoute>
         )}
       </Route>
 
-      {/* Final completion pages */}
-      <Route path="/game-complete" component={GameCompletePage} />
-      <Route path="/statistics" component={StatisticsPage} />
+      {/* Completion pages - require authentication but accessible after game completion */}
+      <Route path="/game-complete">
+        {() => (
+          <AuthProtectedRoute>
+            <GameCompletePage />
+          </AuthProtectedRoute>
+        )}
+      </Route>
+      
+      <Route path="/statistics">
+        {() => (
+          <AuthProtectedRoute>
+            <StatisticsPage />
+          </AuthProtectedRoute>
+        )}
+      </Route>
       
       {/* Default /game -> show map */}
       <Route path="/game">
         {() => (
-          <GameLayout>
-            <ProtectedRoute>
-              <GameMapPage />
-            </ProtectedRoute>
-          </GameLayout>
+          <AuthProtectedRoute>
+            <GameLayout>
+              <GameCompletionProtectedRoute>
+                <GameMapPage />
+              </GameCompletionProtectedRoute>
+            </GameLayout>
+          </AuthProtectedRoute>
         )}
       </Route>
       <Route component={NotFound} />
@@ -97,11 +124,13 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <GameStoreProvider>
-          <Toaster />
-          <Router />
-          {/* Global scanner + preview mounted at app root so any page can open them */}
-          <ScannerView />
-          <ScanPreviewModal />
+          <AuthWrapper>
+            <Toaster />
+            <Router />
+            {/* Global scanner + preview mounted at app root so any page can open them */}
+            <ScannerView />
+            <ScanPreviewModal />
+          </AuthWrapper>
         </GameStoreProvider>
       </TooltipProvider>
     </QueryClientProvider>

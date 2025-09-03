@@ -15,6 +15,7 @@ import {
 } from "@/types/game";
 import { UserProfile, GameProgress } from "@shared/schema";
 import { gameStorage } from "@/lib/storage";
+import { initAuthFromUrl } from '@/services/authService';
 import { QRGenerator } from "@/lib/qr";
 import gameData from "@/assets/game-data.json";
 
@@ -77,6 +78,19 @@ const getInitialState = (): GameState => ({
     completedChallenges: [],
     totalScore: 0,
     gameCompleted: false,
+  },
+  test: false,
+  auth: {
+    isAuthenticated: false,
+    token: null,
+    error: null,
+  },
+  avatarAnimation: {
+    isAnimating: false,
+    fromChallengeId: null,
+    toChallengeId: null,
+    progress: 0,
+    duration: 3000, // 3 seconds default
   },
 });
 
@@ -174,16 +188,37 @@ function createGameStore(deps?: { storage?: StorageService; qr?: QRService }) {
 
   // init: try to read profile from URL or last profile
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const userIdFromUrl = urlParams.get("userId");
+    // Delegate URL auth parsing/persistence to authService to keep this hook focused on state.
+    const authResult = initAuthFromUrl();
 
-    let profile: UserProfile | null = null;
-    if (userIdFromUrl) profile = storage.getProfile(userIdFromUrl);
-    else profile = storage.getLastProfile();
+    // Set auth state
+    setGameState((prev) => ({
+      ...prev,
+      test: !!authResult.test,
+      auth: {
+        isAuthenticated: authResult.success,
+        token: authResult.token,
+        error: authResult.error,
+      },
+    }));
 
-    if (profile) {
-      setGameState((prev) => ({ ...prev, currentUser: { userId: profile.userId, displayName: profile.displayName, avatar: profile.avatar, qrData: storage.getQR(profile.userId) } }));
-      loadGameProgress(profile.userId);
+    // Only proceed with profile loading if authentication succeeded
+    if (authResult.success) {
+      let profile: UserProfile | null = null;
+      profile = storage.getLastProfile();
+
+      if (profile) {
+        setGameState((prev) => ({ 
+          ...prev, 
+          currentUser: { 
+            userId: profile.userId, 
+            displayName: profile.displayName, 
+            avatar: profile.avatar, 
+            qrData: storage.getQR(profile.userId) 
+          }
+        }));
+        loadGameProgress(profile.userId);
+      }
     }
   }, [storage, loadGameProgress]);
 
@@ -313,6 +348,77 @@ function createGameStore(deps?: { storage?: StorageService; qr?: QRService }) {
     [gameState.challenges, gameState.gameProgress.completedChallenges, openModal, showToast]
   );
 
+  // --- Avatar Animation Management ---
+  const startAvatarAnimation = useCallback(
+    (fromChallengeId: string, toChallengeId: string, duration = 3000) => {
+      setGameState((prev) => ({
+        ...prev,
+        avatarAnimation: {
+          isAnimating: true,
+          fromChallengeId,
+          toChallengeId,
+          progress: 0,
+          duration,
+        },
+      }));
+
+      // Start the animation loop
+      const startTime = Date.now();
+      const animate = () => {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+
+        setGameState((prev) => ({
+          ...prev,
+          avatarAnimation: {
+            ...prev.avatarAnimation,
+            progress,
+          },
+        }));
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          // Animation complete - reset animation state
+          setGameState((prev) => ({
+            ...prev,
+            avatarAnimation: {
+              isAnimating: false,
+              fromChallengeId: null,
+              toChallengeId: null,
+              progress: 0,
+              duration: 3000,
+            },
+          }));
+          
+          // Auto-open next challenge after animation with a delay
+          setTimeout(() => {
+            const targetChallenge = gameState.challenges.find(c => c.id === toChallengeId);
+            if (targetChallenge && targetChallenge.status === "available") {
+              openChallenge(toChallengeId);
+            }
+          }, 800); // Slightly longer delay for better UX
+        }
+      };
+
+      requestAnimationFrame(animate);
+    },
+    [gameState.challenges, openChallenge]
+  );
+
+  const stopAvatarAnimation = useCallback(() => {
+    setGameState((prev) => ({
+      ...prev,
+      avatarAnimation: {
+        isAnimating: false,
+        fromChallengeId: null,
+        toChallengeId: null,
+        progress: 0,
+        duration: 3000,
+      },
+    }));
+  }, []);
+
   return {
     gameState,
     toasts,
@@ -328,6 +434,8 @@ function createGameStore(deps?: { storage?: StorageService; qr?: QRService }) {
     openChallenge,
     withRouteTransition,
     setWithRouteTransition,
+    startAvatarAnimation,
+    stopAvatarAnimation,
   };
 }
 
