@@ -684,4 +684,46 @@
   .road-segment {
     z-index: 5;
   }
+
+  /* Pixel-perfect retro game animations for CompletionModal */
+  @keyframes gemZoomIn {
+    0% {
+      transform: scale(0) rotate(0deg);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1.2) rotate(180deg);
+      opacity: 0.8;
+    }
+    75% {
+      transform: scale(0.9) rotate(270deg);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1) rotate(360deg);
+      opacity: 1;
+    }
+  }
+
+  /* Pixelated rendering for retro assets */
+  .pixelated {
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+  }
+
+  /* Retro glow effects */
+  .retro-glow {
+    filter: drop-shadow(0 0 10px currentColor);
+  }
+
+  .retro-border {
+    border-image: 
+      linear-gradient(45deg, 
+        transparent 30%, 
+        currentColor 30%, 
+        currentColor 70%, 
+        transparent 70%
+      ) 1;
+  }
 }
