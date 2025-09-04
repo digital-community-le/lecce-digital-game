@@ -10,12 +10,12 @@ interface ChallengeContentLayoutProps {
   description: string;
   /** Testo del suggerimento nel box scuro */
   tip: string;
-  /** Progresso corrente (numeratore) */
-  progress: number;
-  /** Progresso totale (denominatore) */
-  total: number;
-  /** Etichetta del progresso (es. "Alleati trovati", "Progresso") */
-  progressLabel: string;
+  /** Progresso corrente (numeratore) - opzionale */
+  progress?: number;
+  /** Progresso totale (denominatore) - opzionale */
+  total?: number;
+  /** Etichetta del progresso (es. "Alleati trovati", "Progresso") - opzionale */
+  progressLabel?: string;
   /** Se true, mostra lo stato di caricamento */
   isLoading?: boolean;
   /** Se true, la challenge è completata */
@@ -51,7 +51,7 @@ const ChallengeContentLayout: React.FC<ChallengeContentLayoutProps> = ({
   children,
   progressInfo
 }) => {
-  const progressPercentage = total > 0 ? (progress / total) * 100 : 0;
+  const progressPercentage = (total && progress) ? (total > 0 ? (progress / total) * 100 : 0) : 0;
 
   if (isLoading) {
     return (
@@ -80,27 +80,29 @@ const ChallengeContentLayout: React.FC<ChallengeContentLayoutProps> = ({
           </div>
         </div>
 
-        {/* Progress indicator */}
-        <div className="mb-6">
-          <div className="flex justify-between text-sm mb-2">
-            <span>{progressLabel}</span>
-            <span data-testid="challenge-progress">
-              {progress}/{total}
-            </span>
-          </div>
-          <div className="progress-custom">
-            <div 
-              className="progress-fill" 
-              style={{ width: `${Math.min(progressPercentage, 100)}%` }}
-              data-testid="progress-bar"
-            ></div>
-          </div>
-          {progressInfo && (
-            <div className="mt-2">
-              {progressInfo}
+        {/* Progress indicator - only show if progress props are provided */}
+        {(progress !== undefined && total !== undefined && progressLabel) && (
+          <div className="mb-6">
+            <div className="flex justify-between text-sm mb-2">
+              <span>{progressLabel}</span>
+              <span data-testid="challenge-progress">
+                {progress}/{total}
+              </span>
             </div>
-          )}
-        </div>
+            <div className="progress-custom">
+              <div 
+                className="progress-fill" 
+                style={{ width: `${Math.min(progressPercentage, 100)}%` }}
+                data-testid="progress-bar"
+              ></div>
+            </div>
+            {progressInfo && (
+              <div className="mt-2">
+                {progressInfo}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Main challenge content */}
         {!isCompleted ? (

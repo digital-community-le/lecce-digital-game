@@ -174,9 +174,6 @@ const GuildBuilder: React.FC = () => {
       gemIcon={allianceGem}
       description={guildBuilderConfig.description}
       tip={`Seleziona ${TEAM_SIZE} compagni che possano affrontare insieme la quest. Scegli con saggezza!`}
-      progress={selectedCompanions.filter(c => c !== null).length}
-      total={TEAM_SIZE}
-      progressLabel="Squadra"
       isCompleted={isCompleted}
       completionMessage="Hai formato la squadra perfetta! La Gemma dell'Alleanza è tua."
     >

@@ -170,7 +170,7 @@ const RetroPuzzle: React.FC = () => {
       isCompleted={isCompleted}
       completionMessage="Hai svelato tutti i misteri! La Gemma della Conoscenza è tua."
     >
-      <div className="p-4">
+      <div>
         {!isCompleted ? (
           <>
             {/* Game board */}
