@@ -4,6 +4,7 @@ import { gameStorage } from '@/lib/storage';
 import { GuildState, GuildCompanion } from '@shared/schema';
 import ChallengeContentLayout from '@/components/layout/ChallengeContentLayout';
 import ChallengeCompleted from '@/components/ChallengeCompleted';
+import CompanionSlot from './CompanionSlot';
 import gameData from '@/assets/game-data.json';
 import allianceGem from '@assets/images/gem-of-alliance.png';
 
@@ -26,7 +27,7 @@ const companions: GuildCompanion[] = [
 const GuildBuilder: React.FC = () => {
   const { gameState, updateChallengeProgress, showToast } = useGameStore();
   const [guildState, setGuildState] = useState<GuildState | null>(null);
-  const [selectedCompanions, setSelectedCompanions] = useState<GuildCompanion[]>([]);
+  const [selectedCompanions, setSelectedCompanions] = useState<(GuildCompanion | null)[]>([null, null, null]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Configuration validation
@@ -62,39 +63,35 @@ const GuildBuilder: React.FC = () => {
         gameStorage.saveGuildState(gameState.currentUser.userId, state);
       }
       
-      // Convert team object to selectedCompanions array, filtering out null/undefined values
-      const teamArray = Object.values(state.team)
-        .filter(companion => companion && companion.id && companion.name && companion.role) as GuildCompanion[];
-      setSelectedCompanions(teamArray);
+      // Convert team object to selectedCompanions array with null placeholders
+      const newSelectedCompanions: (GuildCompanion | null)[] = [null, null, null];
+      Object.values(state.team)
+        .filter(companion => companion && companion.id && companion.name && companion.role)
+        .forEach((companion, index) => {
+          if (index < 3) {
+            newSelectedCompanions[index] = companion as GuildCompanion;
+          }
+        });
+      
+      setSelectedCompanions(newSelectedCompanions);
       setGuildState(state);
       setIsLoading(false);
     }
   }, [gameState.currentUser.userId]);
 
-  const handleCompanionToggle = (companion: GuildCompanion) => {
+  const handleCompanionSelect = (slotIndex: number, companion: GuildCompanion | null) => {
     if (!guildState) return;
 
-    const isSelected = selectedCompanions.some(c => c.id === companion.id);
-    let newSelected: GuildCompanion[];
-
-    if (isSelected) {
-      // Remove companion
-      newSelected = selectedCompanions.filter(c => c.id !== companion.id);
-    } else {
-      // Add companion (max 3)
-      if (selectedCompanions.length >= TEAM_SIZE) {
-        showToast(`Puoi selezionare al massimo ${TEAM_SIZE} compagni!`, 'error');
-        return;
-      }
-      newSelected = [...selectedCompanions, companion];
-    }
-
+    const newSelected = [...selectedCompanions];
+    newSelected[slotIndex] = companion;
     setSelectedCompanions(newSelected);
 
-    // Update guild state - only store actually selected companions, no empty slots
+    // Update guild state - only store actually selected companions
     const newTeam: Record<string, GuildCompanion> = {};
     newSelected.forEach((comp, index) => {
-      newTeam[`slot_${index}`] = comp;
+      if (comp) {
+        newTeam[`slot_${index}`] = comp;
+      }
     });
 
     const updatedState: GuildState = {
@@ -106,16 +103,26 @@ const GuildBuilder: React.FC = () => {
     gameStorage.saveGuildState(gameState.currentUser.userId, updatedState);
   };
 
+  const getAvailableCompanions = (forSlotIndex: number): GuildCompanion[] => {
+    const selectedIds = selectedCompanions
+      .filter((comp, index) => comp !== null && index !== forSlotIndex)
+      .map(comp => comp!.id);
+    
+    return companions.filter(comp => !selectedIds.includes(comp.id));
+  };
+
   const handleSubmit = () => {
     if (!guildState) return;
 
-    if (selectedCompanions.length !== TEAM_SIZE) {
+    const validCompanions = selectedCompanions.filter(c => c !== null) as GuildCompanion[];
+    
+    if (validCompanions.length !== TEAM_SIZE) {
       showToast(`Devi selezionare esattamente ${TEAM_SIZE} compagni!`, 'error');
       return;
     }
 
     // Check if the selected team has the required roles
-    const selectedRoles = selectedCompanions.map(c => c.role);
+    const selectedRoles = validCompanions.map(c => c.role);
     const hasAllRequiredRoles = requiredRoles.every((role: string) => selectedRoles.includes(role));
 
     const newAttempts = guildState.attempts + 1;
@@ -157,7 +164,7 @@ const GuildBuilder: React.FC = () => {
     };
     
     setGuildState(newState);
-    setSelectedCompanions([]);
+    setSelectedCompanions([null, null, null]);
     gameStorage.saveGuildState(gameState.currentUser.userId, newState);
     showToast('Squadra ricominciata!', 'info');
   };
@@ -179,7 +186,7 @@ const GuildBuilder: React.FC = () => {
       gemIcon={allianceGem}
       description={guildBuilderConfig.description}
       tip={`Seleziona ${TEAM_SIZE} compagni che possano affrontare insieme la quest. Scegli con saggezza!`}
-      progress={selectedCompanions.length}
+      progress={selectedCompanions.filter(c => c !== null).length}
       total={TEAM_SIZE}
       progressLabel="Squadra"
       isCompleted={isCompleted}
@@ -189,124 +196,27 @@ const GuildBuilder: React.FC = () => {
         {!isCompleted ? (
           <>
             {/* Quest display */}
-            <div className="nes-container is-rounded mb-4">
+            <div className="nes-container is-rounded mb-6">
               <p className="font-retro text-sm mb-2">📜 Quest:</p>
               <p className="text-sm">{questText}</p>
             </div>
 
-            {/* Selected team display */}
+            {/* Companion Slots */}
             <div className="mb-6">
-              <h4 className="font-retro text-sm mb-4" style={{ color: 'var(--ldc-contrast-yellow)' }}>🛡️ La tua squadra ({selectedCompanions.length}/{TEAM_SIZE})</h4>
-              <div className="grid grid-cols-1 gap-3">
-                {Array.from({ length: TEAM_SIZE }, (_, index) => {
-                  const companion = selectedCompanions[index];
-                  return (
-                    <div
-                      key={index}
-                      className={`nes-container is-rounded p-4 flex items-center gap-4 ${
-                        companion ? 'is-success' : 'is-light'
-                      }`}
-                      style={{ minHeight: '80px' }}
-                    >
-                      {companion ? (
-                        <>
-                          <div className="w-16 h-16 flex-shrink-0">
-                            <img 
-                              src={companion.avatar} 
-                              alt={companion.name} 
-                              className="w-full h-full object-contain"
-                              style={{ imageRendering: 'pixelated' }}
-                            />
-                          </div>
-                          <div className="flex-1 text-left">
-                            <div className="font-retro text-base mb-1" style={{ color: 'var(--ldc-rpg-green)' }}>{companion.name}</div>
-                            <div className="text-sm font-medium mb-1">{companion.role}</div>
-                            <div className="text-xs text-muted-foreground">{companion.description}</div>
-                          </div>
-                          <div className="text-2xl">✓</div>
-                        </>
-                      ) : (
-                        <div className="w-full text-center py-4">
-                          <div className="text-4xl mb-2">👤</div>
-                          <div className="text-sm text-muted-foreground font-retro">Slot Libero</div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Available companions */}
-            <div className="mb-6">
-              <h4 className="font-retro text-sm mb-4" style={{ color: 'var(--ldc-contrast-yellow)' }}>👥 Compagni Disponibili</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {companions.map((companion) => {
-                  const isSelected = selectedCompanions.some(c => c.id === companion.id);
-                  
-                  return (
-                    <button
-                      key={companion.id}
-                      className={`nes-container w-full p-4 text-left transition-all duration-200 transform hover:scale-105 ${
-                        isSelected 
-                          ? 'is-success' 
-                          : 'hover:shadow-lg'
-                      }`}
-                      style={{
-                        border: isSelected 
-                          ? '4px solid var(--ldc-rpg-green)' 
-                          : '4px solid var(--ldc-surface)',
-                        backgroundColor: isSelected 
-                          ? 'rgba(47, 140, 47, 0.1)' 
-                          : 'var(--ldc-surface)',
-                        boxShadow: isSelected 
-                          ? '0 0 15px rgba(47, 140, 47, 0.5), inset 0 0 10px rgba(47, 140, 47, 0.2)' 
-                          : '0 4px 8px rgba(0,0,0,0.1)'
-                      }}
-                      onClick={() => handleCompanionToggle(companion)}
-                      data-testid={`companion-${companion.name.toLowerCase()}`}
-                    >
-                      <div className="flex items-start gap-4">
-                        <div className="w-16 h-16 flex-shrink-0">
-                          <img 
-                            src={companion.avatar} 
-                            alt={companion.name} 
-                            className="w-full h-full object-contain"
-                            style={{ 
-                              imageRendering: 'pixelated',
-                              filter: isSelected ? 'brightness(1.1) contrast(1.1)' : 'none'
-                            }}
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className={`font-retro text-base mb-1 ${
-                            isSelected ? 'text-white' : ''
-                          }`} style={{ 
-                            color: isSelected ? 'var(--ldc-rpg-green)' : 'var(--ldc-on-surface)' 
-                          }}>
-                            {companion.name}
-                          </div>
-                          <div className={`text-sm font-medium mb-2 ${
-                            isSelected ? 'text-white' : 'text-muted-foreground'
-                          }`}>
-                            {companion.role}
-                          </div>
-                          <div className={`text-xs leading-relaxed ${
-                            isSelected ? 'text-gray-100' : 'text-muted-foreground'
-                          }`}>
-                            {companion.description}
-                          </div>
-                          {isSelected && (
-                            <div className="mt-2 flex items-center gap-2">
-                              <span className="text-lg">✓</span>
-                              <span className="font-retro text-xs" style={{ color: 'var(--ldc-rpg-green)' }}>SELEZIONATO</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
+              <h4 className="font-retro text-sm mb-4" style={{ color: 'var(--ldc-contrast-yellow)' }}>
+                🛡️ Forma la tua squadra ({selectedCompanions.filter(c => c !== null).length}/{TEAM_SIZE})
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {Array.from({ length: TEAM_SIZE }, (_, index) => (
+                  <CompanionSlot
+                    key={index}
+                    slotIndex={index}
+                    availableCompanions={getAvailableCompanions(index)}
+                    selectedCompanion={selectedCompanions[index]}
+                    onCompanionSelect={(companion) => handleCompanionSelect(index, companion)}
+                    disabled={isCompleted}
+                  />
+                ))}
               </div>
             </div>
 
@@ -315,7 +225,7 @@ const GuildBuilder: React.FC = () => {
               <button 
                 className="nes-btn is-primary"
                 onClick={handleSubmit}
-                disabled={selectedCompanions.length !== TEAM_SIZE}
+                disabled={selectedCompanions.filter(c => c !== null).length !== TEAM_SIZE}
                 data-testid="button-submit-team"
               >
                 Conferma Squadra
@@ -339,7 +249,7 @@ const GuildBuilder: React.FC = () => {
               <div className="text-sm">
                 <div className="flex justify-between">
                   <span>Squadra formata:</span>
-                  <span className="font-retro">{selectedCompanions.length}/{TEAM_SIZE}</span>
+                  <span className="font-retro">{selectedCompanions.filter(c => c !== null).length}/{TEAM_SIZE}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Tentativi totali:</span>
