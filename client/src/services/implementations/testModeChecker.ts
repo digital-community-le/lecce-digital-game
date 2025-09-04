@@ -22,6 +22,11 @@ export class TestModeChecker implements ITestModeChecker {
       return true;
     }
     
+    // Auto-enable test mode in development environment
+    if (this.isDevelopmentMode()) {
+      return true;
+    }
+    
     // Check localStorage for persisted test flag
     try {
       const storedGame = this.localStorage.getItem('lecce-digital-game');
@@ -35,5 +40,23 @@ export class TestModeChecker implements ITestModeChecker {
     }
     
     return false;
+  }
+
+  /**
+   * Check if we're running in development mode
+   * @private
+   */
+  private isDevelopmentMode(): boolean {
+    // Check for development environment indicators
+    return (
+      // Vite development mode
+      import.meta.env?.DEV === true ||
+      // Development server ports and hosts
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1' ||
+      window.location.port === '5000' ||
+      window.location.port === '3000' ||
+      window.location.port === '5173'
+    );
   }
 }

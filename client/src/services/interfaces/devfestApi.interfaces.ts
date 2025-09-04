@@ -8,6 +8,7 @@ export interface IDevFestApiConfig {
 
 /**
  * Test mode checker interface
+ * Returns true for explicit test mode OR development environment
  */
 export interface ITestModeChecker {
   isTestMode(): boolean;
