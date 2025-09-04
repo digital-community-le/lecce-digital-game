@@ -12,7 +12,7 @@ const gemOfAlliance = '/assets/images/gem-of-alliance.png';
 const GEM_IMAGES = {
   'debug-dungeon': gemOfWisdom,
   'retro-puzzle': gemOfMemory,
-  'networking-forest': gemOfCommunity,
+  'guild-builder': gemOfCommunity,
   'social-arena': gemOfAlliance,
 } as const;
 

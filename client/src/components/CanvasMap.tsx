@@ -186,7 +186,7 @@ const CanvasMap: React.FC = () => {
       const h = 64;
       // Simple color mapping to match previous classes
       const colorMap: Record<string, string> = {
-        "networking-forest": "#16a34a",
+        "guild-builder": "#16a34a",
         "retro-puzzle": "#f59e0b",
         "debug-dungeon": "#7c3aed",
         "social-arena": "#f97316",
@@ -246,7 +246,7 @@ const CanvasMap: React.FC = () => {
 
   const getNodeButtonClass = (node: MapNode): string => {
     switch (node.id) {
-      case "networking-forest":
+      case "guild-builder":
         return "nes-container with-title bg-green-600 text-white";
       case "retro-puzzle":
         return "nes-container with-title bg-yellow-500 text-black";

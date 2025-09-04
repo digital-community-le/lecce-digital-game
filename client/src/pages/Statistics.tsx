@@ -15,14 +15,14 @@ const Statistics: React.FC = () => {
   const challengesCompleted = totalGems;
 
   const gemMap: Record<string, string> = {
-    'networking-forest': allianceGem,
+    'guild-builder': allianceGem,
     'retro-puzzle': memoryGem,
     'debug-dungeon': wisdomGem,
     'social-arena': communityGem,
   };
 
   const badgeMap: Record<string, string> = {
-    'networking-forest': "Gemma dell'Alleanza",
+    'guild-builder': "Gemma dell'Alleanza",
     'retro-puzzle': "Gemma della Conoscenza",
     'debug-dungeon': "Gemma del Sapere",
     'social-arena': "Sigillo di Lecce",

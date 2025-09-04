@@ -93,6 +93,26 @@ export const quizStateSchema = z.object({
 export type QuizQuestion = z.infer<typeof quizQuestionSchema>;
 export type QuizState = z.infer<typeof quizStateSchema>;
 
+// Guild Builder State Schema
+export const guildCompanionSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  role: z.string(),
+});
+
+export const guildStateSchema = z.object({
+  id: z.string(),
+  team: z.record(z.string(), guildCompanionSchema),
+  completed: z.boolean(),
+  attempts: z.number(),
+  startedAt: z.string().optional(),
+  finishedAt: z.string().optional(),
+  score: z.number().optional(),
+});
+
+export type GuildCompanion = z.infer<typeof guildCompanionSchema>;
+export type GuildState = z.infer<typeof guildStateSchema>;
+
 // Social Proof Schema (Social Arena)
 export const socialProofSchema = z.object({
   opId: z.string(),

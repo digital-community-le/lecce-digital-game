@@ -479,7 +479,7 @@ export const renderMap = (
       const w = 64; // default visual size
       const h = 64;
       const colorMap: Record<string, string> = {
-        'networking-forest': '#16a34a',
+        'guild-builder': '#16a34a',
         'retro-puzzle': '#f59e0b',
         'debug-dungeon': '#7c3aed',
         'social-arena': '#f97316',

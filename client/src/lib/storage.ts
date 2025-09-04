@@ -1,4 +1,4 @@
-import { UserProfile, GameProgress, UserScan, PuzzleState, QuizState, SocialProof } from '@shared/schema';
+import { UserProfile, GameProgress, UserScan, PuzzleState, QuizState, SocialProof, GuildState } from '@shared/schema';
 
 const STORAGE_KEYS = {
   PROFILE: (userId: string) => `ldc:profile:${userId}`,
@@ -7,6 +7,7 @@ const STORAGE_KEYS = {
   PROGRESS: (userId: string) => `ldc:progress:${userId}`,
   SCANS: (userId: string) => `ldc:scans:${userId}`,
   PUZZLE_STATE: (userId: string) => `ldc:puzzle:${userId}`,
+  GUILD_STATE: (userId: string) => `ldc:guild:${userId}`,
   QUIZ_STATE: (userId: string) => `ldc:quiz:${userId}`,
   SOCIAL: (userId: string) => `ldc:social:${userId}`,
   AUTH_TOKEN: (userId: string) => `ldc:auth:${userId}`,
@@ -82,6 +83,20 @@ class GameStorage {
   getPuzzleState(userId: string): PuzzleState | null {
     const stored = localStorage.getItem(STORAGE_KEYS.PUZZLE_STATE(userId));
     return stored ? JSON.parse(stored) : null;
+  }
+
+  // Guild Builder methods
+  saveGuildState(userId: string, state: GuildState): void {
+    localStorage.setItem(STORAGE_KEYS.GUILD_STATE(userId), JSON.stringify(state));
+  }
+
+  getGuildState(userId: string): GuildState | null {
+    const stored = localStorage.getItem(STORAGE_KEYS.GUILD_STATE(userId));
+    return stored ? JSON.parse(stored) : null;
+  }
+
+  removeGuildState(userId: string): void {
+    localStorage.removeItem(STORAGE_KEYS.GUILD_STATE(userId));
   }
 
   // Debug Dungeon methods

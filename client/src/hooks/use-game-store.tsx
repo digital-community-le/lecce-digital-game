@@ -21,7 +21,7 @@ import gameData from "@/assets/game-data.json";
 
 // Fallback challenges (keeps previous defaults if JSON missing entries)
 const FALLBACK_CHALLENGES: MapNode[] = [
-  { id: "networking-forest", title: "Forest", emoji: "🌲", position: { top: "30%", left: "15%" }, status: "available", progress: 0, total: 5 },
+  { id: "guild-builder", title: "Guild Builder", emoji: "🛡️", position: { top: "30%", left: "15%" }, status: "available", progress: 0, total: 1 },
   { id: "retro-puzzle", title: "Puzzle", emoji: "🧩", position: { top: "20%", left: "45%" }, status: "locked", progress: 0, total: 8 },
   { id: "debug-dungeon", title: "Debug", emoji: "⚔️", position: { top: "45%", left: "70%" }, status: "locked", progress: 0, total: 10 },
   { id: "social-arena", title: "Arena", emoji: "📱", position: { top: "65%", left: "40%" }, status: "locked", progress: 0, total: 1 },
@@ -283,8 +283,8 @@ function createGameStore(deps?: { storage?: StorageService; qr?: QRService }) {
           // map challenge to title
           const titleForChallenge = (() => {
             switch (challengeId) {
-              case "networking-forest":
-                return "Ally of the Forest";
+              case "guild-builder":
+                return "Guild Master";
               case "retro-puzzle":
                 return "Puzzle Master";
               case "debug-dungeon":
