@@ -55,8 +55,8 @@ const GameComplete: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4 py-12">
-      <div className="relative w-full max-w-4xl text-center text-white my-8">
+    <div className="min-h-screen flex items-center justify-center p-4 py-12" style={{ background: 'var(--ldc-surface)' }}>
+      <div className="relative w-full max-w-4xl text-center my-8" style={{ color: 'var(--ldc-on-surface)' }}>
         
         {/* Epic Seal Animation */}
         <div className="mb-12">
@@ -77,7 +77,7 @@ const GameComplete: React.FC = () => {
               data-testid="final-seal-image"
               style={{
                 imageRendering: 'pixelated',
-                filter: 'drop-shadow(0 0 30px rgba(255, 215, 0, 0.8)) drop-shadow(0 0 60px rgba(255, 255, 255, 0.4))'
+                filter: 'drop-shadow(0 0 30px var(--ldc-contrast-yellow)) drop-shadow(0 0 60px var(--ldc-background))'
               }}
             />
           </div>

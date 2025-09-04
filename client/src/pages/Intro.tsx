@@ -64,17 +64,19 @@ const IntroPage: React.FC = () => {
   };
 
   return (
-    <div className="intro-screen fixed inset-0 bg-gradient-to-b from-purple-900 to-black flex flex-col items-center justify-center text-white z-10">
+  <div className="intro-screen fixed inset-0 flex flex-col items-center justify-center z-10" style={{ background: 'linear-gradient(to bottom, var(--ldc-primary-dark), var(--ldc-surface))', color: 'var(--ldc-on-surface)' }}>
       {/* Title */}
       <div className="text-center mb-8">
         <h1
-          className="font-retro text-xl md:text-2xl mb-4 text-yellow-400"
+          className="font-retro text-xl md:text-2xl mb-4"
+          style={{ color: 'var(--ldc-contrast-yellow)' }}
           data-testid="text-game-title"
         >
           {titleText}
         </h1>
         <h2
-          className="font-retro text-lg text-purple-300"
+          className="font-retro text-lg"
+          style={{ color: 'var(--ldc-primary-light)' }}
           data-testid="text-game-subtitle"
         >
           {subtitleText}

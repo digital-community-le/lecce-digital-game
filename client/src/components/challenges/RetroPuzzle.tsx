@@ -186,13 +186,14 @@ const RetroPuzzle: React.FC = () => {
                     return (
                       <button
                         key={term}
-                        className={`w-full p-3 border-2 border-black text-left text-sm transition-colors ${
-                          isMatched 
-                            ? 'bg-green-200 text-green-800 cursor-not-allowed' 
-                            : isSelected 
-                              ? 'bg-primary text-white' 
-                              : 'bg-muted hover:bg-primary hover:text-white'
-                        }`}
+                        className={`w-full p-3 border-2 text-left text-sm transition-colors`}
+                        style={
+                          isMatched
+                            ? { background: 'var(--ldc-rpg-green)', color: 'var(--ldc-background)', border: '2px solid var(--ldc-rpg-green)', cursor: 'not-allowed' }
+                            : isSelected
+                              ? { background: 'var(--ldc-primary)', color: 'var(--ldc-background)', border: '2px solid var(--ldc-primary-dark)' }
+                              : { background: 'var(--ldc-background)', color: 'var(--ldc-primary-dark)', border: '2px solid var(--ldc-primary-dark)' }
+                        }
                         onClick={() => !isMatched && handleTermClick(term)}
                         disabled={!!isMatched}
                         data-testid={`term-${term.toLowerCase().replace(/[^a-z]/g, '-')}`}
@@ -214,13 +215,14 @@ const RetroPuzzle: React.FC = () => {
                     return (
                       <button
                         key={category}
-                        className={`w-full p-3 border-2 border-black text-left text-sm transition-colors ${
-                          isMatched 
-                            ? 'bg-green-200 text-green-800 cursor-not-allowed' 
-                            : selectedTerm 
-                              ? 'bg-secondary text-white hover:bg-accent' 
-                              : 'bg-muted cursor-not-allowed'
-                        }`}
+                        className={`w-full p-3 border-2 text-left text-sm transition-colors`}
+                        style={
+                          isMatched
+                            ? { background: 'var(--ldc-rpg-green)', color: 'var(--ldc-background)', border: '2px solid var(--ldc-rpg-green)', cursor: 'not-allowed' }
+                            : selectedTerm
+                              ? { background: 'var(--ldc-primary-dark)', color: 'var(--ldc-background)', border: '2px solid var(--ldc-primary)' }
+                              : { background: 'var(--ldc-background)', color: 'var(--ldc-primary-dark)', border: '2px solid var(--ldc-primary-dark)', cursor: 'not-allowed' }
+                        }
                         onClick={() => selectedTerm && !isMatched && handleCategoryClick(category)}
                         disabled={!selectedTerm || isMatched}
                         data-testid={`category-${category.toLowerCase().replace(/[^a-z]/g, '-')}`}

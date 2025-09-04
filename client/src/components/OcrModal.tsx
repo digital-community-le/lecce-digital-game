@@ -136,7 +136,7 @@ const OcrModal: React.FC<Props> = ({
       </div>
 
       <div className="mb-3">
-        <div className="w-full bg-gray-700 rounded h-3 overflow-hidden">
+  <div className="w-full rounded h-3 overflow-hidden" style={{ background: 'var(--ldc-primary-dark)' }}>
           <div
             className="bg-green-500 h-3 transition-all"
             style={{ width: `${ocrProgress}%` }}
