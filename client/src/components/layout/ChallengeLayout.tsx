@@ -18,8 +18,8 @@ interface ChallengeLayoutProps {
  */
 const getChallengeTitle = (challengeId: string) => {
   switch (challengeId) {
-    case 'networking-forest':
-      return 'Forest';
+    case 'guild-builder':
+      return 'Taverna';
     case 'retro-puzzle':
       return 'Puzzle';
     case 'debug-dungeon':

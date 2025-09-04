@@ -16,31 +16,38 @@
   },
   "challenges": [
     {
-      "id": "networking-forest",
-      "title": "Networking Forest",
-      "type": "networking",
-      "description": "Nel Networking Forest, ogni connessione è un filo di luce che rafforza il tuo cammino. Scansiona i QR degli altri partecipanti per raccogliere la Gemma dell'Alleanza.",
-      "emoji": "🌲",
-      "nodeIcon": "/assets/map-icons/forest.png",
+      "id": "guild-builder",
+      "title": "Guild Builder — La Taverna dei Compagni",
+      "type": "matching-quiz",
+      "description": "Forma una squadra di 3 compagni in grado di affrontare la sfida richiesta. Ogni compagno ha un ruolo unico e una descrizione. Scegli con attenzione!",
+      "emoji": "🛡️",
+      "nodeIcon": "/assets/map-icons/tavern.png",
       "position": {
         "top": "30%",
         "left": "15%"
       },
       "requirements": {
-        "type": "scans",
-        "minDistinctScans": 5
+        "type": "compose_team",
+        "requirement": {
+          "id": "req-social-boost",
+          "text": "Migliora la visibilità sui social con una squadra bilanciata",
+          "roles": ["Social Media Wizard", "Designer", "Speaker"]
+        }
+      },
+      "settings": {
+        "poolSize": 8,
+        "allowDuplicates": false,
+        "shufflePool": true
       },
       "rewards": {
-        "points": 150,
+        "points": 180,
         "badge": "Gemma dell'Alleanza",
-        "unlocks": [
-          "retro-puzzle"
-        ]
+        "unlocks": ["retro-puzzle"]
       },
       "gemImage": "@assets/images/gem-of-alliance.png",
       "completion": {
         "title": "Gemma dell'Alleanza Conquistata",
-        "message": "I legami forgiati nel Networking Forest brillano ora nella gemma verde. Ogni connessione e un filo di luce che rafforza il tuo cammino verso il Sigillo."
+        "message": "Hai formato la squadra giusta per affrontare la sfida: la Gemma dell'Alleanza è tua. Il tuo gruppo ha dimostrato sinergia e solidarietà."
       }
     },
     {

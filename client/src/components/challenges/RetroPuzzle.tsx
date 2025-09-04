@@ -171,29 +171,6 @@ const RetroPuzzle: React.FC = () => {
       completionMessage="Hai svelato tutti i misteri! La Gemma della Conoscenza è tua."
     >
       <div className="p-4">
-        {/* Progress and score */}
-        <div className="mb-6">
-          <div className="flex justify-between text-sm mb-2">
-            <span>Progresso</span>
-            <span data-testid="text-puzzle-progress">
-              {PAIRS_COUNT - puzzleState.remaining}/{PAIRS_COUNT}
-            </span>
-          </div>
-          <div className="progress-custom mb-3">
-            <div 
-              className="progress-fill" 
-              style={{ width: `${progressPercentage}%` }}
-              data-testid="progress-puzzle"
-            ></div>
-          </div>
-          <div className="flex justify-between text-xs">
-            <span>Punteggio: <span className="font-retro" data-testid="text-puzzle-score">
-              {puzzleState.score || 0}
-            </span></span>
-            <span>Tentativi: {puzzleState.attempts}</span>
-          </div>
-        </div>
-
         {!isCompleted ? (
           <>
             {/* Game board */}

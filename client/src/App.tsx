@@ -10,7 +10,7 @@ import StatisticsPage from "@/pages/Statistics";
 import GameLayout from "@/components/layout/GameLayout";
 import ScannerView from "@/components/ScannerView";
 import ScanPreviewModal from "@/components/ScanPreviewModal";
-import NetworkingForestPage from "@/pages/challenges/NetworkingForest";
+import GuildBuilderPage from "@/pages/challenges/GuildBuilder";
 import RetroPuzzlePage from "@/pages/challenges/RetroPuzzle";
 import DebugDungeonPage from "@/pages/challenges/DebugDungeon";
 import SocialArenaPage from "@/pages/challenges/SocialArena";
@@ -37,12 +37,12 @@ function Router() {
         )}
       </Route>
 
-      <Route path="/game/challenge/networking-forest">
+      <Route path="/game/challenge/guild-builder">
         {() => (
           <AuthProtectedRoute>
             <GameLayout>
               <GameCompletionProtectedRoute>
-                <NetworkingForestPage />
+                <GuildBuilderPage />
               </GameCompletionProtectedRoute>
             </GameLayout>
           </AuthProtectedRoute>
