@@ -127,7 +127,7 @@
   ],
   "rewards": {
     "badges": [
-      { "id": "networking-master", "name": "Gemma dell'Alleanza", "description": "Hai creato connessioni nel Networking Forest", "icon": "🌲" },
+      { "id": "guild-master", "name": "Gemma dell'Alleanza", "description": "Hai formato la Taverna dei Compagni nel Guild Builder", "icon": "🛡️" },
       { "id": "puzzle-solver", "name": "Gemma della Conoscenza", "description": "Hai risolto tutti i puzzle del sapere", "icon": "🧩" },
       { "id": "debug-warrior", "name": "Gemma del Sapere", "description": "Hai conquistato il Debug Dungeon", "icon": "⚔️" },
       { "id": "social-champion", "name": "Sigillo di Lecce", "description": "Hai completato la prova finale", "icon": "💎" }
