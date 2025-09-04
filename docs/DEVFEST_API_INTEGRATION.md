@@ -9,7 +9,7 @@ La configurazione dell'API DevFest è definita in `game-data.json`:
   "gameConfig": {
     "api": {
       "badgeEndpoint": "https://api.devfest.gdglecce.it/badges/@scan",
-      "gameCompletionSecret": "LECCE_DIGITAL_QUEST_2025_SIGILLO_MASTER_KEY_DEVFEST_COMPLETION_BADGE_ULTIMATE_SEAL"
+      "gameCompletionSecret": "community"
     }
   }
 }
