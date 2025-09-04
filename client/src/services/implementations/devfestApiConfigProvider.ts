@@ -9,8 +9,8 @@ import { IDevFestApiConfig } from '../interfaces/devfestApi.interfaces';
 export class DevFestApiConfigProvider {
   private readonly gameData: any;
 
-  constructor(gameData: any = require('@/assets/game-data.json')) {
-    this.gameData = gameData;
+  constructor(gameDataParam?: any) {
+    this.gameData = gameDataParam || gameData;
   }
 
   getConfig(): IDevFestApiConfig {
