@@ -4,87 +4,73 @@ import { GuildCompanion } from '@shared/schema';
 interface CompanionSlotProps {
   slotIndex: number;
   availableCompanions: GuildCompanion[];
-  selectedCompanion: GuildCompanion | null;
-  onCompanionSelect: (companion: GuildCompanion | null) => void;
+  onCompanionChange: (companion: GuildCompanion | null) => void;
   disabled?: boolean;
 }
 
 const CompanionSlot: React.FC<CompanionSlotProps> = ({
   slotIndex,
   availableCompanions,
-  selectedCompanion,
-  onCompanionSelect,
+  onCompanionChange,
   disabled = false
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const handlePrevious = () => {
-    if (availableCompanions.length === 0) return;
-    setCurrentIndex((prev) => 
-      prev === 0 ? availableCompanions.length - 1 : prev - 1
-    );
+    if (availableCompanions.length === 0 || disabled) return;
+    const newIndex = currentIndex === 0 ? availableCompanions.length - 1 : currentIndex - 1;
+    setCurrentIndex(newIndex);
+    onCompanionChange(availableCompanions[newIndex]);
   };
 
   const handleNext = () => {
-    if (availableCompanions.length === 0) return;
-    setCurrentIndex((prev) => 
-      prev === availableCompanions.length - 1 ? 0 : prev + 1
-    );
-  };
-
-  const handleSelect = () => {
-    if (disabled || availableCompanions.length === 0) return;
-    
-    const currentCompanion = availableCompanions[currentIndex];
-    if (selectedCompanion?.id === currentCompanion.id) {
-      // Deselect if already selected
-      onCompanionSelect(null);
-    } else {
-      // Select new companion
-      onCompanionSelect(currentCompanion);
-    }
+    if (availableCompanions.length === 0 || disabled) return;
+    const newIndex = currentIndex === availableCompanions.length - 1 ? 0 : currentIndex + 1;
+    setCurrentIndex(newIndex);
+    onCompanionChange(availableCompanions[newIndex]);
   };
 
   const currentCompanion = availableCompanions[currentIndex];
-  const isSelected = selectedCompanion !== null;
-  const displayCompanion = isSelected ? selectedCompanion : currentCompanion;
+
+  // Auto-select first companion when available companions change
+  React.useEffect(() => {
+    if (availableCompanions.length > 0 && currentIndex >= availableCompanions.length) {
+      setCurrentIndex(0);
+      onCompanionChange(availableCompanions[0]);
+    } else if (availableCompanions.length > 0 && currentIndex < availableCompanions.length) {
+      onCompanionChange(availableCompanions[currentIndex]);
+    } else {
+      onCompanionChange(null);
+    }
+  }, [availableCompanions, currentIndex, onCompanionChange]);
 
   return (
     <div 
-      className={`nes-container is-rounded p-4 ${
-        isSelected ? 'is-success' : 'is-light'
-      }`}
+      className="nes-container is-rounded p-4"
       style={{ 
         minHeight: '220px',
-        backgroundColor: isSelected 
-          ? 'rgba(47, 140, 47, 0.1)' 
-          : 'var(--ldc-surface)',
-        border: isSelected 
-          ? '4px solid var(--ldc-rpg-green)' 
-          : '4px solid var(--ldc-surface)',
-        boxShadow: isSelected 
-          ? '0 0 15px rgba(47, 140, 47, 0.5), inset 0 0 10px rgba(47, 140, 47, 0.2)' 
-          : 'none'
+        backgroundColor: 'var(--ldc-surface)',
+        border: '3px solid var(--ldc-border)',
       }}
     >
       <div className="text-center mb-3">
-        <h5 className="font-retro text-sm" style={{ color: 'var(--ldc-contrast-yellow)' }}>
+        <h5 className="font-retro text-sm text-gray-600">
           Slot {slotIndex + 1}
         </h5>
       </div>
 
-      {displayCompanion ? (
+      {currentCompanion ? (
         <>
           {/* Avatar with navigation arrows */}
           <div className="flex items-center justify-center mb-4 relative">
-            {!isSelected && availableCompanions.length > 1 && (
+            {availableCompanions.length > 1 && (
               <button
                 onClick={handlePrevious}
-                className="nes-btn is-small absolute left-0 z-10"
+                className="nes-btn is-normal absolute left-0 z-10"
                 style={{ 
                   width: '40px', 
                   height: '40px',
-                  fontSize: '12px',
+                  fontSize: '16px',
                   lineHeight: '1'
                 }}
                 disabled={disabled}
@@ -96,24 +82,21 @@ const CompanionSlot: React.FC<CompanionSlotProps> = ({
             
             <div className="w-20 h-20 mx-8">
               <img 
-                src={displayCompanion.avatar} 
-                alt={displayCompanion.name} 
+                src={currentCompanion.avatar} 
+                alt={currentCompanion.name} 
                 className="w-full h-full object-contain"
-                style={{ 
-                  imageRendering: 'pixelated',
-                  filter: isSelected ? 'brightness(1.1) contrast(1.1)' : 'none'
-                }}
+                style={{ imageRendering: 'pixelated' }}
               />
             </div>
 
-            {!isSelected && availableCompanions.length > 1 && (
+            {availableCompanions.length > 1 && (
               <button
                 onClick={handleNext}
-                className="nes-btn is-small absolute right-0 z-10"
+                className="nes-btn is-normal absolute right-0 z-10"
                 style={{ 
                   width: '40px', 
                   height: '40px',
-                  fontSize: '12px',
+                  fontSize: '16px',
                   lineHeight: '1'
                 }}
                 disabled={disabled}
@@ -126,71 +109,29 @@ const CompanionSlot: React.FC<CompanionSlotProps> = ({
 
           {/* Companion info */}
           <div className="text-center space-y-2">
-            <div 
-              className="font-retro text-base font-bold"
-              style={{ color: isSelected ? 'var(--ldc-rpg-green)' : 'var(--ldc-on-surface)' }}
-            >
-              {displayCompanion.name}
+            <div className="font-retro text-base font-bold text-gray-800">
+              {currentCompanion.name}
             </div>
-            <div 
-              className="text-sm font-medium"
-              style={{ color: isSelected ? 'var(--ldc-rpg-green)' : 'var(--ldc-on-surface)' }}
-            >
-              {displayCompanion.role}
+            <div className="text-sm font-medium text-gray-600">
+              {currentCompanion.role}
             </div>
-            <div 
-              className="text-xs leading-relaxed px-2"
-              style={{ color: isSelected ? 'rgba(255,255,255,0.9)' : 'var(--ldc-on-surface-variant)' }}
-            >
-              {displayCompanion.description}
+            <div className="text-xs leading-relaxed px-2 text-gray-500">
+              {currentCompanion.description}
             </div>
           </div>
-
-          {/* Selection button */}
-          <div className="text-center mt-4">
-            {isSelected ? (
-              <button
-                onClick={handleSelect}
-                className="nes-btn is-warning is-small"
-                disabled={disabled}
-              >
-                Rimuovi
-              </button>
-            ) : (
-              <button
-                onClick={handleSelect}
-                className="nes-btn is-primary is-small"
-                disabled={disabled || !currentCompanion}
-              >
-                Seleziona
-              </button>
-            )}
-          </div>
-
-          {isSelected && (
-            <div className="text-center mt-2">
-              <span className="text-lg">✓</span>
-              <span 
-                className="font-retro text-xs ml-1" 
-                style={{ color: 'var(--ldc-rpg-green)' }}
-              >
-                SELEZIONATO
-              </span>
-            </div>
-          )}
         </>
       ) : (
         <div className="text-center py-8">
           <div className="text-6xl mb-4">👤</div>
-          <div className="text-sm text-muted-foreground font-retro">
+          <div className="text-sm text-gray-400 font-retro">
             Nessun compagno disponibile
           </div>
         </div>
       )}
 
-      {!isSelected && availableCompanions.length > 1 && (
+      {availableCompanions.length > 1 && (
         <div className="text-center mt-3">
-          <div className="text-xs text-muted-foreground">
+          <div className="text-xs text-gray-400">
             {currentIndex + 1} di {availableCompanions.length}
           </div>
         </div>
