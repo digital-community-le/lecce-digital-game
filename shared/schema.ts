@@ -98,6 +98,8 @@ export const guildCompanionSchema = z.object({
   id: z.string(),
   name: z.string(),
   role: z.string(),
+  description: z.string().optional(),
+  avatar: z.string().optional(),
 });
 
 export const guildStateSchema = z.object({

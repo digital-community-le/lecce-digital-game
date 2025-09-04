@@ -13,14 +13,14 @@ const guildBuilderConfig = Array.isArray((gameData as any).challenges)
   : undefined;
 
 const companions: GuildCompanion[] = [
-  { id: '1', name: 'Alice', role: 'Social Media Wizard' },
-  { id: '2', name: 'Bob', role: 'Designer' },
-  { id: '3', name: 'Charlie', role: 'Speaker' },
-  { id: '4', name: 'David', role: 'Developer' },
-  { id: '5', name: 'Eve', role: 'Project Manager' },
-  { id: '6', name: 'Frank', role: 'Tester' },
-  { id: '7', name: 'Grace', role: 'Marketing Expert' },
-  { id: '8', name: 'Henry', role: 'Content Creator' },
+  { id: '1', name: 'Alice', role: 'Social Media Wizard', description: 'Esperta nel connettere persone e comunità online', avatar: '@assets/generated_images/Female_developer_avatar_pixel_20b982fb.png' },
+  { id: '2', name: 'Bob', role: 'Designer', description: 'Crea esperienze visive memorabili e innovative', avatar: '@assets/generated_images/Designer_avatar_pixel_art_50737636.png' },
+  { id: '3', name: 'Charlie', role: 'Speaker', description: 'Comunica idee complesse con chiarezza e passione', avatar: '@assets/generated_images/Teacher_avatar_pixel_art_c32e4d73.png' },
+  { id: '4', name: 'David', role: 'Developer', description: 'Costruisce soluzioni tecniche robuste e scalabili', avatar: '@assets/generated_images/Developer_avatar_pixel_art_a2515cc8.png' },
+  { id: '5', name: 'Eve', role: 'Project Manager', description: 'Coordina team e progetti con efficienza strategica', avatar: '@assets/generated_images/Manager_avatar_pixel_art_1555a05c.png' },
+  { id: '6', name: 'Frank', role: 'Tester', description: 'Garantisce qualità e affidabilità in ogni dettaglio', avatar: '@assets/generated_images/Scientist_avatar_pixel_art_eac1695c.png' },
+  { id: '7', name: 'Grace', role: 'Marketing Expert', description: 'Trasforma prodotti in storie che coinvolgono', avatar: '@assets/generated_images/Female_teacher_avatar_pixel_2ede18a1.png' },
+  { id: '8', name: 'Henry', role: 'Content Creator', description: 'Produce contenuti che educano e ispirano', avatar: '@assets/generated_images/Student_avatar_pixel_art_285fb9d0.png' },
 ];
 
 const GuildBuilder: React.FC = () => {
@@ -196,24 +196,40 @@ const GuildBuilder: React.FC = () => {
 
             {/* Selected team display */}
             <div className="mb-6">
-              <h4 className="font-retro text-xs mb-3">🛡️ La tua squadra ({selectedCompanions.length}/{TEAM_SIZE})</h4>
-              <div className="grid grid-cols-1 gap-2">
+              <h4 className="font-retro text-sm mb-4" style={{ color: 'var(--ldc-contrast-yellow)' }}>🛡️ La tua squadra ({selectedCompanions.length}/{TEAM_SIZE})</h4>
+              <div className="grid grid-cols-1 gap-3">
                 {Array.from({ length: TEAM_SIZE }, (_, index) => {
                   const companion = selectedCompanions[index];
                   return (
                     <div
                       key={index}
-                      className={`nes-container is-rounded p-3 text-center ${
-                        companion ? 'bg-green-100' : 'bg-gray-100'
+                      className={`nes-container is-rounded p-4 flex items-center gap-4 ${
+                        companion ? 'is-success' : 'is-light'
                       }`}
+                      style={{ minHeight: '80px' }}
                     >
                       {companion ? (
-                        <div>
-                          <div className="font-bold">{companion.name}</div>
-                          <div className="text-xs text-gray-600">{companion.role}</div>
-                        </div>
+                        <>
+                          <div className="w-16 h-16 flex-shrink-0">
+                            <img 
+                              src={companion.avatar} 
+                              alt={companion.name} 
+                              className="w-full h-full object-contain"
+                              style={{ imageRendering: 'pixelated' }}
+                            />
+                          </div>
+                          <div className="flex-1 text-left">
+                            <div className="font-retro text-base mb-1" style={{ color: 'var(--ldc-rpg-green)' }}>{companion.name}</div>
+                            <div className="text-sm font-medium mb-1">{companion.role}</div>
+                            <div className="text-xs text-muted-foreground">{companion.description}</div>
+                          </div>
+                          <div className="text-2xl">✓</div>
+                        </>
                       ) : (
-                        <div className="text-gray-400">Slot vuoto</div>
+                        <div className="w-full text-center py-4">
+                          <div className="text-4xl mb-2">👤</div>
+                          <div className="text-sm text-muted-foreground font-retro">Slot Libero</div>
+                        </div>
                       )}
                     </div>
                   );
@@ -223,25 +239,71 @@ const GuildBuilder: React.FC = () => {
 
             {/* Available companions */}
             <div className="mb-6">
-              <h4 className="font-retro text-xs mb-3">👥 Compagni disponibili</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <h4 className="font-retro text-sm mb-4" style={{ color: 'var(--ldc-contrast-yellow)' }}>👥 Compagni Disponibili</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {companions.map((companion) => {
                   const isSelected = selectedCompanions.some(c => c.id === companion.id);
                   
                   return (
                     <button
                       key={companion.id}
-                      className={`w-full p-3 border-2 border-black text-left text-sm transition-colors ${
+                      className={`nes-container w-full p-4 text-left transition-all duration-200 transform hover:scale-105 ${
                         isSelected 
-                          ? 'bg-blue-200 text-blue-800' 
-                          : 'bg-muted hover:bg-primary hover:text-white'
+                          ? 'is-success' 
+                          : 'hover:shadow-lg'
                       }`}
+                      style={{
+                        border: isSelected 
+                          ? '4px solid var(--ldc-rpg-green)' 
+                          : '4px solid var(--ldc-surface)',
+                        backgroundColor: isSelected 
+                          ? 'rgba(47, 140, 47, 0.1)' 
+                          : 'var(--ldc-surface)',
+                        boxShadow: isSelected 
+                          ? '0 0 15px rgba(47, 140, 47, 0.5), inset 0 0 10px rgba(47, 140, 47, 0.2)' 
+                          : '0 4px 8px rgba(0,0,0,0.1)'
+                      }}
                       onClick={() => handleCompanionToggle(companion)}
                       data-testid={`companion-${companion.name.toLowerCase()}`}
                     >
-                      <div className="font-bold">{companion.name}</div>
-                      <div className="text-xs">{companion.role}</div>
-                      {isSelected && <div className="text-xs">✓ Selezionato</div>}
+                      <div className="flex items-start gap-4">
+                        <div className="w-16 h-16 flex-shrink-0">
+                          <img 
+                            src={companion.avatar} 
+                            alt={companion.name} 
+                            className="w-full h-full object-contain"
+                            style={{ 
+                              imageRendering: 'pixelated',
+                              filter: isSelected ? 'brightness(1.1) contrast(1.1)' : 'none'
+                            }}
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className={`font-retro text-base mb-1 ${
+                            isSelected ? 'text-white' : ''
+                          }`} style={{ 
+                            color: isSelected ? 'var(--ldc-rpg-green)' : 'var(--ldc-on-surface)' 
+                          }}>
+                            {companion.name}
+                          </div>
+                          <div className={`text-sm font-medium mb-2 ${
+                            isSelected ? 'text-white' : 'text-muted-foreground'
+                          }`}>
+                            {companion.role}
+                          </div>
+                          <div className={`text-xs leading-relaxed ${
+                            isSelected ? 'text-gray-100' : 'text-muted-foreground'
+                          }`}>
+                            {companion.description}
+                          </div>
+                          {isSelected && (
+                            <div className="mt-2 flex items-center gap-2">
+                              <span className="text-lg">✓</span>
+                              <span className="font-retro text-xs" style={{ color: 'var(--ldc-rpg-green)' }}>SELEZIONATO</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </button>
                   );
                 })}
