@@ -2,18 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { useGameStore } from '@/hooks/use-game-store';
 import gameData from '@/assets/game-data.json';
 
-// Import static gem images as URL strings
-const gemOfWisdom = '/assets/images/gem-of-wisdom.png';
-const gemOfMemory = '/assets/images/gem-of-memory.png';
-const gemOfCommunity = '/assets/images/gem-of-community.png';
-const gemOfAlliance = '/assets/images/gem-of-alliance.png';
+// Import gem images using Vite's asset imports
+import gemOfWisdom from '@assets/images/gem-of-wisdom.png';
+import gemOfMemory from '@assets/images/gem-of-memory.png';
+import gemOfCommunity from '@assets/images/gem-of-community.png';
+import gemOfAlliance from '@assets/images/gem-of-alliance.png';
 
 // Map challenge IDs to their corresponding gem images
 const GEM_IMAGES = {
   'debug-dungeon': gemOfWisdom,
   'retro-puzzle': gemOfMemory,
-  'guild-builder': gemOfCommunity,
-  'social-arena': gemOfAlliance,
+  'guild-builder': gemOfAlliance,
+  'social-arena': gemOfCommunity,
 } as const;
 
 const CompletionModal: React.FC = () => {
