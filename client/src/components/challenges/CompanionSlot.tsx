@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GuildCompanion } from '@shared/schema';
 
 interface CompanionSlotProps {
   slotIndex: number;
   availableCompanions: GuildCompanion[];
+  currentCompanion: GuildCompanion | null;
   onCompanionChange: (companion: GuildCompanion | null) => void;
   disabled?: boolean;
 }
@@ -11,10 +12,32 @@ interface CompanionSlotProps {
 const CompanionSlot: React.FC<CompanionSlotProps> = ({
   slotIndex,
   availableCompanions,
+  currentCompanion,
   onCompanionChange,
   disabled = false
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Update current index when current companion changes from parent
+  useEffect(() => {
+    if (currentCompanion && availableCompanions.length > 0) {
+      const index = availableCompanions.findIndex(comp => comp.id === currentCompanion.id);
+      if (index >= 0) {
+        setCurrentIndex(index);
+      } else {
+        // Current companion is no longer available, reset to first
+        setCurrentIndex(0);
+        onCompanionChange(availableCompanions[0] || null);
+      }
+    } else if (availableCompanions.length > 0) {
+      // No current companion but have available ones, select first
+      setCurrentIndex(0);
+      onCompanionChange(availableCompanions[0]);
+    } else {
+      // No available companions
+      onCompanionChange(null);
+    }
+  }, [availableCompanions, currentCompanion?.id]);
 
   const handlePrevious = () => {
     if (availableCompanions.length === 0 || disabled) return;
@@ -30,19 +53,7 @@ const CompanionSlot: React.FC<CompanionSlotProps> = ({
     onCompanionChange(availableCompanions[newIndex]);
   };
 
-  const currentCompanion = availableCompanions[currentIndex];
-
-  // Auto-select first companion when available companions change
-  React.useEffect(() => {
-    if (availableCompanions.length > 0 && currentIndex >= availableCompanions.length) {
-      setCurrentIndex(0);
-      onCompanionChange(availableCompanions[0]);
-    } else if (availableCompanions.length > 0 && currentIndex < availableCompanions.length) {
-      onCompanionChange(availableCompanions[currentIndex]);
-    } else {
-      onCompanionChange(null);
-    }
-  }, [availableCompanions, currentIndex, onCompanionChange]);
+  const displayCompanion = currentCompanion || availableCompanions[currentIndex];
 
   return (
     <div 
@@ -59,7 +70,7 @@ const CompanionSlot: React.FC<CompanionSlotProps> = ({
         </h5>
       </div>
 
-      {currentCompanion ? (
+      {displayCompanion ? (
         <>
           {/* Avatar with navigation arrows */}
           <div className="flex items-center justify-center mb-4 relative">
@@ -82,8 +93,8 @@ const CompanionSlot: React.FC<CompanionSlotProps> = ({
             
             <div className="w-20 h-20 mx-8">
               <img 
-                src={currentCompanion.avatar} 
-                alt={currentCompanion.name} 
+                src={displayCompanion.avatar} 
+                alt={displayCompanion.name} 
                 className="w-full h-full object-contain"
                 style={{ imageRendering: 'pixelated' }}
               />
@@ -110,13 +121,13 @@ const CompanionSlot: React.FC<CompanionSlotProps> = ({
           {/* Companion info */}
           <div className="text-center space-y-2">
             <div className="font-retro text-base font-bold text-gray-800">
-              {currentCompanion.name}
+              {displayCompanion.name}
             </div>
             <div className="text-sm font-medium text-gray-600">
-              {currentCompanion.role}
+              {displayCompanion.role}
             </div>
             <div className="text-xs leading-relaxed px-2 text-gray-500">
-              {currentCompanion.description}
+              {displayCompanion.description}
             </div>
           </div>
         </>

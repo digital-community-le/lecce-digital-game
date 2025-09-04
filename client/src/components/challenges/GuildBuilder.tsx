@@ -27,7 +27,7 @@ const companions: GuildCompanion[] = [
 const GuildBuilder: React.FC = () => {
   const { gameState, updateChallengeProgress, showToast } = useGameStore();
   const [guildState, setGuildState] = useState<GuildState | null>(null);
-  const [currentCompanions, setCurrentCompanions] = useState<(GuildCompanion | null)[]>([null, null, null]);
+  const [selectedCompanions, setSelectedCompanions] = useState<(GuildCompanion | null)[]>([null, null, null]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Configuration validation
@@ -63,30 +63,30 @@ const GuildBuilder: React.FC = () => {
         gameStorage.saveGuildState(gameState.currentUser.userId, state);
       }
       
-      // Convert team object to currentCompanions array with null placeholders
-      const newCurrentCompanions: (GuildCompanion | null)[] = [null, null, null];
+      // Convert team object to selectedCompanions array with null placeholders
+      const newSelectedCompanions: (GuildCompanion | null)[] = [null, null, null];
       Object.values(state.team)
         .filter(companion => companion && companion.id && companion.name && companion.role)
         .forEach((companion, index) => {
           if (index < 3) {
-            newCurrentCompanions[index] = companion as GuildCompanion;
+            newSelectedCompanions[index] = companion as GuildCompanion;
           }
         });
       
-      setCurrentCompanions(newCurrentCompanions);
+      setSelectedCompanions(newSelectedCompanions);
       setGuildState(state);
       setIsLoading(false);
     }
   }, [gameState.currentUser.userId]);
 
   const handleCompanionChange = (slotIndex: number, companion: GuildCompanion | null) => {
-    const newCurrent = [...currentCompanions];
-    newCurrent[slotIndex] = companion;
-    setCurrentCompanions(newCurrent);
+    const newSelected = [...selectedCompanions];
+    newSelected[slotIndex] = companion;
+    setSelectedCompanions(newSelected);
   };
 
   const getAvailableCompanions = (forSlotIndex: number): GuildCompanion[] => {
-    const usedIds = currentCompanions
+    const usedIds = selectedCompanions
       .filter((comp, index) => comp !== null && index !== forSlotIndex)
       .map(comp => comp!.id);
     
@@ -96,7 +96,7 @@ const GuildBuilder: React.FC = () => {
   const handleSubmit = () => {
     if (!guildState) return;
 
-    const validCompanions = currentCompanions.filter(c => c !== null) as GuildCompanion[];
+    const validCompanions = selectedCompanions.filter(c => c !== null) as GuildCompanion[];
     
     if (validCompanions.length !== TEAM_SIZE) {
       showToast(`Devi selezionare esattamente ${TEAM_SIZE} compagni!`, 'error');
@@ -152,7 +152,7 @@ const GuildBuilder: React.FC = () => {
     };
     
     setGuildState(newState);
-    setCurrentCompanions([null, null, null]);
+    setSelectedCompanions([null, null, null]);
     gameStorage.saveGuildState(gameState.currentUser.userId, newState);
     showToast('Squadra ricominciata!', 'info');
   };
@@ -174,7 +174,7 @@ const GuildBuilder: React.FC = () => {
       gemIcon={allianceGem}
       description={guildBuilderConfig.description}
       tip={`Seleziona ${TEAM_SIZE} compagni che possano affrontare insieme la quest. Scegli con saggezza!`}
-      progress={currentCompanions.filter(c => c !== null).length}
+      progress={selectedCompanions.filter(c => c !== null).length}
       total={TEAM_SIZE}
       progressLabel="Squadra"
       isCompleted={isCompleted}
@@ -192,14 +192,15 @@ const GuildBuilder: React.FC = () => {
             {/* Companion Slots */}
             <div className="mb-6">
               <h4 className="font-retro text-sm mb-4 text-gray-700">
-                🛡️ Forma la tua squadra ({currentCompanions.filter(c => c !== null).length}/{TEAM_SIZE})
+                🛡️ Forma la tua squadra ({selectedCompanions.filter(c => c !== null).length}/{TEAM_SIZE})
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {Array.from({ length: TEAM_SIZE }, (_, index) => (
                   <CompanionSlot
-                    key={index}
+                    key={`slot-${index}`}
                     slotIndex={index}
                     availableCompanions={getAvailableCompanions(index)}
+                    currentCompanion={selectedCompanions[index]}
                     onCompanionChange={(companion) => handleCompanionChange(index, companion)}
                     disabled={isCompleted}
                   />
@@ -212,7 +213,7 @@ const GuildBuilder: React.FC = () => {
               <button 
                 className="nes-btn is-primary"
                 onClick={handleSubmit}
-                disabled={currentCompanions.filter(c => c !== null).length !== TEAM_SIZE}
+                disabled={selectedCompanions.filter(c => c !== null).length !== TEAM_SIZE}
                 data-testid="button-submit-team"
               >
                 Conferma Squadra
@@ -236,7 +237,7 @@ const GuildBuilder: React.FC = () => {
               <div className="text-sm">
                 <div className="flex justify-between">
                   <span>Squadra formata:</span>
-                  <span className="font-retro">{currentCompanions.filter(c => c !== null).length}/{TEAM_SIZE}</span>
+                  <span className="font-retro">{selectedCompanions.filter(c => c !== null).length}/{TEAM_SIZE}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Tentativi totali:</span>
