@@ -8,7 +8,7 @@ import sealWithGemsImage from '@assets/images/seal-with-gems.png';
 const GameComplete: React.FC = () => {
   const { gameState } = useGameStore();
   const [, setLocation] = useLocation();
-  const [animationPhase, setAnimationPhase] = useState<'seal' | 'title' | 'description' | 'button'>('seal');
+  const [animationPhase, setAnimationPhase] = useState<'seal' | 'title' | 'description'>('seal');
   const [badgeInfo, setBadgeInfo] = useState<any>(null);
   
   const { finalCompletion } = gameData;
@@ -41,18 +41,12 @@ const GameComplete: React.FC = () => {
     setAnimationPhase('seal');
     const timer1 = setTimeout(() => setAnimationPhase('title'), 1200);
     const timer2 = setTimeout(() => setAnimationPhase('description'), 2000);
-    const timer3 = setTimeout(() => setAnimationPhase('button'), 3200);
     
     return () => {
       clearTimeout(timer1);
       clearTimeout(timer2);
-      clearTimeout(timer3);
     };
   }, []);
-
-  const handleViewStats = () => {
-    setLocation('/statistics');
-  };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 py-12" style={{ background: 'var(--ldc-surface)' }}>
@@ -86,7 +80,7 @@ const GameComplete: React.FC = () => {
         {/* Epic Title */}
         <div 
           className={`mb-8 transition-all duration-1000 ${
-            animationPhase === 'seal' || animationPhase === 'title'
+            animationPhase === 'seal'
               ? 'opacity-0 translate-y-8'
               : 'opacity-100 translate-y-0'
           }`}
@@ -106,7 +100,7 @@ const GameComplete: React.FC = () => {
         {/* Epic Description */}
         <div 
           className={`mb-8 transition-all duration-1000 delay-300 ${
-            ['seal', 'title', 'description'].includes(animationPhase)
+            animationPhase === 'seal' || animationPhase === 'title'
               ? 'opacity-0 translate-y-8'
               : 'opacity-100 translate-y-0'
           }`}
@@ -123,7 +117,7 @@ const GameComplete: React.FC = () => {
         {badgeInfo && (
           <div 
             className={`mb-8 transition-all duration-1000 delay-500 ${
-              ['seal', 'title', 'description'].includes(animationPhase)
+              animationPhase === 'seal' || animationPhase === 'title'
                 ? 'opacity-0 translate-y-8'
                 : 'opacity-100 translate-y-0'
             }`}
@@ -150,23 +144,6 @@ const GameComplete: React.FC = () => {
             </div>
           </div>
         )}
-
-        {/* Epic Button */}
-        <div 
-          className={`mb-8 transition-all duration-1000 delay-700 ${
-            animationPhase !== 'button'
-              ? 'opacity-0 translate-y-8'
-              : 'opacity-100 translate-y-0'
-          }`}
-        >
-          <button 
-            className="nes-btn is-success font-retro"
-            onClick={handleViewStats}
-            data-testid="button-view-statistics"
-          >
-            {finalCompletion.buttonText}
-          </button>
-        </div>
 
       </div>
     </div>
