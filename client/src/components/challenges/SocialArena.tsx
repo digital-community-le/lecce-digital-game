@@ -605,8 +605,8 @@ const SocialArena: React.FC = () => {
 
             {/* Share guide modal */}
             {showShareGuide && (
-              <div className="fixed inset-0 z-60 flex items-center justify-center bg-black bg-opacity-70">
-                <div className="bg-white rounded-lg p-4 max-w-md w-full">
+              <div className="fixed inset-0 z-60 flex items-center justify-center" style={{ background: 'rgba(43, 20, 36, 0.85)' }}>
+                <div className="rounded-lg p-4 max-w-md w-full" style={{ background: 'var(--ldc-background)', color: 'var(--ldc-primary-dark)' }}>
                   <h3 className="font-retro text-sm mb-2">
                     Come condividere su Instagram
                   </h3>
@@ -646,7 +646,8 @@ const SocialArena: React.FC = () => {
                   <img
                     src={proofPreviewUrl || (proof.imageLocalUrl as string)}
                     alt="Prova verificata"
-                    className="w-16 h-16 object-cover border-2 border-black"
+                    className="w-16 h-16 object-cover border-2"
+                    style={{ borderColor: 'var(--ldc-primary-dark)' }}
                   />
                 )}
               </div>
