@@ -1,11 +1,9 @@
 import React, { useEffect } from 'react';
 import Header from '@/components/Header';
-import FloatingActionButton from '../FloatingActionButton';
 import ScanPreviewModal from '../ScanPreviewModal';
 import CompletionModal from '../CompletionModal';
 import EpilogueModal from '../EpilogueModal';
 import StatisticsModal from '../StatisticsModal';
-import QRModal from '../QRModal';
 import { useGameStore } from '@/hooks/use-game-store';
 import ScannerView from '../ScannerView';
 import RouteTransition from '@/components/RouteTransition';
@@ -52,15 +50,12 @@ const GameLayout: React.FC<GameLayoutProps> = ({
         <RouteTransition />
       </main>
 
-      <FloatingActionButton />
-
       {/* Modals - Keep these for overlays */}
       <ScannerView />
       <ScanPreviewModal />
       <CompletionModal />
       <EpilogueModal />
       <StatisticsModal />
-      <QRModal />
       
       {/* Toast notifications */}
       {toasts.map((toast) => (

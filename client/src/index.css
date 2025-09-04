@@ -29,7 +29,7 @@
 
   /* Border tuned to dark-plum surface for subtle separation */
   --ldc-border: rgba(43, 22, 36, 0.18);
-  /* Surface shadow used for elevated elements (cards, FAB) */
+  /* Surface shadow used for elevated elements (cards, modals) */
   --ldc-surface-shadow: 0 6px 18px rgba(43, 22, 36, 0.28);
   --ldc-elevated-border: rgba(255, 255, 255, 0.04);
   --ldc-focus: var(--ldc-primary-light);
@@ -388,45 +388,6 @@
   .bg-muted .border-black,
   .bg-background .border-black {
     border-color: var(--ldc-border) !important;
-  }
-
-  /* Floating action button: use NES.css button look, override only color/position */
-  .fab-nes {
-    position: fixed;
-    bottom: 1.5rem;
-    right: 1.5rem;
-    z-index: 40;
-    width: 56px;
-    height: 56px;
-    padding: 0.25rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  box-shadow: var(--ldc-surface-shadow);
-  }
-
-  /* Keep NES visual, but override background color to match the theme */
-  .fab-nes.nes-btn.is-primary {
-    background-color: var(--ldc-primary) !important;
-    border-color: var(--ldc-primary) !important;
-    color: white !important;
-  }
-
-  .fab-nes .icon svg {
-    width: 20px;
-    height: 20px;
-  }
-
-  /* Strong visible focus ring for keyboard users */
-  .fab-nes:focus {
-    outline: none;
-    box-shadow: 0 0 0 4px rgba(200, 56, 128, 0.25), 0 2px 6px rgba(0,0,0,0.2);
-    transform: translateY(-1px);
-  }
-
-  /* Ensure keyboard can activate via Enter/Space (semantic button handles this natively) */
-  .fab-nes:active {
-    transform: translateY(0);
   }
 
   /* Progress bar custom styling */

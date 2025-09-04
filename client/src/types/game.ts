@@ -19,7 +19,6 @@ export interface GameState {
   userId: string;
   displayName: string;
   avatar: string;
-  qrData: string | null;
   title?: string;
   };
   challenges: MapNode[];

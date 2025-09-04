@@ -16,7 +16,6 @@ import {
 import { UserProfile, GameProgress } from "@shared/schema";
 import { gameStorage } from "@/lib/storage";
 import { initAuthFromUrl } from '@/services/authService';
-import { QRGenerator } from "@/lib/qr";
 import gameData from "@/assets/game-data.json";
 
 // Fallback challenges (keeps previous defaults if JSON missing entries)
@@ -58,7 +57,6 @@ function buildInitialChallenges(data: any): MapNode[] {
 }
 // Small service interfaces so we can inject dependencies (DIP)
 type StorageService = typeof gameStorage;
-type QRService = typeof QRGenerator;
 
 /**
  * Single place for the initial state so it's easy to reason about.
@@ -68,7 +66,6 @@ const getInitialState = (): GameState => ({
     userId: "",
     displayName: "",
     avatar: "👨‍💻",
-    qrData: null,
     title: undefined,
   },
   challenges: buildInitialChallenges(gameData),
@@ -152,9 +149,8 @@ function useModalManager() {
 /**
  * Main factory for the game store. Accepts optional dependencies for easier testing and SRP.
  */
-function createGameStore(deps?: { storage?: StorageService; qr?: QRService }) {
+function createGameStore(deps?: { storage?: StorageService }) {
   const storage = deps?.storage ?? gameStorage;
-  const qr = deps?.qr ?? QRGenerator;
 
   const [gameState, setGameState] = useState<GameState>(getInitialState());
   const [withRouteTransition, setWithRouteTransition] = useState(false);
@@ -213,8 +209,7 @@ function createGameStore(deps?: { storage?: StorageService; qr?: QRService }) {
           currentUser: { 
             userId: profile.userId, 
             displayName: profile.displayName, 
-            avatar: profile.avatar, 
-            qrData: storage.getQR(profile.userId) 
+            avatar: profile.avatar
           }
         }));
         loadGameProgress(profile.userId);
@@ -222,7 +217,7 @@ function createGameStore(deps?: { storage?: StorageService; qr?: QRService }) {
     }
   }, [storage, loadGameProgress]);
 
-  // --- Profile / QR creation ---
+  // --- Profile creation ---
   const saveProfile = useCallback(
     async (displayName: string, avatar: string, userId?: string) => {
       const finalUserId = userId || `user_${Date.now()}`;
@@ -231,23 +226,13 @@ function createGameStore(deps?: { storage?: StorageService; qr?: QRService }) {
       const profile: UserProfile = { userId: finalUserId, displayName, avatar, createdAt: now, lastUpdated: now };
       storage.saveProfile(profile);
 
-      setGameState((prev) => ({ ...prev, currentUser: { userId: finalUserId, displayName, avatar, qrData: null } }));
+      setGameState((prev) => ({ ...prev, currentUser: { userId: finalUserId, displayName, avatar } }));
 
-      try {
-        const qrPayload = { userId: finalUserId, displayName, avatarUrl: avatar, timestamp: now };
-        const qrDataUrl = await qr.generateQR(qrPayload);
-        storage.saveQR(finalUserId, qrDataUrl);
-
-        setGameState((prev) => ({ ...prev, currentUser: { ...prev.currentUser, qrData: qrDataUrl } }));
-
-        const gameProgress: GameProgress = { userId: finalUserId, currentChallengeIndex: 0, completedChallenges: [], totalScore: 0, startedAt: now, lastUpdated: now, gameCompleted: false };
-        storage.saveProgress(gameProgress);
-        loadGameProgress(finalUserId);
-      } catch (e) {
-        showToast("Errore nella creazione del QR code", "error");
-      }
+      const gameProgress: GameProgress = { userId: finalUserId, currentChallengeIndex: 0, completedChallenges: [], totalScore: 0, startedAt: now, lastUpdated: now, gameCompleted: false };
+      storage.saveProgress(gameProgress);
+      loadGameProgress(finalUserId);
     },
-    [storage, qr, loadGameProgress, showToast]
+    [storage, loadGameProgress, showToast]
   );
 
   // --- Challenge progress ---

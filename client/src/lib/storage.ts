@@ -3,7 +3,6 @@ import { UserProfile, GameProgress, UserScan, PuzzleState, QuizState, SocialProo
 const STORAGE_KEYS = {
   PROFILE: (userId: string) => `ldc:profile:${userId}`,
   PROFILE_LAST: 'ldc:profile:last',
-  QR: (userId: string) => `ldc:qr:${userId}`,
   PROGRESS: (userId: string) => `ldc:progress:${userId}`,
   SCANS: (userId: string) => `ldc:scans:${userId}`,
   PUZZLE_STATE: (userId: string) => `ldc:puzzle:${userId}`,
@@ -38,15 +37,6 @@ class GameStorage {
 
   getAuthToken(userId: string): string | null {
     return localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN(userId));
-  }
-
-  // QR methods
-  saveQR(userId: string, qrData: string): void {
-    localStorage.setItem(STORAGE_KEYS.QR(userId), qrData);
-  }
-
-  getQR(userId: string): string | null {
-    return localStorage.getItem(STORAGE_KEYS.QR(userId));
   }
 
   // Game progress methods
