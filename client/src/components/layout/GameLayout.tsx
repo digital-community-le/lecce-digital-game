@@ -1,11 +1,9 @@
 import React, { useEffect } from 'react';
 import Header from '@/components/Header';
-import ScanPreviewModal from '../ScanPreviewModal';
 import CompletionModal from '../CompletionModal';
 import EpilogueModal from '../EpilogueModal';
 import StatisticsModal from '../StatisticsModal';
 import { useGameStore } from '@/hooks/use-game-store';
-import ScannerView from '../ScannerView';
 import RouteTransition from '@/components/RouteTransition';
 
 interface GameLayoutProps {
@@ -51,8 +49,6 @@ const GameLayout: React.FC<GameLayoutProps> = ({
       </main>
 
       {/* Modals - Keep these for overlays */}
-      <ScannerView />
-      <ScanPreviewModal />
       <CompletionModal />
       <EpilogueModal />
       <StatisticsModal />

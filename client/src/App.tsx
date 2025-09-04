@@ -8,8 +8,6 @@ import GameMapPage from "@/pages/GameMap";
 import GameCompletePage from "@/pages/GameComplete";
 import StatisticsPage from "@/pages/Statistics";
 import GameLayout from "@/components/layout/GameLayout";
-import ScannerView from "@/components/ScannerView";
-import ScanPreviewModal from "@/components/ScanPreviewModal";
 import GuildBuilderPage from "@/pages/challenges/GuildBuilder";
 import RetroPuzzlePage from "@/pages/challenges/RetroPuzzle";
 import DebugDungeonPage from "@/pages/challenges/DebugDungeon";
@@ -127,9 +125,6 @@ function App() {
           <AuthWrapper>
             <Toaster />
             <Router />
-            {/* Global scanner + preview mounted at app root so any page can open them */}
-            <ScannerView />
-            <ScanPreviewModal />
           </AuthWrapper>
         </GameStoreProvider>
       </TooltipProvider>
