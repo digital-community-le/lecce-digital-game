@@ -57,21 +57,37 @@ app.use((req, res, next) => {
   }
 
   // ALWAYS serve the app on the port specified in the environment variable PORT
-  // Other ports are firewalled. Default to 5000 if not specified.
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = parseInt(process.env.PORT || '5000', 10);
-  // Prefer an explicit HOST env var. On Windows some environments
-  // don't permit binding to 0.0.0.0, so default to 127.0.0.1 there.
-  const defaultHost = process.platform === 'win32' ? '127.0.0.1' : '0.0.0.0';
+  const port = parseInt(process.env.PORT || "5000", 10);
+
+  // Su macOS preferiamo 127.0.0.1 per evitare problemi di bind con 0.0.0.0
+  const isMac = process.platform === "darwin";
+  const defaultHost =
+  isMac ? "127.0.0.1" : (process.platform === "win32" ? "127.0.0.1" : "0.0.0.0");
   const host = process.env.HOST || defaultHost;
 
-  const listenOpts: any = { port, host };
-  if (process.platform !== 'win32') {
-    listenOpts.reusePort = true;
+  // Opzioni per listen: niente reusePort su TCP (può causare ENOTSUP)
+  const listenOpts: { port: number; host: string } = { port, host };
+
+  // Gestione errori di bind (porta occupata) e ENOTSUP
+  server.on("error", (err: any) => {
+  if (err?.code === "EADDRINUSE") {
+    log(`❌ Porta ${port} già in uso. Chiudi il processo che la usa:
+  lsof -ti :${port} | xargs kill -9
+  oppure avvia con un'altra porta:
+  PORT=${port + 1} npm run dev`);
+  } else if (err?.code === "ENOTSUP") {
+    log(`❌ ENOTSUP: operazione non supportata sulla socket.
+  Prova a:
+  - usare HOST=127.0.0.1 (già default su macOS),
+  - cambiare porta: PORT=${port + 1} npm run dev,
+  - verificare la versione/architettura di Node.`);
+  } else {
+    log(`❌ Errore server: ${err?.message || err}`);
   }
+  process.exit(1);
+  });
 
   server.listen(listenOpts, () => {
-    log(`serving on http://${host}:${port}`);
+  log(`✅ serving on http://${host}:${port}`);
   });
 })();
