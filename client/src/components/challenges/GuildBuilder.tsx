@@ -33,7 +33,7 @@ const GuildBuilder: React.FC = () => {
   // Configuration validation
   if (!guildBuilderConfig) {
     return (
-      <div className="p-4">
+      <div>
         <p className="title bg-card">Guild Builder — Errore</p>
         <div className="text-center text-red-600 mt-4">
           Configurazione della challenge "guild-builder" non trovata in <code>game-data.json</code>.
@@ -159,7 +159,7 @@ const GuildBuilder: React.FC = () => {
 
   if (isLoading || !guildState) {
     return (
-      <div className="p-4">
+      <div>
         <p className="title bg-card">Guild Builder</p>
         <div className="text-center">Caricamento...</div>
       </div>
@@ -180,18 +180,18 @@ const GuildBuilder: React.FC = () => {
       isCompleted={isCompleted}
       completionMessage="Hai formato la squadra perfetta! La Gemma dell'Alleanza è tua."
     >
-      <div className="p-4">
+
         {!isCompleted ? (
           <>
             {/* Quest display */}
-            <div className="nes-container is-rounded mb-6">
-              <p className="font-retro text-sm mb-2">📜 Quest:</p>
-              <p className="text-sm">{questText}</p>
+            <div className="nes-container is-rounded mb-6" style={{ backgroundColor: '#f8f9fa', border: '3px solid #212529' }}>
+              <p className="font-retro text-sm mb-2" style={{ color: '#212529' }}>📜 Quest:</p>
+              <p className="text-sm" style={{ color: '#495057' }}>{questText}</p>
             </div>
 
             {/* Companion Slots */}
             <div className="mb-6">
-              <h4 className="font-retro text-sm mb-4 text-gray-700">
+              <h4 className="font-retro text-base mb-4" style={{ color: '#212529' }}>
                 🛡️ Forma la tua squadra ({selectedCompanions.filter(c => c !== null).length}/{TEAM_SIZE})
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -215,6 +215,10 @@ const GuildBuilder: React.FC = () => {
                 onClick={handleSubmit}
                 disabled={selectedCompanions.filter(c => c !== null).length !== TEAM_SIZE}
                 data-testid="button-submit-team"
+                style={{ 
+                  backgroundColor: selectedCompanions.filter(c => c !== null).length === TEAM_SIZE ? '#0d6efd' : '#6c757d',
+                  borderColor: selectedCompanions.filter(c => c !== null).length === TEAM_SIZE ? '#0a58ca' : '#5c636a'
+                }}
               >
                 Conferma Squadra
               </button>
@@ -222,6 +226,11 @@ const GuildBuilder: React.FC = () => {
                 className="nes-btn is-warning"
                 onClick={handleRestart}
                 data-testid="button-restart-guild"
+                style={{ 
+                  backgroundColor: '#ffc107',
+                  borderColor: '#e0a800',
+                  color: '#212529'
+                }}
               >
                 Ricomincia
               </button>
@@ -233,8 +242,8 @@ const GuildBuilder: React.FC = () => {
             message="Hai formato la squadra giusta per affrontare la sfida: la Gemma dell'Alleanza è tua. Il tuo gruppo ha dimostrato sinergia e solidarietà."
             emoji="🛡️"
           >
-            <div className="nes-container is-light p-3 mb-3">
-              <div className="text-sm">
+            <div className="nes-container is-light p-3 mb-3" style={{ backgroundColor: '#e7f3ff', border: '3px solid #0d6efd' }}>
+              <div className="text-sm" style={{ color: '#212529' }}>
                 <div className="flex justify-between">
                   <span>Squadra formata:</span>
                   <span className="font-retro">{selectedCompanions.filter(c => c !== null).length}/{TEAM_SIZE}</span>
@@ -251,13 +260,18 @@ const GuildBuilder: React.FC = () => {
                 className="nes-btn is-warning"
                 onClick={handleRestart}
                 data-testid="button-play-again"
+                style={{ 
+                  backgroundColor: '#ffc107',
+                  borderColor: '#e0a800',
+                  color: '#212529'
+                }}
               >
                 Forma un'altra squadra
               </button>
             </div>
           </ChallengeCompleted>
         )}
-      </div>
+
     </ChallengeContentLayout>
   );
 };

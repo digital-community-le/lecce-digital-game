@@ -59,13 +59,13 @@ const CompanionSlot: React.FC<CompanionSlotProps> = ({
     <div 
       className="nes-container is-rounded p-4"
       style={{ 
-        minHeight: '220px',
-        backgroundColor: 'var(--ldc-surface)',
-        border: '3px solid var(--ldc-border)',
+        minHeight: '180px',
+        backgroundColor: '#ffffff',
+        border: '3px solid #212529',
       }}
     >
       <div className="text-center mb-3">
-        <h5 className="font-retro text-sm text-gray-600">
+        <h5 className="font-retro text-sm" style={{ color: '#212529' }}>
           Slot {slotIndex + 1}
         </h5>
       </div>
@@ -73,16 +73,18 @@ const CompanionSlot: React.FC<CompanionSlotProps> = ({
       {displayCompanion ? (
         <>
           {/* Avatar with navigation arrows */}
-          <div className="flex items-center justify-center mb-4 relative">
+          <div className="flex items-center justify-center mb-3 relative">
             {availableCompanions.length > 1 && (
               <button
                 onClick={handlePrevious}
                 className="nes-btn is-normal absolute left-0 z-10"
                 style={{ 
-                  width: '40px', 
-                  height: '40px',
-                  fontSize: '16px',
-                  lineHeight: '1'
+                  width: '32px', 
+                  height: '32px',
+                  fontSize: '14px',
+                  lineHeight: '1',
+                  backgroundColor: '#f8f9fa',
+                  color: '#212529'
                 }}
                 disabled={disabled}
                 aria-label="Compagno precedente"
@@ -91,7 +93,7 @@ const CompanionSlot: React.FC<CompanionSlotProps> = ({
               </button>
             )}
             
-            <div className="w-20 h-20 mx-8">
+            <div className="w-16 h-16 mx-6">
               <img 
                 src={displayCompanion.avatar} 
                 alt={displayCompanion.name} 
@@ -105,10 +107,12 @@ const CompanionSlot: React.FC<CompanionSlotProps> = ({
                 onClick={handleNext}
                 className="nes-btn is-normal absolute right-0 z-10"
                 style={{ 
-                  width: '40px', 
-                  height: '40px',
-                  fontSize: '16px',
-                  lineHeight: '1'
+                  width: '32px', 
+                  height: '32px',
+                  fontSize: '14px',
+                  lineHeight: '1',
+                  backgroundColor: '#f8f9fa',
+                  color: '#212529'
                 }}
                 disabled={disabled}
                 aria-label="Compagno successivo"
@@ -119,30 +123,30 @@ const CompanionSlot: React.FC<CompanionSlotProps> = ({
           </div>
 
           {/* Companion info */}
-          <div className="text-center space-y-2">
-            <div className="font-retro text-base font-bold text-gray-800">
+          <div className="text-center space-y-1">
+            <div className="font-retro text-sm font-bold" style={{ color: '#212529' }}>
               {displayCompanion.name}
             </div>
-            <div className="text-sm font-medium text-gray-600">
+            <div className="text-xs font-medium" style={{ color: '#6c757d' }}>
               {displayCompanion.role}
             </div>
-            <div className="text-xs leading-relaxed px-2 text-gray-500">
+            <div className="text-xs leading-relaxed px-1" style={{ color: '#868e96' }}>
               {displayCompanion.description}
             </div>
           </div>
         </>
       ) : (
-        <div className="text-center py-8">
-          <div className="text-6xl mb-4">👤</div>
-          <div className="text-sm text-gray-400 font-retro">
+        <div className="text-center py-6">
+          <div className="text-4xl mb-2">👤</div>
+          <div className="text-xs font-retro" style={{ color: '#adb5bd' }}>
             Nessun compagno disponibile
           </div>
         </div>
       )}
 
       {availableCompanions.length > 1 && (
-        <div className="text-center mt-3">
-          <div className="text-xs text-gray-400">
+        <div className="text-center mt-2">
+          <div className="text-xs" style={{ color: '#adb5bd' }}>
             {currentIndex + 1} di {availableCompanions.length}
           </div>
         </div>
