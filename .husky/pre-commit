@@ -1,6 +1,3 @@
-#!/usr/bin/env sh
-. "$(dirname "$0")/_/husky.sh"
-
 echo "🚀 Running pre-commit checks..."
 
 # Esegui lint-staged per controllare solo i file modificati
