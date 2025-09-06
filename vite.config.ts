@@ -35,6 +35,7 @@ export default defineConfig({
       },
     },
   },
+  publicDir: path.resolve(import.meta.dirname, "public"),
   worker: {
     format: 'es',
     rollupOptions: {
