@@ -5,6 +5,7 @@ import { GuildState, GuildCompanion } from '@shared/schema';
 import ChallengeContentLayout from '@/components/layout/ChallengeContentLayout';
 import ChallengeCompleted from '@/components/ChallengeCompleted';
 import CompanionSlot from './CompanionSlot';
+import UiDialog from '@/components/UiDialog';
 import gameData from '@/assets/game-data.json';
 import allianceGem from '@assets/images/gem-of-alliance.png';
 
@@ -24,11 +25,85 @@ const companions: GuildCompanion[] = [
   { id: '8', name: 'Henry', role: 'Content Creator', description: 'Produce contenuti che educano e ispirano', avatar: '@assets/generated_images/Student_avatar_pixel_art_285fb9d0.png' },
 ];
 
+/**
+ * Mapping dei suggerimenti per ruoli errati basato sui requisiti della quest
+ */
+export const getSuggestion = (wrongRole: string, requiredRoles: string[], questText: string): string => {
+  // Analisi del testo della quest per fornire suggerimenti contestuali
+  const lowerQuestText = questText.toLowerCase();
+  
+  // Mappatura specifica per ruoli errati vs ruoli richiesti
+  const roleSuggestions: Record<string, Record<string, string>> = {
+    'Developer': {
+      'Social Media Wizard': 'per gestire la visibilità sui social',
+      'Designer': 'per creare contenuti visivi accattivanti',
+      'Speaker': 'per comunicare efficacemente con il pubblico',
+      'Marketing Expert': 'per promuovere il progetto',
+      'Content Creator': 'per produrre contenuti coinvolgenti'
+    },
+    'Designer': {
+      'Developer': 'per risolvere problemi tecnici e bug',
+      'Tester': 'per garantire la qualità del software',
+      'Project Manager': 'per coordinare il team efficacemente',
+      'Social Media Wizard': 'per la gestione dei social media'
+    },
+    'Tester': {
+      'Developer': 'per implementare nuove funzionalità',
+      'Designer': 'per migliorare l\'aspetto visivo',
+      'Speaker': 'per presentare il progetto',
+      'Social Media Wizard': 'per aumentare la visibilità online'
+    },
+    'Project Manager': {
+      'Developer': 'per le competenze tecniche necessarie',
+      'Social Media Wizard': 'per la strategia sui social media',
+      'Designer': 'per l\'aspetto creativo del progetto',
+      'Speaker': 'per la comunicazione pubblica'
+    },
+    'Marketing Expert': {
+      'Social Media Wizard': 'per la gestione specifica dei social',
+      'Content Creator': 'per la creazione di contenuti',
+      'Developer': 'per le competenze tecniche',
+      'Designer': 'per la parte visiva'
+    },
+    'Content Creator': {
+      'Social Media Wizard': 'per la strategia sui social media',
+      'Designer': 'per la creatività visiva',
+      'Speaker': 'per la comunicazione diretta',
+      'Marketing Expert': 'per la strategia di marketing'
+    },
+    'Social Media Wizard': {
+      'Developer': 'per risolvere problemi tecnici',
+      'Tester': 'per testare l\'applicazione',
+      'Project Manager': 'per gestire il progetto',
+      'Designer': 'per la parte creativa'
+    },
+    'Speaker': {
+      'Developer': 'per le competenze tecniche',
+      'Designer': 'per l\'aspetto visivo',
+      'Social Media Wizard': 'per i social media',
+      'Tester': 'per il controllo qualità'
+    }
+  };
+
+  // Trova il primo ruolo richiesto che non è quello sbagliato
+  const suggestedRole = requiredRoles.find(role => role !== wrongRole);
+  
+  if (suggestedRole && roleSuggestions[wrongRole]?.[suggestedRole]) {
+    const reason = roleSuggestions[wrongRole][suggestedRole];
+    return `Hai scelto un ${wrongRole} in gamba, ma purtroppo non può esserti utile per questa missione. Sicuramente un ${suggestedRole} sarebbe più adatto ${reason}.`;
+  }
+  
+  // Fallback generico
+  return `Hai scelto un ${wrongRole} di talento, ma per questa quest avresti bisogno di competenze diverse. Prova con un altro profilo!`;
+};
+
 const GuildBuilder: React.FC = () => {
   const { gameState, updateChallengeProgress, showToast } = useGameStore();
   const [guildState, setGuildState] = useState<GuildState | null>(null);
   const [selectedCompanions, setSelectedCompanions] = useState<(GuildCompanion | null)[]>([null, null, null]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showSuggestionDialog, setShowSuggestionDialog] = useState(false);
+  const [currentSuggestion, setCurrentSuggestion] = useState<string>('');
 
   // Configuration validation
   if (!guildBuilderConfig) {
@@ -83,6 +158,12 @@ const GuildBuilder: React.FC = () => {
     const newSelected = [...selectedCompanions];
     newSelected[slotIndex] = companion;
     setSelectedCompanions(newSelected);
+    
+    // Clear suggestion dialog when user changes selection
+    if (showSuggestionDialog) {
+      setShowSuggestionDialog(false);
+      setCurrentSuggestion('');
+    }
   };
 
   const getAvailableCompanions = (forSlotIndex: number): GuildCompanion[] => {
@@ -128,7 +209,20 @@ const GuildBuilder: React.FC = () => {
       gameStorage.saveGuildState(gameState.currentUser.userId, updatedState);
       updateChallengeProgress('guild-builder', 1, true);
       showToast('Squadra perfetta! Challenge completata!', 'success');
+      // Clear suggestion dialog on success
+      setShowSuggestionDialog(false);
+      setCurrentSuggestion('');
     } else {
+      // Generate suggestion for the first wrong role found
+      const wrongRoles = selectedRoles.filter(role => !requiredRoles.includes(role));
+      const firstWrongRole = wrongRoles[0]; // Show only the first wrong role
+      
+      if (firstWrongRole) {
+        const suggestion = getSuggestion(firstWrongRole, requiredRoles, questText);
+        setCurrentSuggestion(suggestion);
+        setShowSuggestionDialog(true);
+      }
+
       const updatedState: GuildState = {
         ...guildState,
         attempts: newAttempts,
@@ -136,7 +230,7 @@ const GuildBuilder: React.FC = () => {
 
       setGuildState(updatedState);
       gameStorage.saveGuildState(gameState.currentUser.userId, updatedState);
-      showToast('La squadra non soddisfa i requisiti della quest. Riprova!', 'error');
+      showToast('La squadra non soddisfa i requisiti della quest. Consulta i suggerimenti!', 'error');
     }
   };
   
@@ -153,8 +247,16 @@ const GuildBuilder: React.FC = () => {
     
     setGuildState(newState);
     setSelectedCompanions([null, null, null]);
+    // Clear suggestion dialog on restart
+    setShowSuggestionDialog(false);
+    setCurrentSuggestion('');
     gameStorage.saveGuildState(gameState.currentUser.userId, newState);
     showToast('Squadra ricominciata!', 'info');
+  };
+
+  const handleCloseSuggestion = () => {
+    setShowSuggestionDialog(false);
+    setCurrentSuggestion('');
   };
 
   if (isLoading || !guildState) {
@@ -268,6 +370,34 @@ const GuildBuilder: React.FC = () => {
             </div>
           </ChallengeCompleted>
         )}
+
+        {/* Suggestion Dialog */}
+        <UiDialog
+          open={showSuggestionDialog}
+          onClose={handleCloseSuggestion}
+          title="💡 Suggerimento"
+          rounded={true}
+          ariaLabelledBy="suggestion-dialog-title"
+          ariaDescribedBy="suggestion-dialog-content"
+        >
+          <div id="suggestion-dialog-content">
+            <p className="text-sm mb-4" style={{ color: '#856404' }}>
+              {currentSuggestion}
+            </p>
+            <div className="text-center">
+              <button 
+                className="nes-btn is-primary"
+                onClick={handleCloseSuggestion}
+                style={{ 
+                  backgroundColor: '#0d6efd',
+                  borderColor: '#0a58ca'
+                }}
+              >
+                Ho capito!
+              </button>
+            </div>
+          </div>
+        </UiDialog>
 
     </ChallengeContentLayout>
   );

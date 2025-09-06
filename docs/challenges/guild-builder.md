@@ -144,6 +144,21 @@ AC6 — Accessibilità e UX:
 AC7 — Retry e comportamento one-shot:
 - In caso di fallimento, l'utente ritorna alla schermata di selezione con lo stesso requisito e può ritentare; non deve essere mostrata una nuova richiesta. La challenge è considerata "one-shot" nel senso che la requirement non viene sostituita automaticamente da una diversa e una volta completata non può essere rigiocata.
 
+## Suggerimenti per la selezione
+
+In caso di errore nella selezione della squadra, il sistema fornirà un feedback specifico per aiutare il giocatore a migliorare la propria scelta. Ogni messaggio di errore includerà:
+
+1. **Identificazione del profilo errato**: Un messaggio che evidenzia il ruolo selezionato che non soddisfa il requisito.
+2. **Suggerimento per la sostituzione**: Una raccomandazione su quale figura sarebbe più adatta e il motivo.
+
+### Esempi di messaggi di errore
+
+- "Hai scelto un Developer in gamba, ma purtroppo non può esserti utile per questa missione. Sicuramente un Social Media Manager sarebbe più adatto per gestire la richiesta di visibilità sui social."
+- "Il Designer che hai selezionato è talentuoso, ma per risolvere i bug della nostra app avremmo bisogno di un Tester."
+- "Un Organizer è perfetto per eventi, ma per nuove idee creative ti consigliamo di includere un Visionary."
+
+Questi suggerimenti saranno mostrati ogni volta che il giocatore conferma una squadra errata, migliorando l'apprendimento e l'esperienza di gioco.
+
 ## Testing & edge cases
 
 - Edge: fewer than 3 selectable companions (shouldn't happen) → disable confirm and show error.

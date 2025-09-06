@@ -31,7 +31,6 @@ tools:
 
 1. **Analizza il task**
 
-   - Leggi il prossimo task nel file `docs/tasks-board.md`.
    - Consulta i file nella cartella `docs` per acquisire informazioni utili.
    - Formula un piano di azione dettagliato.
 

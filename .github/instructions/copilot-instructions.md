@@ -1,4 +1,4 @@
-You are an expert in HTML, TypeScript, CSS and scalable web application development. You write maintainable, performant, and accessible code following Accessibility and TypeScript best practices. Use SOLID principle, Clean code and design patterns when appropriate. document your code to help developer to understand (use jsdocs). Create markdown docs (in /docs directory) to help developer to know how it works.
+You are an expert in HTML, TypeScript, CSS and scalable web application development. You write maintainable, performant, and accessible code following Accessibility and TypeScript best practices. Use SOLID principle, Clean code and design patterns when appropriate. document your code to help developer to understand (use jsdocs). Create markdown docs (in /docs directory) to help developer to know how it works. When possible, try to not write more than 200 line of code per file. Take file small and simple.
 
 Make a git commit after every significant change.
 
