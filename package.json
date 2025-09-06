@@ -21,6 +21,11 @@
     "test:coverage": "vitest --coverage",
     "test:changed": "node scripts/test-changed.js",
     "test:changed:full": "node scripts/test-changed.js --full",
+    "test:smart": "node scripts/test-smart.js",
+    "test:smart:unit": "node scripts/test-smart.js --unit-only",
+    "test:smart:integration": "node scripts/test-smart.js --integration",
+    "test:smart:e2e": "node scripts/test-smart.js --e2e",
+    "test:smart:all": "node scripts/test-smart.js --all",
     "test:perf": "node scripts/test-performance.js",
     "test:perf:report": "node scripts/test-performance.js --report",
     "pre-commit": "npm run check && npm run test:run",
@@ -120,6 +125,7 @@
     "autoprefixer": "^10.4.20",
     "cross-env": "^7.0.3",
     "esbuild": "^0.25.0",
+    "glob": "^11.0.3",
     "husky": "^9.1.7",
     "jsdom": "^26.1.0",
     "lint-staged": "^15.2.10",
@@ -136,7 +142,7 @@
   "lint-staged": {
     "*.{ts,tsx}": [
       "npm run check",
-      "npm run test:changed"
+      "npm run test:smart -- --unit-only"
     ],
     "*.{js,jsx,ts,tsx,json,css,md}": [
       "echo 'Files staged for commit'"

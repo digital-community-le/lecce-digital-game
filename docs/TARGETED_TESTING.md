@@ -1,64 +1,115 @@
-# Test Mirati e Ottimizzazioni CI
+# Test Stratificati e Ottimizzazioni CI
 
-Questo documento spiega come il progetto utilizza test mirati per ottimizzare i tempi di esecuzione nella CI/CD pipeline.
+Questo documento spiega come il progetto utilizza una strategia di test stratificata per ottimizzare qualità e performance.
 
-## 🎯 Strategia dei Test Mirati
+## 🎯 Strategia dei Test Stratificati
 
-### Principio
-Invece di eseguire tutti i test per ogni modifica, il sistema identifica e esegue solo i test correlati ai file modificati.
+### Principi Fondamentali
+Il sistema distingue tra tre livelli di test con scopi e trigger diversi:
 
-### Benefici
-- ⚡ **Feedback più veloce**: Riduce i tempi di CI/CD
-- 💰 **Costi ridotti**: Meno utilizzo di risorse CI
-- 🔄 **Iterazioni più rapide**: Sviluppo più fluido
-- 🎯 **Test mirati**: Focus sui cambiamenti effettivi
+1. **🔧 Unit Tests**: Test isolati per singoli componenti/funzioni
+2. **🔗 Integration Tests**: Test per verificare interazioni tra componenti
+3. **🌐 E2E Tests**: Test completi del flusso utente end-to-end
 
-## 🔍 Come Funziona
+### Benefici della Stratificazione
+- ⚡ **Feedback graduale**: Unit test veloci → Integration → E2E completi
+- 🎯 **Testing mirato**: Ogni livello ha trigger specifici
+- � **Ottimizzazione risorse**: Esegue solo ciò che serve
+- 🛡️ **Sicurezza progressiva**: Più livelli = più protezione
 
-### Rilevamento File Modificati
-1. **Sviluppo locale**: Analizza file staged + unstaged
-2. **CI/CD**: Confronta con la branch di base (origin/main)
-3. **Filtraggio**: Include solo file testabili (*.ts, *.tsx, test files)
+## � Matrice dei Test per Tipologia
 
-### Ricerca Test Correlati
-Per ogni file modificato, cerca test in:
-- Stessa directory: `Component.test.tsx`
-- Subdirectory `__tests__/`: `__tests__/Component.test.tsx`
-- Directory parallela: `test/components/Component.test.tsx`
+### 🔧 Unit Tests
+| Trigger | Quando | Cosa Testa |
+|---------|---------|------------|
+| File modificati | Sempre | Solo test correlati ai file cambiati |
+| Pre-commit | Sempre | Unit test per file staged |
+| PR Review | Sempre | Unit test mirati per diff |
+
+### 🔗 Integration Tests  
+| Trigger | Quando | Cosa Testa |
+|---------|---------|------------|
+| Servizi modificati | `src/services/`, `src/hooks/`, `src/context/` | Tutti gli integration test |
+| Config changes | `package.json`, `vite.config.ts`, etc. | Tutti gli integration test |
+| Forced execution | `--integration` flag | Tutti gli integration test |
+| Production deploy | Merge to main | Tutti gli integration test |
+
+### 🌐 E2E Tests
+| Trigger | Quando | Cosa Testa |
+|---------|---------|------------|
+| Pages modificate | `src/pages/`, `src/App.tsx` | Tutti gli E2E test |
+| API changes | `server/routes.ts`, `server/index.ts` | Tutti gli E2E test |
+| Forced execution | `--e2e` flag | Tutti gli E2E test |
+| Production deploy | Merge to main | Tutti gli E2E test |
+
+## 🏗️ Struttura delle Directory
+
+```
+client/src/
+├── components/
+│   └── __tests__/              # Unit tests per componenti
+├── services/
+│   └── __tests__/              # Unit tests per servizi
+├── __integration__/            # Integration tests
+│   ├── auth.integration.test.tsx
+│   ├── game-system.integration.test.tsx
+│   └── api.integration.test.tsx
+└── __e2e__/                   # End-to-end tests
+    ├── user-journeys.e2e.test.tsx
+    ├── pwa-features.e2e.test.tsx
+    └── offline-sync.e2e.test.tsx
+```
 
 ## 📋 Script Disponibili
 
+### Smart Test Runner (Raccomandato)
 | Script | Descrizione | Uso |
 |--------|-------------|-----|
-| `npm run test:changed` | Test solo file modificati | Sviluppo quotidiano |
-| `npm run test:changed:full` | Forza test completi | Quando servono tutti i test |
-| `npm run test:perf` | Analizza performance test | Monitoraggio ottimizzazioni |
-| `npm run test:perf:report` | Report performance | Visualizza statistiche |
+| `npm run test:smart` | Strategia automatica basata su file modificati | Sviluppo quotidiano |
+| `npm run test:smart:unit` | Solo unit tests per file modificati | Feedback veloce |
+| `npm run test:smart:integration` | Forza tutti gli integration tests | Verifica integrazioni |
+| `npm run test:smart:e2e` | Forza tutti gli E2E tests | Test flussi completi |
+| `npm run test:smart:all` | Tutti i test (unit + integration + e2e) | Deploy produzione |
 
-## 🔄 Workflow CI/CD
+### Legacy Scripts (Ancora disponibili)
+| Script | Descrizione |
+|--------|-------------|
+| `npm run test:changed` | Solo unit test per file modificati |
+| `npm run test:run` | Tutti i test senza stratificazione |
 
-### Pull Request (Ottimizzato)
+## 🔄 Workflow CI/CD Ottimizzati
+
+### Pull Request Strategy
 ```yaml
-- name: Run targeted tests (PR optimization)
-  run: CI=true npm run test:changed
+- name: Run smart test strategy (PR optimization)
+  run: CI=true npm run test:smart
 ```
-- ✅ Esegue solo test correlati ai file modificati
-- ⚡ Feedback rapido per sviluppatori
-- 🔄 Ideale per iterazioni frequenti
+**Comportamento**:
+- Unit tests: Solo per file modificati
+- Integration tests: Solo se ci sono cambiamenti a servizi/config
+- E2E tests: Solo se ci sono cambiamenti a pagine/API
 
-### Merge to Main (Completo)
+### Production Deploy Strategy
 ```yaml
-- name: Run full test suite (production deployment)
-  run: npm run test:run
+- name: Run complete test suite (production deployment)
+  run: npm run test:smart:all
 ```
-- ✅ Esegue TUTTI i test prima del deploy
-- 🛡️ Sicurezza massima per produzione
-- 🎯 Zero compromessi sulla qualità
+**Comportamento**:
+- Unit tests: TUTTI
+- Integration tests: TUTTI  
+- E2E tests: TUTTI
 
-### Full Test Workflow
-- 📅 **Schedule**: Ogni domenica alle 2 AM
-- 🔧 **Manual trigger**: Workflow_dispatch
-- 🧪 **Comprehensive**: Test su Node.js 20.x e 22.x
+### Development Strategy (Local)
+```bash
+# Pre-commit hook
+npm run test:smart -- --unit-only  # Solo unit test veloci
+
+# Before push
+npm run test:smart                  # Strategia automatica
+
+# Before release
+npm run test:smart:all             # Tutti i test
+```
 
 ## 💡 Esempi Pratici
 

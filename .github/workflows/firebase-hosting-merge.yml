@@ -20,8 +20,8 @@ jobs:
         run: npm ci
       - name: Run type checking
         run: npm run check
-      - name: Run full test suite (production deployment)
-        run: npm run test:run
+      - name: Run complete test suite (production deployment)
+        run: npm run test:smart:all
       - name: Run tests with coverage
         run: npm run test:coverage
         
