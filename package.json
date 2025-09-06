@@ -19,6 +19,10 @@
     "test:run": "vitest run",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --coverage",
+    "test:changed": "node scripts/test-changed.js",
+    "test:changed:full": "node scripts/test-changed.js --full",
+    "test:perf": "node scripts/test-performance.js",
+    "test:perf:report": "node scripts/test-performance.js --report",
     "pre-commit": "npm run check && npm run test:run",
     "pre-commit:quick": "npm run check && npm run test:run --reporter=basic",
     "test:pre-commit": "node scripts/test-pre-commit.js",
@@ -132,7 +136,7 @@
   "lint-staged": {
     "*.{ts,tsx}": [
       "npm run check",
-      "npm run test:run --passWithNoTests --reporter=basic"
+      "npm run test:changed"
     ],
     "*.{js,jsx,ts,tsx,json,css,md}": [
       "echo 'Files staged for commit'"
