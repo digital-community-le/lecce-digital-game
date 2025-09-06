@@ -1,11 +1,14 @@
-const CACHE_NAME = 'ldc-game-v1';
+const CACHE_NAME = 'ldc-game-v3';
 const urlsToCache = [
   '/',
-  '/static/js/bundle.js',
-  '/static/css/main.css',
   '/manifest.json',
-  'https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;800&family=Press+Start+2P&display=swap',
-  'https://unpkg.com/nes.css@latest/css/nes.min.css'
+  '/favicon.ico',
+  '/favicon-16x16.png',
+  '/favicon-32x32.png',
+  '/apple-touch-icon.png',
+  '/icon-192x192.png',
+  '/icon-512x512.png',
+  '/assets/splash_screens/icon.png'
 ];
 
 // Install event - cache resources
@@ -13,28 +16,69 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('Opened cache');
+        console.log('SW: Opened cache');
+        // Cache essential resources first
         return cache.addAll(urlsToCache);
+      })
+      .then(() => {
+        // Force the waiting service worker to become the active service worker
+        self.skipWaiting();
+      })
+      .catch((error) => {
+        console.error('SW: Failed to cache resources:', error);
       })
   );
 });
 
 // Fetch event - serve from cache when offline
 self.addEventListener('fetch', (event) => {
+  const { request } = event;
+  
+  // Skip non-GET requests
+  if (request.method !== 'GET') {
+    return;
+  }
+  
+  // Skip cross-origin requests
+  if (!request.url.startsWith(self.location.origin)) {
+    return;
+  }
+  
   event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Return cached version or fetch from network
-        if (response) {
-          return response;
+    caches.match(request)
+      .then((cachedResponse) => {
+        // Return cached version if available
+        if (cachedResponse) {
+          return cachedResponse;
         }
         
-        return fetch(event.request).catch(() => {
-          // If both cache and network fail, return a fallback for navigation requests
-          if (event.request.mode === 'navigate') {
-            return caches.match('/');
-          }
-        });
+        // Otherwise, fetch from network
+        return fetch(request)
+          .then((networkResponse) => {
+            // Don't cache non-successful responses
+            if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+              return networkResponse;
+            }
+            
+            // Clone the response as it can only be consumed once
+            const responseToCache = networkResponse.clone();
+            
+            // Add to cache for future use
+            caches.open(CACHE_NAME)
+              .then((cache) => {
+                cache.put(request, responseToCache);
+              });
+            
+            return networkResponse;
+          })
+          .catch(() => {
+            // If both cache and network fail, return a fallback for navigation requests
+            if (request.mode === 'navigate') {
+              return caches.match('/');
+            }
+            // For other requests, just fail
+            return new Response('Offline', { status: 408 });
+          });
       })
   );
 });
@@ -42,16 +86,21 @@ self.addEventListener('fetch', (event) => {
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
+    caches.keys()
+      .then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            if (cacheName !== CACHE_NAME) {
+              console.log('SW: Deleting old cache:', cacheName);
+              return caches.delete(cacheName);
+            }
+          })
+        );
+      })
+      .then(() => {
+        // Take control of all pages immediately
+        return self.clients.claim();
+      })
   );
 });
 
