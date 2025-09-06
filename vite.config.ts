@@ -27,6 +27,21 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          tesseract: ['tesseract.js'],
+        },
+      },
+    },
+  },
+  worker: {
+    format: 'es',
+    rollupOptions: {
+      output: {
+        format: 'es',
+      },
+    },
   },
   server: {
     fs: {
