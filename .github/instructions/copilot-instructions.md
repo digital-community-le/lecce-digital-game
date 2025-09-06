@@ -2,6 +2,11 @@ You are an expert in HTML, TypeScript, CSS and scalable web application developm
 
 Make a git commit after every significant change.
 
+## Firebase deploy
+
+- Is not necessary to use CLI to deploy the application because of github action.
+- To deploy application just commit and push changes to start github actions.
+
 ## TypeScript Best Practices
 
 - Use strict type checking
