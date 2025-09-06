@@ -1,4 +1,9 @@
-const CACHE_NAME = 'ldc-game-v3';
+// Auto-generated cache version - this will be replaced during build
+const CACHE_VERSION = '%%CACHE_VERSION%%';
+const CACHE_NAME = `ldc-game-${CACHE_VERSION}`;
+
+console.log(`SW: Cache version ${CACHE_VERSION}`);
+
 const urlsToCache = [
   '/',
   '/manifest.json',
@@ -83,23 +88,42 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Activate event - clean up old caches
+// Activate event - clean up old caches and notify clients of updates
 self.addEventListener('activate', (event) => {
+  console.log('SW: Activating new service worker');
+  
   event.waitUntil(
     caches.keys()
       .then((cacheNames) => {
-        return Promise.all(
-          cacheNames.map((cacheName) => {
-            if (cacheName !== CACHE_NAME) {
-              console.log('SW: Deleting old cache:', cacheName);
-              return caches.delete(cacheName);
-            }
-          })
-        );
+        // Delete all caches that don't match current version
+        const deletionPromises = cacheNames.map((cacheName) => {
+          if (cacheName !== CACHE_NAME && cacheName.startsWith('ldc-game-')) {
+            console.log('SW: Deleting old cache:', cacheName);
+            return caches.delete(cacheName);
+          }
+        });
+        
+        return Promise.all(deletionPromises);
       })
       .then(() => {
         // Take control of all pages immediately
+        console.log('SW: Taking control of all clients');
         return self.clients.claim();
+      })
+      .then(() => {
+        // Notify all clients that a new version is available
+        return self.clients.matchAll();
+      })
+      .then((clients) => {
+        clients.forEach((client) => {
+          client.postMessage({
+            type: 'SW_UPDATED',
+            payload: {
+              version: CACHE_VERSION,
+              message: 'Una nuova versione è disponibile!'
+            }
+          });
+        });
       })
   );
 });
@@ -164,5 +188,45 @@ self.addEventListener('notificationclick', (event) => {
     event.waitUntil(
       clients.openWindow('/')
     );
+  }
+});
+
+// Message listener for commands from the main app
+self.addEventListener('message', (event) => {
+  console.log('SW: Received message:', event.data);
+  
+  if (event.data?.type === 'SKIP_WAITING') {
+    console.log('SW: Skipping waiting and activating immediately');
+    self.skipWaiting();
+  } else if (event.data?.type === 'FORCE_UPDATE') {
+    console.log('SW: Force updating cache');
+    
+    // Clear all caches and restart
+    event.waitUntil(
+      caches.keys()
+        .then((cacheNames) => {
+          const deletionPromises = cacheNames.map((cacheName) => {
+            if (cacheName.startsWith('ldc-game-')) {
+              console.log('SW: Force deleting cache:', cacheName);
+              return caches.delete(cacheName);
+            }
+          });
+          return Promise.all(deletionPromises);
+        })
+        .then(() => {
+          // Notify client that cache has been cleared
+          event.ports[0]?.postMessage({
+            type: 'CACHE_CLEARED',
+            message: 'Cache aggiornata con successo!'
+          });
+        })
+    );
+  } else if (event.data?.type === 'CHECK_VERSION') {
+    // Return current version info
+    event.ports[0]?.postMessage({
+      type: 'VERSION_INFO',
+      version: CACHE_VERSION,
+      cacheName: CACHE_NAME
+    });
   }
 });
