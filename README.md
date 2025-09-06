@@ -10,6 +10,14 @@
 - Fornire un'esperienza PWA offline-first
 - Mantenere uno stile retro 8-bit accattivante
 
+## 📋 Prerequisiti
+
+- **Node.js**: >=20.0.0 (richiesto da Firebase CLI v14+)
+- **npm**: >=10.0.0
+- **Git**: Per il versioning e i pre-commit hooks
+
+> **Nota**: Se usi nvm, puoi utilizzare `nvm use` per impostare automaticamente la versione corretta di Node.js (specificata in `.nvmrc`).
+
 ## 🏗️ Architettura
 
 ### Stack Tecnologico

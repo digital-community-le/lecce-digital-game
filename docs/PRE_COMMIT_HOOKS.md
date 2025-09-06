@@ -2,7 +2,12 @@
 
 Questo progetto utilizza Git hooks per garantire la qualità del codice prima di ogni commit.
 
-## 🚀 Configurazione Automatica
+## � Requisiti
+
+- **Node.js**: >=20.0.0 (richiesto da Firebase CLI v14+)
+- **npm**: >=10.0.0
+
+## �🚀 Configurazione Automatica
 
 I Git hooks sono configurati automaticamente quando installi le dipendenze grazie a Husky:
 

@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "type": "module",
   "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
   "scripts": {
     "dev": "cross-env NODE_ENV=development tsx server/index.ts",
     "build": "node scripts/build-sw-version.js update && vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
@@ -18,6 +22,7 @@
     "pre-commit": "npm run check && npm run test:run",
     "pre-commit:quick": "npm run check && npm run test:run --reporter=basic",
     "test:pre-commit": "node scripts/test-pre-commit.js",
+    "check:prerequisites": "node scripts/check-prerequisites.js",
     "prepare": "husky",
     "lint-staged": "lint-staged"
   },
