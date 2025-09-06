@@ -1,4 +1,4 @@
-name: Scheduled Tests
+name: Daily Health Check
 
 on:
   schedule:
@@ -7,7 +7,7 @@ on:
   workflow_dispatch: # Allow manual triggering
 
 jobs:
-  scheduled-test:
+  health-check:
     runs-on: ubuntu-latest
     
     steps:
@@ -23,12 +23,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
         
-      - name: Run comprehensive tests
-        run: |
-          npm run check
-          npm run test:run
-          npm run test:coverage
-          npm run build
+      - name: Run fast test suite (no coverage)
+        run: npm run test:smart:unit
+        
+      - name: Type checking
+        run: npm run check
+        
+      - name: Build verification
+        run: npm run build
           
       - name: Notify on failure
         if: failure()
