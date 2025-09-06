@@ -14,7 +14,12 @@
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
     "test:watch": "vitest --watch",
-    "test:coverage": "vitest --coverage"
+    "test:coverage": "vitest --coverage",
+    "pre-commit": "npm run check && npm run test:run",
+    "pre-commit:quick": "npm run check && npm run test:run --reporter=basic",
+    "test:pre-commit": "node scripts/test-pre-commit.js",
+    "prepare": "husky",
+    "lint-staged": "lint-staged"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -106,7 +111,9 @@
     "autoprefixer": "^10.4.20",
     "cross-env": "^7.0.3",
     "esbuild": "^0.25.0",
+    "husky": "^9.1.7",
     "jsdom": "^26.1.0",
+    "lint-staged": "^15.2.10",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.17",
     "tsx": "^4.19.1",
@@ -116,5 +123,14 @@
   },
   "optionalDependencies": {
     "bufferutil": "^4.0.8"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "npm run check",
+      "npm run test:run --passWithNoTests --reporter=basic"
+    ],
+    "*.{js,jsx,ts,tsx,json,css,md}": [
+      "echo 'Files staged for commit'"
+    ]
   }
 }
