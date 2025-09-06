@@ -28,7 +28,7 @@ const companions: GuildCompanion[] = [
 /**
  * Mapping dei suggerimenti per ruoli errati basato sui requisiti della quest
  */
-const getSuggestion = (wrongRole: string, requiredRoles: string[], questText: string): string => {
+export const getSuggestion = (wrongRole: string, requiredRoles: string[], questText: string): string => {
   // Analisi del testo della quest per fornire suggerimenti contestuali
   const lowerQuestText = questText.toLowerCase();
   

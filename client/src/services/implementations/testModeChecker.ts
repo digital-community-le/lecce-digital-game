@@ -7,13 +7,16 @@ import { ITestModeChecker } from '../interfaces/devfestApi.interfaces';
 export class TestModeChecker implements ITestModeChecker {
   private readonly urlSearchParams: URLSearchParams;
   private readonly localStorage: Storage;
+  private readonly developmentModeOverride?: boolean;
 
   constructor(
     urlSearchParams: URLSearchParams = new URLSearchParams(window.location.search),
-    localStorage: Storage = window.localStorage
+    localStorage: Storage = window.localStorage,
+    developmentModeOverride?: boolean
   ) {
     this.urlSearchParams = urlSearchParams;
     this.localStorage = localStorage;
+    this.developmentModeOverride = developmentModeOverride;
   }
 
   isTestMode(): boolean {
@@ -47,6 +50,11 @@ export class TestModeChecker implements ITestModeChecker {
    * @private
    */
   private isDevelopmentMode(): boolean {
+    // Allow override for testing
+    if (this.developmentModeOverride !== undefined) {
+      return this.developmentModeOverride;
+    }
+    
     // Check for development environment indicators
     return (
       // Vite development mode

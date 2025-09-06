@@ -1,22 +1,12 @@
 /**
  * Unit tests for TestModeChecker
  * Demonstrates testability through dependency injection
- * 
- * To run these tests, install vitest:
- * npm install -D vitest @vitest/ui
- * 
- * Add to package.json:
- * "scripts": {
- *   "test": "vitest",
- *   "test:ui": "vitest --ui"
- * }
  */
 
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
 import { TestModeChecker } from '../implementations/testModeChecker';
 
-// Example test structure (commented to avoid compilation errors without vitest)
-
-/*
 describe('TestModeChecker', () => {
   let mockUrlSearchParams: URLSearchParams;
   let mockLocalStorage: Storage;
@@ -49,7 +39,7 @@ describe('TestModeChecker', () => {
     it('should return false when URL param test=0', () => {
       // Arrange
       mockUrlSearchParams.set('test', '0');
-      const checker = new TestModeChecker(mockUrlSearchParams, mockLocalStorage);
+      const checker = new TestModeChecker(mockUrlSearchParams, mockLocalStorage, false);
 
       // Act
       const result = checker.isTestMode();
@@ -62,7 +52,7 @@ describe('TestModeChecker', () => {
       // Arrange
       const gameData = JSON.stringify({ test: true });
       (mockLocalStorage.getItem as MockedFunction<any>).mockReturnValue(gameData);
-      const checker = new TestModeChecker(mockUrlSearchParams, mockLocalStorage);
+      const checker = new TestModeChecker(mockUrlSearchParams, mockLocalStorage, false);
 
       // Act
       const result = checker.isTestMode();
@@ -76,7 +66,7 @@ describe('TestModeChecker', () => {
       // Arrange
       (mockLocalStorage.getItem as MockedFunction<any>).mockReturnValue('invalid-json');
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-      const checker = new TestModeChecker(mockUrlSearchParams, mockLocalStorage);
+      const checker = new TestModeChecker(mockUrlSearchParams, mockLocalStorage, false);
 
       // Act
       const result = checker.isTestMode();
@@ -106,6 +96,41 @@ describe('TestModeChecker', () => {
       // Should not call localStorage since URL param takes precedence
       expect(mockLocalStorage.getItem).not.toHaveBeenCalled();
     });
+
+    it('should return false when no test indicators are present', () => {
+      // Arrange
+      (mockLocalStorage.getItem as MockedFunction<any>).mockReturnValue(null);
+      const checker = new TestModeChecker(mockUrlSearchParams, mockLocalStorage, false);
+
+      // Act
+      const result = checker.isTestMode();
+
+      // Assert
+      expect(result).toBe(false);
+    });
+
+    it('should handle empty localStorage data', () => {
+      // Arrange
+      (mockLocalStorage.getItem as MockedFunction<any>).mockReturnValue('{}');
+      const checker = new TestModeChecker(mockUrlSearchParams, mockLocalStorage, false);
+
+      // Act
+      const result = checker.isTestMode();
+
+      // Assert
+      expect(result).toBe(false);
+    });
+
+    it('should return true in development mode when override is enabled', () => {
+      // Arrange
+      (mockLocalStorage.getItem as MockedFunction<any>).mockReturnValue(null);
+      const checker = new TestModeChecker(mockUrlSearchParams, mockLocalStorage, true);
+
+      // Act
+      const result = checker.isTestMode();
+
+      // Assert
+      expect(result).toBe(true);
+    });
   });
 });
-*/

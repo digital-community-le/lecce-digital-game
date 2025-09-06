@@ -34,7 +34,7 @@ console.log(\`SW: Cache version \${CACHE_VERSION}\`);
     mockPath.dirname.mockReturnValue('/mock/path');
     
     // Mock di fileURLToPath usando spyOn
-    vi.mocked(fileURLToPath as any).mockReturnValue('/mock/script/path.js');
+    vi.spyOn(require('url'), 'fileURLToPath').mockReturnValue('/mock/script/path.js');
     
     // Mock esistenza del file
     mockFs.existsSync.mockReturnValue(true);
