@@ -99,6 +99,10 @@ type GameRound = {
   result: 'success' | 'failure'; // Esito del tentativo
   attempts: number; // Numero di tentativi effettuati
   timestamp: string; // Timestamp del tentativo
+  // Punteggio: valori opzionali per registrare l'evoluzione del punteggio durante la sfida
+  scoreBefore?: number; // Punteggio prima del tentativo
+  scoreAfter?: number; // Punteggio dopo il tentativo
+  pointsLost?: number; // Punti persi in questo tentativo (0 se successo)
 };
 ```
 
@@ -115,7 +119,13 @@ type GameRound = {
       "id": "guild-builder",
       "type": "matching-quiz",
       "settings": {
-        "roles": ["Developer", "Designer", "Speaker"]
+        "roles": ["Developer", "Designer", "Speaker"],
+        "scoring": {
+          "maxScore": 100,              // Punteggio iniziale per la challenge
+          "penaltyPerFailure": 25,     // Punti persi ad ogni tentativo fallito
+          "minScore": 0,               // Punteggio minimo (non può scendere sotto)
+          "deductOnRetry": true        // Se true, ogni retry sottrae punti
+        }
       }
     }
   ]
@@ -145,6 +155,104 @@ AC6 — Accessibilità e UX:
 
 AC7 — Retry e comportamento one-shot:
 - In caso di fallimento, l'utente ritorna alla schermata di selezione con lo stesso requisito e può ritentare; non deve essere mostrata una nuova richiesta. La challenge è considerata "one-shot" nel senso che la requirement non viene sostituita automaticamente da una diversa e una volta completata non può essere rigiocata.
+
+AC8 — Sistema di punteggio:
+- La challenge parte con un punteggio massimo configurabile (`settings.scoring.maxScore`).
+- Ad ogni tentativo fallito il punteggio corrente viene diminuito di `settings.scoring.penaltyPerFailure` (fino a `minScore`).
+- Il punteggio viene registrato nel `GameRound` come `scoreBefore`, `pointsLost` e `scoreAfter`.
+- In caso di successo, il punteggio finale viene salvato insieme al risultato e può essere inviato al backend per leaderboard o statistiche.
+
+AC9 — Visualizzazione e feedback del punteggio:
+- Durante la selezione e nell'esito deve essere mostrato chiaramente il punteggio corrente (es. "Punti: 75/100").
+- Dopo un fallimento, mostrare quanti punti sono stati persi e il nuovo totale.
+- L'interfaccia non deve permettere che il punteggio scenda sotto `minScore`.
+
+## UI copy e mockup per la visualizzazione del punteggio
+
+Questa sezione propone copy e mockup concisi per mostrare il punteggio nella schermata di Selezione e nella schermata di Esito.
+
+### Principi di design
+- Posizionare il contatore punti in alto a destra della schermata di selezione (visibile durante tutta la selezione).
+- Usare colori/animazioni leggere per evidenziare la perdita di punti (es. -25 in rosso) e il mantenimento/guadagno in verde.
+- Fornire testo breve e diretto per l'esito, con CTA chiare (Riprova / Prosegui).
+
+### Copy principali (italiano)
+- Selezione (header vicino al contatore): "Punti: {scoreCurrent}/{maxScore}"
+- Tooltip sul contatore: "Ogni tentativo fallito costa {penaltyPerFailure} punti"
+- Fallimento (esito):
+  - Titolo: "Quasi… ma non è la squadra giusta"
+  - Body: "Hai perso {pointsLost} punti. Punti rimanenti: {scoreAfter}/{maxScore}. Vuoi riprovare?"
+  - CTA primaria: "Riprova" (rimane nella stessa challenge)
+  - CTA secondaria: "Esci" / "Torna alla mappa"
+- Successo (esito):
+  - Titolo: "La tua gilda è pronta!"
+  - Body: "Hai rilasciato la Gemma dell'Alleanza. Punteggio finale: {scoreAfter}/{maxScore}."
+  - CTA primaria: "Prosegui nel viaggio"
+
+### Mockup semplificato (layout)
+
+Selezione — vista principale
+
+```sh
+-------------------------------------------
+| Taverna — Forma la gilda                [Punti: 75/100] |
+| ---------------------------------------                     |
+| Requisito: "Migliorare la visibilità sui social"         |
+| [Card requisito]                                          |
+|                                                          |
+| [ Grid avatar 6–8 ]                                       |
+|                                                          |
+| [Selezionate: 2/3]                [Conferma gilda (disabled)] |
+-------------------------------------------
+```
+
+Quando l'utente conferma una squadra errata, mostrare un piccolo pannello overlay:
+
+Fallimento — overlay
+
+```sh
+-----------------------------
+| ❌ Quasi… ma non è la squadra giusta |
+| Hai perso -25 punti                 |
+| Punti rimanenti: 50/100            |
+| [Riprova]   [Torna alla mappa]     |
+-----------------------------
+```
+
+Successo — overlay
+
+```sh
+-----------------------------
+| ✨ La tua gilda è pronta!              |
+| Hai rilasciato la Gemma dell Alleanza  |
+| Punteggio finale: 75/100              |
+| [Prosegui nel viaggio]                |
+-----------------------------
+```
+
+### Mini-sequenza (mermaid) — flow utente
+
+```mermaid
+sequenceDiagram
+  participant U as Utente
+  participant UI as Interfaccia
+  U->>UI: Apri challenge
+  UI-->>U: Mostra requisito + Punti: 100/100
+  U->>UI: Seleziona 3 compagni
+  U->>UI: Conferma
+  UI-->>UI: Valida selezione
+  alt successo
+    UI-->>U: Overlay successo (Punteggio finale)
+  else fallimento
+    UI-->>U: Overlay fallimento (-N punti)
+  end
+```
+
+### Note di implementazione rapida
+- Aggiornare il componente `ChallengeHeader` o simile per leggere `settings.scoring` e mostrare il contatore.
+- Esporre nel payload del `GameRound` i campi `scoreBefore`, `pointsLost`, `scoreAfter` come già specificato.
+- Predisporre una micro-animazione per la perdita di punti (fade-out del -25 accanto al contatore).
+
 
 ## Suggerimenti per la selezione
 

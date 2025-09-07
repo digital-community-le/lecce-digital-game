@@ -104,6 +104,7 @@ const GuildBuilder: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showSuggestionDialog, setShowSuggestionDialog] = useState(false);
   const [currentSuggestion, setCurrentSuggestion] = useState<string>('');
+  const [pointsLost, setPointsLost] = useState<number>(0);
 
   // Configuration validation
   if (!guildBuilderConfig) {
@@ -120,19 +121,42 @@ const GuildBuilder: React.FC = () => {
   const requiredRoles = guildBuilderConfig.requirements?.requirement?.roles || [];
   const questText = guildBuilderConfig.requirements?.requirement?.text || '';
   const TEAM_SIZE = 3; // Fixed team size
+  
+  // Scoring configuration
+  const scoringConfig = guildBuilderConfig.settings?.scoring || {
+    maxScore: 100,
+    penaltyPerFailure: 25,
+    minScore: 0,
+    deductOnRetry: true
+  };
 
   useEffect(() => {
     if (gameState.currentUser.userId) {
       let state = gameStorage.getGuildState(gameState.currentUser.userId);
       
       if (!state) {
-        // Initialize new guild state
+        // Initialize new guild state with scoring
         state = {
           id: `guild_${Date.now()}`,
           team: {},
           completed: false,
           attempts: 0,
           startedAt: new Date().toISOString(),
+          currentScore: scoringConfig.maxScore,
+          maxScore: scoringConfig.maxScore,
+          penaltyPerFailure: scoringConfig.penaltyPerFailure,
+          minScore: scoringConfig.minScore,
+        };
+        
+        gameStorage.saveGuildState(gameState.currentUser.userId, state);
+      } else if (state.currentScore === undefined) {
+        // Migrate existing state to include scoring
+        state = {
+          ...state,
+          currentScore: scoringConfig.maxScore,
+          maxScore: scoringConfig.maxScore,
+          penaltyPerFailure: scoringConfig.penaltyPerFailure,
+          minScore: scoringConfig.minScore,
         };
         
         gameStorage.saveGuildState(gameState.currentUser.userId, state);
@@ -152,7 +176,7 @@ const GuildBuilder: React.FC = () => {
       setGuildState(state);
       setIsLoading(false);
     }
-  }, [gameState.currentUser.userId]);
+  }, [gameState.currentUser.userId, scoringConfig]);
 
   const handleCompanionChange = (slotIndex: number, companion: GuildCompanion | null) => {
     const newSelected = [...selectedCompanions];
@@ -195,6 +219,7 @@ const GuildBuilder: React.FC = () => {
     const hasAllRequiredRoles = requiredRoles.every((role: string) => selectedRoles.includes(role));
 
     const newAttempts = guildState.attempts + 1;
+    const currentScore = guildState.currentScore || scoringConfig.maxScore;
     
     if (hasAllRequiredRoles) {
       const updatedState: GuildState = {
@@ -202,7 +227,7 @@ const GuildBuilder: React.FC = () => {
         completed: true,
         attempts: newAttempts,
         finishedAt: new Date().toISOString(),
-        score: 100,
+        score: currentScore, // Final score
       };
 
       setGuildState(updatedState);
@@ -212,7 +237,14 @@ const GuildBuilder: React.FC = () => {
       // Clear suggestion dialog on success
       setShowSuggestionDialog(false);
       setCurrentSuggestion('');
+      setPointsLost(0);
     } else {
+      // Calculate score reduction
+      const penalty = guildState.penaltyPerFailure || scoringConfig.penaltyPerFailure;
+      const minScore = guildState.minScore || scoringConfig.minScore;
+      const actualPointsLost = Math.min(penalty, Math.max(0, currentScore - minScore));
+      const newScore = Math.max(minScore, currentScore - actualPointsLost);
+      
       // Generate suggestion for the first wrong role found
       const wrongRoles = selectedRoles.filter(role => !requiredRoles.includes(role));
       const firstWrongRole = wrongRoles[0]; // Show only the first wrong role
@@ -220,6 +252,7 @@ const GuildBuilder: React.FC = () => {
       if (firstWrongRole) {
         const suggestion = getSuggestion(firstWrongRole, requiredRoles, questText);
         setCurrentSuggestion(suggestion);
+        setPointsLost(actualPointsLost);
         setShowSuggestionDialog(true);
         // Don't show toast when dialog is displayed
       } else {
@@ -230,6 +263,7 @@ const GuildBuilder: React.FC = () => {
       const updatedState: GuildState = {
         ...guildState,
         attempts: newAttempts,
+        currentScore: newScore,
       };
 
       setGuildState(updatedState);
@@ -240,6 +274,12 @@ const GuildBuilder: React.FC = () => {
   const handleCloseSuggestion = () => {
     setShowSuggestionDialog(false);
     setCurrentSuggestion('');
+    setPointsLost(0);
+  };
+
+  const handleReturnToMap = () => {
+    // Navigate back to the map
+    window.location.href = '/';
   };
 
   if (isLoading || !guildState) {
@@ -252,6 +292,8 @@ const GuildBuilder: React.FC = () => {
   }
 
   const isCompleted = guildState.completed;
+  const currentScore = guildState.currentScore || scoringConfig.maxScore;
+  const maxScore = guildState.maxScore || scoringConfig.maxScore;
 
   return (
     <ChallengeContentLayout
@@ -262,6 +304,20 @@ const GuildBuilder: React.FC = () => {
       isCompleted={isCompleted}
       completionMessage="Hai formato la squadra perfetta! La Gemma dell'Alleanza è tua."
     >
+        {/* Score Display */}
+        {!isCompleted && (
+          <div className="flex justify-end mb-4">
+            <div className="nes-container is-rounded px-3 py-2" style={{ backgroundColor: '#e7f3ff', border: '2px solid #0d6efd' }}>
+              <span className="font-retro text-sm" style={{ color: '#0d6efd' }}>
+                Punti: {currentScore}/{maxScore}
+              </span>
+              <div className="text-xs mt-1" style={{ color: '#6c757d' }}>
+                Ogni errore costa {guildState.penaltyPerFailure || scoringConfig.penaltyPerFailure} punti
+              </div>
+            </div>
+          </div>
+        )}
+
         {!isCompleted ? (
           <>
             {/* Quest display */}
@@ -321,6 +377,10 @@ const GuildBuilder: React.FC = () => {
                   <span>Tentativi totali:</span>
                   <span>{guildState.attempts}</span>
                 </div>
+                <div className="flex justify-between">
+                  <span>Punteggio finale:</span>
+                  <span className="font-retro text-green-600">{guildState.score || currentScore}/{maxScore}</span>
+                </div>
               </div>
             </div>
           </ChallengeCompleted>
@@ -330,7 +390,7 @@ const GuildBuilder: React.FC = () => {
         <UiDialog
           open={showSuggestionDialog}
           onClose={handleCloseSuggestion}
-          title="💡 Suggerimento"
+          title="💡 Quasi… ma non è la squadra giusta"
           rounded={true}
           ariaLabelledBy="suggestion-dialog-title"
           ariaDescribedBy="suggestion-dialog-content"
@@ -339,7 +399,22 @@ const GuildBuilder: React.FC = () => {
             <p className="text-sm mb-4" style={{ color: '#856404' }}>
               {currentSuggestion}
             </p>
-            <div className="text-center">
+            
+            {/* Score feedback */}
+            {pointsLost > 0 && (
+              <div className="nes-container is-light p-3 mb-4" style={{ backgroundColor: '#fff3cd', border: '2px solid #ffc107' }}>
+                <div className="text-sm text-center" style={{ color: '#856404' }}>
+                  <div className="mb-1">
+                    <span className="font-retro text-red-600">-{pointsLost} punti</span>
+                  </div>
+                  <div>
+                    Punti rimanenti: <span className="font-retro">{currentScore - pointsLost}/{maxScore}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            <div className="text-center space-x-3">
               <button 
                 className="nes-btn is-primary"
                 onClick={handleCloseSuggestion}
@@ -348,7 +423,18 @@ const GuildBuilder: React.FC = () => {
                   borderColor: '#0a58ca'
                 }}
               >
-                Ho capito!
+                Riprova
+              </button>
+              <button 
+                className="nes-btn"
+                onClick={handleReturnToMap}
+                style={{ 
+                  backgroundColor: '#6c757d',
+                  borderColor: '#5c636a',
+                  color: 'white'
+                }}
+              >
+                Torna alla mappa
               </button>
             </div>
           </div>

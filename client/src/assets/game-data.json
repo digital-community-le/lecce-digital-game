@@ -37,7 +37,13 @@
       "settings": {
         "poolSize": 8,
         "allowDuplicates": false,
-        "shufflePool": true
+        "shufflePool": true,
+        "scoring": {
+          "maxScore": 100,
+          "penaltyPerFailure": 25,
+          "minScore": 0,
+          "deductOnRetry": true
+        }
       },
       "rewards": {
         "points": 180,

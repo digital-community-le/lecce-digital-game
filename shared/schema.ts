@@ -110,6 +110,11 @@ export const guildStateSchema = z.object({
   startedAt: z.string().optional(),
   finishedAt: z.string().optional(),
   score: z.number().optional(),
+  // Scoring system fields
+  currentScore: z.number().optional(),
+  maxScore: z.number().optional(),
+  penaltyPerFailure: z.number().optional(),
+  minScore: z.number().optional(),
 });
 
 export type GuildCompanion = z.infer<typeof guildCompanionSchema>;
