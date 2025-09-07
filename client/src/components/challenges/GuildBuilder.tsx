@@ -237,26 +237,6 @@ const GuildBuilder: React.FC = () => {
     }
   };
   
-  const handleRestart = () => {
-    if (!gameState.currentUser.userId) return;
-    
-    const newState: GuildState = {
-      id: `guild_${Date.now()}`,
-      team: {},
-      completed: false,
-      attempts: 0,
-      startedAt: new Date().toISOString(),
-    };
-    
-    setGuildState(newState);
-    setSelectedCompanions([null, null, null]);
-    // Clear suggestion dialog on restart
-    setShowSuggestionDialog(false);
-    setCurrentSuggestion('');
-    gameStorage.saveGuildState(gameState.currentUser.userId, newState);
-    showToast('Squadra ricominciata!', 'info');
-  };
-
   const handleCloseSuggestion = () => {
     setShowSuggestionDialog(false);
     setCurrentSuggestion('');
@@ -342,21 +322,6 @@ const GuildBuilder: React.FC = () => {
                   <span>{guildState.attempts}</span>
                 </div>
               </div>
-            </div>
-
-            <div className="text-center">
-              <button 
-                className="nes-btn is-warning"
-                onClick={handleRestart}
-                data-testid="button-play-again"
-                style={{ 
-                  backgroundColor: '#ffc107',
-                  borderColor: '#e0a800',
-                  color: '#212529'
-                }}
-              >
-                Forma un'altra squadra
-              </button>
             </div>
           </ChallengeCompleted>
         )}
