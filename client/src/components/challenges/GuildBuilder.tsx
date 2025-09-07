@@ -323,18 +323,6 @@ const GuildBuilder: React.FC = () => {
               >
                 Conferma Squadra
               </button>
-              <button 
-                className="nes-btn is-warning"
-                onClick={handleRestart}
-                data-testid="button-restart-guild"
-                style={{ 
-                  backgroundColor: '#ffc107',
-                  borderColor: '#e0a800',
-                  color: '#212529'
-                }}
-              >
-                Ricomincia
-              </button>
             </div>
           </>
         ) : (
