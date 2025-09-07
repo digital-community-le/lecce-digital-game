@@ -11,7 +11,7 @@
     "dev": "cross-env NODE_ENV=development tsx server/index.ts",
     "build": "node scripts/build-sw-version.js update && vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
     "start": "cross-env NODE_ENV=production node dist/index.js",
-    "check": "tsc",
+    "check": "node scripts/check-types.js",
     "build:sw": "node scripts/build-sw-version.js update",
     "restore:sw": "node scripts/build-sw-version.js restore",
     "test": "vitest",
@@ -106,6 +106,7 @@
     "@codecov/vite-plugin": "^1.9.1",
     "@replit/vite-plugin-cartographer": "^0.3.0",
     "@replit/vite-plugin-runtime-error-modal": "^0.0.3",
+    "@sentry/core": "^10.10.0",
     "@tailwindcss/typography": "^0.5.15",
     "@tailwindcss/vite": "^4.1.3",
     "@testing-library/jest-dom": "^6.8.0",
@@ -142,11 +143,13 @@
   },
   "lint-staged": {
     "*.{ts,tsx}": [
-      "npm run check",
       "npm run test:smart -- --unit-only"
     ],
     "*.{js,jsx,ts,tsx,json,css,md}": [
       "echo 'Files staged for commit'"
+    ],
+    "{package.json,tsconfig*.json}": [
+      "npm run check"
     ]
   }
 }

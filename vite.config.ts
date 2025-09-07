@@ -1,8 +1,12 @@
 import { defineConfig } from "vite";
 import { defineConfig as defineVitestConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
-import path from "path";
+import * as path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
+import { codecovVitePlugin } from "@codecov/vite-plugin"
+import { fileURLToPath } from 'node:url'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export default defineVitestConfig({
   plugins: [
@@ -16,17 +20,22 @@ export default defineVitestConfig({
           ),
         ]
       : []),
+    codecovVitePlugin({
+      enableBundleAnalysis: process.env.CODECOV_TOKEN !== undefined,
+      bundleName: "lecce-digital-community-legends",
+      uploadToken: process.env.CODECOV_TOKEN,
+    }),
   ],
   resolve: {
     alias: {
-      "@": path.resolve(import.meta.dirname, "client", "src"),
-      "@shared": path.resolve(import.meta.dirname, "shared"),
-      "@assets": path.resolve(import.meta.dirname, "public/assets"),
+      "@": path.resolve(__dirname, "client", "src"),
+      "@shared": path.resolve(__dirname, "shared"),
+      "@assets": path.resolve(__dirname, "public/assets"),
     },
   },
-  root: path.resolve(import.meta.dirname, "client"),
+  root: path.resolve(__dirname, "client"),
   build: {
-    outDir: path.resolve(import.meta.dirname, "dist/public"),
+    outDir: path.resolve(__dirname, "dist/public"),
     emptyOutDir: true,
     rollupOptions: {
       output: {
@@ -36,7 +45,7 @@ export default defineVitestConfig({
       },
     },
   },
-  publicDir: path.resolve(import.meta.dirname, "public"),
+  publicDir: path.resolve(__dirname, "public"),
   worker: {
     format: 'es',
     rollupOptions: {
