@@ -12,6 +12,51 @@ import forestRenderer from './forestRenderer';
 // Simple in-memory cache for loaded map icon images. Keyed by the icon path.
 const iconCache: Map<string, HTMLImageElement> = new Map();
 
+// Preload function to be called during app initialization
+export const preloadMapIcons = (challenges: MapNode[]): Promise<void[]> => {
+  console.debug('🚀 [mapRenderer] preloadMapIcons called with', challenges.length, 'challenges');
+  
+  // Extract unique icon paths from challenges
+  const iconPaths = challenges
+    .map(challenge => challenge.nodeIcon)
+    .filter((path): path is string => !!path && path.trim().length > 0)
+    .filter((path, index, array) => array.indexOf(path) === index); // Remove duplicates
+
+  console.debug('📋 [mapRenderer] Input challenges:', challenges.map(c => ({ id: c.id, nodeIcon: c.nodeIcon })));
+  console.debug('🎯 [mapRenderer] Extracted icon paths:', iconPaths);
+  
+  if (iconPaths.length === 0) {
+    console.warn('⚠️ [mapRenderer] No icon paths found in challenges!');
+    return Promise.resolve([]);
+  }
+
+  console.debug('🔄 [mapRenderer] Starting preload of', iconPaths.length, 'icons:', iconPaths);
+
+  return Promise.all(iconPaths.map(iconPath => {
+    return new Promise<void>((resolve, reject) => {
+      if (iconCache.has(iconPath)) {
+        console.debug('✅ [mapRenderer] Icon already cached:', iconPath);
+        resolve();
+        return;
+      }
+      
+      console.debug('🆕 [mapRenderer] Creating new Image for:', iconPath);
+      const img = new Image();
+      img.onload = () => {
+        iconCache.set(iconPath, img);
+        console.debug('✅ [mapRenderer] Preloaded icon successfully:', iconPath, `${img.naturalWidth}x${img.naturalHeight}`);
+        resolve();
+      };
+      img.onerror = (err) => {
+        console.error('❌ [mapRenderer] Failed to preload icon:', iconPath, err);
+        reject(new Error(`Failed to load icon: ${iconPath}`));
+      };
+      img.src = iconPath;
+      console.debug('📡 [mapRenderer] Set img.src to:', iconPath);
+    });
+  }));
+};
+
 export type TerrainType = 'grass' | 'forest' | 'mountain' | 'lake' | 'road';
 
 export interface MapTile {
@@ -739,55 +784,53 @@ export const renderMap = (
       const by = nr.cy - boxH / 2;
 
   // Background: try to draw the challenge's nodeIcon (preferred) or the
-  const mapIconPath = (ch as MapNode & any).nodeIcon as string | undefined;
+  const mapIconPath = ch.nodeIcon;
   let drewImage = false;
-    if (mapIconPath) {
-      const cached = iconCache.get(mapIconPath);
-      if (cached && cached.complete && cached.naturalWidth > 0) {
-        // draw image centered and covering the node box
-        ctx.drawImage(cached, bx, by, boxW, boxH);
-        drewImage = true;
-      } else if (cached && !cached.complete) {
-        // image is already being loaded elsewhere; ensure we have a load
-        // and error handler attached so we trigger a redraw when ready.
-        const anyCached = cached as any;
-        if (!anyCached.__mapListenerAttached) {
-          const onLoad = () => {
-            iconCache.set(mapIconPath, cached);
-            try { window.dispatchEvent(new CustomEvent('map-icon-loaded', { detail: { path: mapIconPath } })); } catch (e) {}
-          };
-          const onErr = () => {
-            try { window.dispatchEvent(new CustomEvent('map-icon-loaded', { detail: { path: mapIconPath, error: true } })); } catch (e) {}
-          };
-          cached.addEventListener('load', onLoad);
-          cached.addEventListener('error', onErr);
-          anyCached.__mapListenerAttached = true;
-        }
-      } else if (!cached) {
-        // start loading and store placeholder in cache to avoid duplicate loads
-        const img = new Image();
-        // log load start
-        try { console.debug('[mapRenderer] start loading icon', mapIconPath); } catch (e) {}
-        // Attach handlers before setting src to avoid missing the load event
-        img.onload = () => {
-          try { console.debug('[mapRenderer] loaded icon', mapIconPath, img.naturalWidth, img.naturalHeight); } catch (e) {}
-          iconCache.set(mapIconPath, img);
-          try { window.dispatchEvent(new CustomEvent('map-icon-loaded', { detail: { path: mapIconPath } })); } catch (e) {}
-        };
-        img.onerror = (err) => {
-          try { console.warn('[mapRenderer] failed loading icon', mapIconPath, err); } catch (e) {}
-          try { window.dispatchEvent(new CustomEvent('map-icon-loaded', { detail: { path: mapIconPath, error: true } })); } catch (e) {}
-        };
-        img.src = mapIconPath;
+  
+  console.debug('[mapRenderer] Processing challenge', ch.id, 'icon path:', mapIconPath);
+  
+  if (mapIconPath) {
+    const cached = iconCache.get(mapIconPath);
+    console.debug('[mapRenderer] Icon cache lookup for', mapIconPath, 'result:', {
+      exists: !!cached,
+      complete: cached?.complete,
+      naturalWidth: cached?.naturalWidth,
+      naturalHeight: cached?.naturalHeight
+    });
+    
+    if (cached && cached.complete && cached.naturalWidth > 0) {
+      // draw image centered and covering the node box
+      ctx.drawImage(cached, bx, by, boxW, boxH);
+      drewImage = true;
+      console.debug('[mapRenderer] Successfully drew image for', ch.id, 'at', bx, by, boxW, boxH);
+    } else if (!cached) {
+      // start loading and store placeholder in cache to avoid duplicate loads
+      const img = new Image();
+      // log load start
+      console.debug('[mapRenderer] Starting image load for', mapIconPath);
+      // Attach handlers before setting src to avoid missing the load event
+      img.onload = () => {
+        console.debug('[mapRenderer] Image loaded successfully', mapIconPath, img.naturalWidth, img.naturalHeight);
         iconCache.set(mapIconPath, img);
-        // If the image is already complete (e.g. browser cache), trigger redraw now
-        try {
-          if (img.complete && img.naturalWidth > 0) {
-            try { window.dispatchEvent(new CustomEvent('map-icon-loaded', { detail: { path: mapIconPath } })); } catch (e) {}
-          }
-        } catch (e) {}
-      }
+        try { window.dispatchEvent(new CustomEvent('map-icon-loaded', { detail: { path: mapIconPath } })); } catch (e) {}
+      };
+      img.onerror = (err) => {
+        console.warn('[mapRenderer] Image failed to load', mapIconPath, err);
+        try { window.dispatchEvent(new CustomEvent('map-icon-loaded', { detail: { path: mapIconPath, error: true } })); } catch (e) {}
+      };
+      img.src = mapIconPath;
+      iconCache.set(mapIconPath, img);
+      // If the image is already complete (e.g. browser cache), trigger redraw now
+      try {
+        if (img.complete && img.naturalWidth > 0) {
+          console.debug('[mapRenderer] Image was already cached in browser for', mapIconPath);
+          try { window.dispatchEvent(new CustomEvent('map-icon-loaded', { detail: { path: mapIconPath } })); } catch (e) {}
+        }
+      } catch (e) {}
     }
+  } else {
+    console.debug('[mapRenderer] No icon path found for challenge', ch.id);
+  }
 
   if (!drewImage) {
     // No filled background per design request — leave the node box transparent
@@ -796,18 +839,21 @@ export const renderMap = (
   }
   // No border: nodes should render without a surrounding rectangle per request.
 
-  // Emoji / icon: draw a faint white stroke behind the emoji for contrast
-  // then fill with black for legibility on varied backgrounds.
-  ctx.font = `${Math.floor(boxH * 0.5)}px serif`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  const emojiY = by + boxH * 0.45;
-  // stroke for contrast
-  ctx.lineWidth = Math.max(2, Math.floor(boxH * 0.08));
-  ctx.strokeStyle = 'rgba(255,255,255,0.85)';
-  if (nr.emoji) ctx.strokeText(nr.emoji, bx + boxW / 2, emojiY);
-  ctx.fillStyle = '#000';
-  if (nr.emoji) ctx.fillText(nr.emoji, bx + boxW / 2, emojiY);
+  // Only render emoji as fallback when no image was drawn
+  if (!drewImage && nr.emoji) {
+    // Emoji / icon: draw a faint white stroke behind the emoji for contrast
+    // then fill with black for legibility on varied backgrounds.
+    ctx.font = `${Math.floor(boxH * 0.5)}px serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const emojiY = by + boxH * 0.45;
+    // stroke for contrast
+    ctx.lineWidth = Math.max(2, Math.floor(boxH * 0.08));
+    ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+    ctx.strokeText(nr.emoji, bx + boxW / 2, emojiY);
+    ctx.fillStyle = '#000';
+    ctx.fillText(nr.emoji, bx + boxW / 2, emojiY);
+  }
 
   // Title small (subtle, no stroke)
   ctx.font = `${Math.floor(boxH * 0.15)}px serif`;

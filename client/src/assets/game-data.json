@@ -21,7 +21,7 @@
       "type": "matching-quiz",
       "description": "Forma una squadra di 3 compagni in grado di affrontare la sfida richiesta. Ogni compagno ha un ruolo unico e una descrizione. Scegli con attenzione!",
       "emoji": "🛡️",
-      "nodeIcon": "/assets/map-icons/tavern.png",
+      "nodeIcon": "/assets/map-icons/taverna.png",
       "position": {
         "top": "30%",
         "left": "15%"
@@ -56,7 +56,7 @@
       "type": "puzzle",
       "description": "Nel puzzle antico, ogni connessione rivela un frammento di saggezza. Abbina i termini alle loro categorie per raccogliere la Gemma della Conoscenza.",
       "emoji": "🧩",
-      "nodeIcon": "/assets/map-icons/house-group.png",
+      "nodeIcon": "/assets/map-icons/cripta.png",
       "position": {
         "top": "20%",
         "left": "45%"
@@ -130,7 +130,7 @@
       "type": "quiz",
       "description": "Nel Debug Dungeon, ogni risposta corretta illumina il sentiero verso la conoscenza. Supera il quiz per conquistare la Gemma del Sapere.",
       "emoji": "⚔️",
-      "nodeIcon": "/assets/map-icons/cave.png",
+      "nodeIcon": "/assets/map-icons/labirinto.png",
       "position": {
         "top": "45%",
         "left": "70%"
@@ -293,7 +293,7 @@
       "type": "social",
       "description": "Davanti allo Stand, il tuo gesto diventa simbolo: cattura la foto con il gadget e attiva l'epilogo della leggenda.",
       "emoji": "📱",
-      "nodeIcon": "/assets/map-icons/castle.png",
+      "nodeIcon": "/assets/map-icons/arena.png",
       "position": {
         "top": "65%",
         "left": "40%"

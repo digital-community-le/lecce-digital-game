@@ -48,6 +48,7 @@ function buildInitialChallenges(data: any): MapNode[] {
       id: c.id,
       title: c.title || (c.id ? c.id.replace(/[-_]/g, " ").replace(/\b\w/g, (s: string) => s.toUpperCase()) : "Unknown"),
       emoji: c.emoji || "❓",
+      nodeIcon: c.nodeIcon, // Add nodeIcon property from game-data.json
       position,
       status: idx === 0 ? "available" : "locked",
       progress: 0,

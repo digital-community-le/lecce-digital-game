@@ -7,6 +7,7 @@ import {
   renderMap,
   determineSafePositionForChallenge,
   NodeRect,
+  preloadMapIcons,
 } from "@/lib/mapRenderer";
 
 // Import atlas semplificato e configurazione tiles
@@ -60,6 +61,37 @@ const CanvasMap: React.FC = () => {
   const [nodeRectsState, setNodeRectsState] = useState<
     Record<string, NodeRect> | undefined
   >(undefined);
+
+  // Preload map icons when component mounts
+  useEffect(() => {
+    console.log('🎮 [CanvasMap] CanvasMap useEffect triggered!');
+    console.log('🎮 [CanvasMap] gameState.challenges:', gameState.challenges);
+    console.debug('🎮 [CanvasMap] Starting icon preload for challenges:', gameState.challenges.map(c => ({ id: c.id, nodeIcon: c.nodeIcon })));
+    
+    preloadMapIcons(gameState.challenges)
+      .then(() => {
+        console.log('✅ [CanvasMap] All icons preloaded successfully!');
+      })
+      .catch(err => {
+        console.warn('❌ [CanvasMap] Some map icons failed to preload:', err);
+      });
+    
+    // Listen for icon load events to trigger re-render
+    const handleIconLoaded = (event: CustomEvent) => {
+      console.debug('🎨 [CanvasMap] Icon loaded, triggering re-render:', event.detail);
+      // Force re-render by calling drawMap again
+      if (canvasRef.current) {
+        const canvas = canvasRef.current;
+        renderMap(canvas, gameState.challenges, MAP_WIDTH, MAP_HEIGHT, 48, nodeRectsState);
+      }
+    };
+    
+    window.addEventListener('map-icon-loaded', handleIconLoaded as EventListener);
+    
+    return () => {
+      window.removeEventListener('map-icon-loaded', handleIconLoaded as EventListener);
+    };
+  }, [gameState.challenges, nodeRectsState]);
   
   // Check for pending avatar animation when map loads
   useEffect(() => {
