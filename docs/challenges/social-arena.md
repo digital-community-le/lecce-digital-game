@@ -1,5 +1,11 @@
 # Social Arena — Istruzioni per sviluppo
 
+## Titolo per mappa
+La sfida comparirà con il titolo: "L'arena della Comunità"
+
+## Missione (etichetta)
+Unisci le voci e coordina la prova social
+
 Questo documento raccoglie tutte le istruzioni tecniche e UX per la challenge "Social Arena".
 
 ## Checklist rapida

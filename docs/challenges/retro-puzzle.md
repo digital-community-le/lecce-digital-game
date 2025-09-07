@@ -1,5 +1,11 @@
 # Retro Puzzle — Istruzioni per sviluppo
 
+## Titolo per mappa
+La sfida comparirà con il titolo: "La Cripta degli Antichi"
+
+## Missione (etichetta)
+Ricongiungi le parole perdute
+
 Questo documento raccoglie le istruzioni tecniche e UX per la challenge "Retro Puzzle".
 
 ## Scopo

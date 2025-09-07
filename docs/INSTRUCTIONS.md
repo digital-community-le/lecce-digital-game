@@ -151,11 +151,13 @@ Dettagli tecnici per la mappa e contratto `game-data.json`:
 
 - Ogni nodo definito come (esempio JSON):
 
-#### Networking Forest — purpose
+#### Guild Builder — purpose
 
-Scopo: scansione dei QR-code personali di altri partecipanti per ottenere scansioni distinte e sbloccare progressione sulla mappa.
+- Titolo: "La taverna dei compagni"
 
-Per la specifica completa (UX flow, tipi, persistenza, acceptance criteria) vedere [docs/challenges/networking-forest.md](docs/challenges/networking-forest.md).
+Scopo: selezionare la giusta squadra di compagni in base al requisito della quest; completamento rilascia la Gemma dell'Alleanza.
+
+Per la specifica completa (UX flow, tipi, persistenza, acceptance criteria) vedere [docs/challenges/guild-builder.md](docs/challenges/guild-builder.md).
 
 #### Retro Puzzle — purpose
 

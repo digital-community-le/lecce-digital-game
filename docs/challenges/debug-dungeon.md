@@ -1,4 +1,6 @@
 # Debug Dungeon — Istruzioni per sviluppo
+## Titolo per mappa
+La sfida comparirà con il titolo: "Il Labirinto dei Bug"
 
 Questo documento raccoglie le istruzioni tecniche, UX e contratti per la challenge "Debug Dungeon".
 

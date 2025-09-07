@@ -52,6 +52,8 @@ Esempi (non esaustivi):
 ## Requisiti tecnici e assets
 
 - ID challenge: `guild-builder` (sostituisce `networking-forest` nel game-data)
+ - ID challenge: `guild-builder` (sostituisce `networking-forest` nel game-data)
+ - Titolo: "La taverna dei compagni"
 - Gemma rilasciata: `gem-of-alliance` (usare asset esistente `public/assets/images/gem-of-alliance.png`)
 - Assets richiesti:
   - 6–10 avatar pixel-art (reuse di quelli esistenti in generated_images o nuovi)

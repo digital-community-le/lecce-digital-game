@@ -202,7 +202,7 @@ Ogni elemento interattivo ha un `data-testid` per testing:
 // Pattern naming
 button-{action}     // button-start-game
 text-{content}      // text-user-name  
-node-{id}          // node-networking-forest
+node-{id}          // node-guild-builder
 tile-{type}-{id}   // tile-grass-123
 ```
 

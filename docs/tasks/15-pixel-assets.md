@@ -12,7 +12,7 @@ Consegne richieste
 
 1. Intro images per ciascuna challenge
 
-   - `challenge-networking-forest-intro.png` (1x: 320×320, 2x: 640×640)
+   - `challenge-guild-builder-intro.png` (1x: 320×320, 2x: 640×640)
    - `challenge-retro-puzzle-intro.png` (1x/2x)
    - `challenge-debug-dungeon-intro.png` (1x/2x)
    - `challenge-social-arena-intro.png` (1x/2x)
@@ -91,7 +91,7 @@ Acceptance criteria (per HD to QA)
 
 Checklist di consegna (da spuntare prima di PR)
 
-- [ ] `public/assets/pixel-art/intro/challenge-networking-forest-intro.png` (1x e 2x)
+- [ ] `public/assets/pixel-art/intro/challenge-guild-builder-intro.png` (1x e 2x)
 - [ ] `public/assets/pixel-art/intro/challenge-retro-puzzle-intro.png` (1x e 2x)
 - [ ] `public/assets/pixel-art/intro/challenge-debug-dungeon-intro.png` (1x e 2x)
 - [ ] `public/assets/pixel-art/intro/challenge-social-arena-intro.png` (1x e 2x)
@@ -108,11 +108,11 @@ Note finali e raccomandazioni
 
 ```json
 {
-  "intro": {
-    "networking-forest": "intro/challenge-networking-forest-intro.png",
-    "retro-puzzle": "intro/challenge-retro-puzzle-intro.png",
-    "debug-dungeon": "intro/challenge-debug-dungeon-intro.png",
-    "social-arena": "intro/challenge-social-arena-intro.png"
-  }
+      "intro": {
+      "guild-builder": "intro/challenge-guild-builder-intro.png",
+      "retro-puzzle": "intro/challenge-retro-puzzle-intro.png",
+      "debug-dungeon": "intro/challenge-debug-dungeon-intro.png",
+      "social-arena": "intro/challenge-social-arena-intro.png"
+   }
 }
 ```

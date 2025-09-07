@@ -172,7 +172,7 @@ interface GameProgress {
 ### Challenge
 ```typescript
 interface Challenge {
-  id: string;               // ID sfida ('networking-forest', etc.)
+  id: string;               // ID sfida ('guild-builder', etc.)
   title: string;            // Titolo breve per UI
   emoji: string;            // Emoji rappresentativa
   description: string;      // Descrizione completa
