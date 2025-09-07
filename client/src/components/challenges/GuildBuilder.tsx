@@ -282,19 +282,6 @@ const GuildBuilder: React.FC = () => {
       isCompleted={isCompleted}
       completionMessage="Hai formato la squadra perfetta! La Gemma dell'Alleanza è tua."
     >
-      {/* VISIBLE TEST - REMOVE AFTER DEBUG */}
-      <div style={{ 
-        background: 'red', 
-        color: 'white', 
-        padding: '20px', 
-        margin: '10px 0',
-        fontSize: '18px',
-        fontWeight: 'bold',
-        textAlign: 'center'
-      }}>
-        🚨 TEST: Se vedi questo box rosso, le modifiche funzionano! 🚨
-      </div>
-
         {!isCompleted ? (
           <>
             {/* Quest display */}
@@ -348,41 +335,6 @@ const GuildBuilder: React.FC = () => {
               >
                 Ricomincia
               </button>
-              
-              {/* Test button for dialog - ALWAYS SHOW FOR DEBUG */}
-              <button 
-                className="nes-btn is-success"
-                onClick={() => {
-                  console.log('Test dialog button clicked!');
-                  setCurrentSuggestion('Test del dialog dei suggerimenti!');
-                  setShowSuggestionDialog(true);
-                }}
-                style={{ 
-                  backgroundColor: '#28a745',
-                  borderColor: '#1e7e34',
-                  fontSize: '12px'
-                }}
-              >
-                Test Dialog
-              </button>
-              
-              {/* Debug info */}
-              {true && (
-                <div style={{ 
-                  position: 'fixed', 
-                  top: '10px', 
-                  right: '10px', 
-                  background: 'rgba(0,0,0,0.8)', 
-                  color: 'white', 
-                  padding: '10px', 
-                  fontSize: '10px',
-                  zIndex: 9999
-                }}>
-                  ENV: {process.env.NODE_ENV || 'undefined'}<br/>
-                  Dialog: {showSuggestionDialog.toString()}<br/>
-                  Suggestion: {currentSuggestion ? 'Set' : 'Empty'}
-                </div>
-              )}
             </div>
           </>
         ) : (
