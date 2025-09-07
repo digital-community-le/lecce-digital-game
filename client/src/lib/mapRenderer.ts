@@ -14,45 +14,34 @@ const iconCache: Map<string, HTMLImageElement> = new Map();
 
 // Preload function to be called during app initialization
 export const preloadMapIcons = (challenges: MapNode[]): Promise<void[]> => {
-  console.debug('🚀 [mapRenderer] preloadMapIcons called with', challenges.length, 'challenges');
-  
   // Extract unique icon paths from challenges
   const iconPaths = challenges
     .map(challenge => challenge.nodeIcon)
     .filter((path): path is string => !!path && path.trim().length > 0)
     .filter((path, index, array) => array.indexOf(path) === index); // Remove duplicates
 
-  console.debug('📋 [mapRenderer] Input challenges:', challenges.map(c => ({ id: c.id, nodeIcon: c.nodeIcon })));
-  console.debug('🎯 [mapRenderer] Extracted icon paths:', iconPaths);
-  
   if (iconPaths.length === 0) {
-    console.warn('⚠️ [mapRenderer] No icon paths found in challenges!');
+    console.warn('[mapRenderer] No icon paths found in challenges');
     return Promise.resolve([]);
   }
-
-  console.debug('🔄 [mapRenderer] Starting preload of', iconPaths.length, 'icons:', iconPaths);
 
   return Promise.all(iconPaths.map(iconPath => {
     return new Promise<void>((resolve, reject) => {
       if (iconCache.has(iconPath)) {
-        console.debug('✅ [mapRenderer] Icon already cached:', iconPath);
         resolve();
         return;
       }
       
-      console.debug('🆕 [mapRenderer] Creating new Image for:', iconPath);
       const img = new Image();
       img.onload = () => {
         iconCache.set(iconPath, img);
-        console.debug('✅ [mapRenderer] Preloaded icon successfully:', iconPath, `${img.naturalWidth}x${img.naturalHeight}`);
         resolve();
       };
       img.onerror = (err) => {
-        console.error('❌ [mapRenderer] Failed to preload icon:', iconPath, err);
+        console.error('[mapRenderer] Failed to preload icon:', iconPath, err);
         reject(new Error(`Failed to load icon: ${iconPath}`));
       };
       img.src = iconPath;
-      console.debug('📡 [mapRenderer] Set img.src to:', iconPath);
     });
   }));
 };
@@ -787,30 +776,18 @@ export const renderMap = (
   const mapIconPath = ch.nodeIcon;
   let drewImage = false;
   
-  console.debug('[mapRenderer] Processing challenge', ch.id, 'icon path:', mapIconPath);
-  
   if (mapIconPath) {
     const cached = iconCache.get(mapIconPath);
-    console.debug('[mapRenderer] Icon cache lookup for', mapIconPath, 'result:', {
-      exists: !!cached,
-      complete: cached?.complete,
-      naturalWidth: cached?.naturalWidth,
-      naturalHeight: cached?.naturalHeight
-    });
     
     if (cached && cached.complete && cached.naturalWidth > 0) {
       // draw image centered and covering the node box
       ctx.drawImage(cached, bx, by, boxW, boxH);
       drewImage = true;
-      console.debug('[mapRenderer] Successfully drew image for', ch.id, 'at', bx, by, boxW, boxH);
     } else if (!cached) {
       // start loading and store placeholder in cache to avoid duplicate loads
       const img = new Image();
-      // log load start
-      console.debug('[mapRenderer] Starting image load for', mapIconPath);
       // Attach handlers before setting src to avoid missing the load event
       img.onload = () => {
-        console.debug('[mapRenderer] Image loaded successfully', mapIconPath, img.naturalWidth, img.naturalHeight);
         iconCache.set(mapIconPath, img);
         try { window.dispatchEvent(new CustomEvent('map-icon-loaded', { detail: { path: mapIconPath } })); } catch (e) {}
       };
@@ -823,13 +800,10 @@ export const renderMap = (
       // If the image is already complete (e.g. browser cache), trigger redraw now
       try {
         if (img.complete && img.naturalWidth > 0) {
-          console.debug('[mapRenderer] Image was already cached in browser for', mapIconPath);
           try { window.dispatchEvent(new CustomEvent('map-icon-loaded', { detail: { path: mapIconPath } })); } catch (e) {}
         }
       } catch (e) {}
     }
-  } else {
-    console.debug('[mapRenderer] No icon path found for challenge', ch.id);
   }
 
   if (!drewImage) {

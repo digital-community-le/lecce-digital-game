@@ -64,21 +64,12 @@ const CanvasMap: React.FC = () => {
 
   // Preload map icons when component mounts
   useEffect(() => {
-    console.log('🎮 [CanvasMap] CanvasMap useEffect triggered!');
-    console.log('🎮 [CanvasMap] gameState.challenges:', gameState.challenges);
-    console.debug('🎮 [CanvasMap] Starting icon preload for challenges:', gameState.challenges.map(c => ({ id: c.id, nodeIcon: c.nodeIcon })));
-    
-    preloadMapIcons(gameState.challenges)
-      .then(() => {
-        console.log('✅ [CanvasMap] All icons preloaded successfully!');
-      })
-      .catch(err => {
-        console.warn('❌ [CanvasMap] Some map icons failed to preload:', err);
-      });
+    preloadMapIcons(gameState.challenges).catch(err => {
+      console.warn('[CanvasMap] Some map icons failed to preload:', err);
+    });
     
     // Listen for icon load events to trigger re-render
     const handleIconLoaded = (event: CustomEvent) => {
-      console.debug('🎨 [CanvasMap] Icon loaded, triggering re-render:', event.detail);
       // Force re-render by calling drawMap again
       if (canvasRef.current) {
         const canvas = canvasRef.current;
