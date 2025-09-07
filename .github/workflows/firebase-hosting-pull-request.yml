@@ -2,7 +2,21 @@
 # https://github.com/firebase/firebase-tools
 
 name: Deploy to Firebase Hosting on PR
-on: pull_request
+on: 
+  pull_request:
+    paths:
+      - 'client/**'
+      - 'server/**'  
+      - 'shared/**'
+      - 'public/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'vite.config.ts'
+      - 'tsconfig.json'
+      - 'tailwind.config.ts'
+      - 'postcss.config.js'
+      - 'firebase.json'
+      - '.github/workflows/firebase-hosting-pull-request.yml'
 permissions:
   checks: write
   contents: read

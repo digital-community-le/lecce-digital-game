@@ -6,6 +6,19 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'client/**'
+      - 'server/**'  
+      - 'shared/**'
+      - 'public/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'vite.config.ts'
+      - 'tsconfig.json'
+      - 'tailwind.config.ts'
+      - 'postcss.config.js'
+      - 'firebase.json'
+      - '.github/workflows/firebase-hosting-merge.yml'
 jobs:
   test:
     runs-on: ubuntu-latest

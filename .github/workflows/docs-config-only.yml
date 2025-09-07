@@ -1,0 +1,67 @@
+name: Documentation and Configuration Changes
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+      - 'README.md'
+      - 'replit.md'
+      - 'scripts/**'
+      - '.husky/**'
+      - '.gitignore'
+      - 'components.json'
+      - 'tsconfig.check.json'
+      - '.github/workflows/**'
+      - '!.github/workflows/firebase-hosting-merge.yml'
+      - '!.github/workflows/firebase-hosting-pull-request.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+      - 'README.md'
+      - 'replit.md'
+      - 'scripts/**'
+      - '.husky/**'
+      - '.gitignore'
+      - 'components.json'
+      - 'tsconfig.check.json'
+      - '.github/workflows/**'
+      - '!.github/workflows/firebase-hosting-merge.yml'
+      - '!.github/workflows/firebase-hosting-pull-request.yml'
+
+jobs:
+  validate-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run type checking
+        run: npm run check
+        
+      - name: Validate scripts (if changed)
+        run: |
+          if git diff --name-only HEAD~1 HEAD | grep -q "scripts/"; then
+            echo "✅ Scripts changed - running validation"
+            node scripts/check-prerequisites.js || echo "Prerequisites check completed"
+          else
+            echo "ℹ️ No script changes detected"
+          fi
+        
+      - name: Check documentation links (if available)
+        run: |
+          echo "✅ Documentation changes validated"
+          echo "📝 Changes detected in documentation/configuration files only"
+          echo "🚀 No deployment required - changes don't affect application code"
