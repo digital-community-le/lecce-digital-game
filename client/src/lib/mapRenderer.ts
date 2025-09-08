@@ -565,7 +565,7 @@ export const prepareCanvas = (
  * High-level render function that composes preparation, generation and drawing
  * steps. Keeps CanvasMap component extremely thin.
  */
-export type NodeRect = { cx: number; cy: number; w: number; h: number; bgColor?: string; title?: string; emoji?: string };
+export type NodeRect = { cx: number; cy: number; w: number; h: number; bgColor?: string; title?: string; emoji?: string; shortTitle?: string };
 
 export const renderMap = (
   canvas: HTMLCanvasElement,
@@ -609,7 +609,8 @@ export const renderMap = (
         w,
         h,
         bgColor: bg,
-        title: node.title,
+        // Prefer shortTitle over title for badges
+        title: node.shortTitle || node.title,
         emoji: node.emoji,
       };
     });
@@ -649,6 +650,7 @@ export const renderMap = (
   // A* variant `findTilePath` with a turn penalty to minimize curves.
   const roadTiles = new Set<string>();
   const usedRoadTiles = new Set<string>();
+  const restrictedUsedRoadTiles = new Set<string>();
   const forbiddenForRoads: TerrainType[] = ['mountain', 'lake']; // Removed forest - roads can pass through trees
 
   // Calculate node positions for roads using EXACT coordinates from where nodes are drawn
@@ -750,14 +752,6 @@ export const renderMap = (
     // Always allow endpoints
     excludedDueToAdjacency.delete(`${start.x},${start.y}`);
     excludedDueToAdjacency.delete(`${goal.x},${goal.y}`);
-
-    // Create modified usedRoadTiles that excludes node tiles (where overlaps are allowed)
-    const restrictedUsedRoadTiles = new Set<string>();
-    for (const usedTile of Array.from(usedRoadTiles)) {
-      if (!nodeTiles.has(usedTile)) {
-        restrictedUsedRoadTiles.add(usedTile);
-      }
-    }
 
     let path = findTilePath(start, goal, mapWidth, mapHeight, forbiddenForRoads, excludedDueToAdjacency, restrictedUsedRoadTiles);
     if (!path) {
@@ -918,6 +912,7 @@ export const renderMap = (
       const badgeCenterY = by + boxH + 20; // Position badge below the node with some margin
       const maxBadgeWidth = Math.max(boxW, 100); // Ensure badge is at least as wide as the node
 
+      // Use the resolved title from NodeRect (which should already prefer shortTitle)
       drawChallengeBadge(ctx, nr.title || '', badgeCenterX, badgeCenterY, maxBadgeWidth);
     }
   }

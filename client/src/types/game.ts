@@ -6,6 +6,8 @@ export interface MapNode {
   id: string;
   title: string;
   emoji: string;
+  /** Optional short title used for badges / iBadge on the map */
+  shortTitle?: string;
   /** Optional path/URL to an icon used when rendering the node on the map */
   nodeIcon?: string;
   position: { top: string; left: string };
@@ -16,10 +18,10 @@ export interface MapNode {
 
 export interface GameState {
   currentUser: {
-  userId: string;
-  displayName: string;
-  avatar: string;
-  title?: string;
+    userId: string;
+    displayName: string;
+    avatar: string;
+    title?: string;
   };
   challenges: MapNode[];
   currentChallengeId: string | null;

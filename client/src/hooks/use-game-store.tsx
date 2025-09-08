@@ -47,6 +47,7 @@ function buildInitialChallenges(data: any): MapNode[] {
     return {
       id: c.id,
       title: c.title || (c.id ? c.id.replace(/[-_]/g, " ").replace(/\b\w/g, (s: string) => s.toUpperCase()) : "Unknown"),
+      shortTitle: c.shortTitle, // Add shortTitle property from game-data.json
       emoji: c.emoji || "❓",
       nodeIcon: c.nodeIcon, // Add nodeIcon property from game-data.json
       position,

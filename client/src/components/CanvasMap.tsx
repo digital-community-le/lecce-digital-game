@@ -221,7 +221,7 @@ const CanvasMap: React.FC = () => {
         w,
         h,
         bgColor: bg,
-        title: node.title,
+        title: node.shortTitle || node.title,
         emoji: node.emoji,
       };
     });

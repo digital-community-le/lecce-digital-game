@@ -11,13 +11,14 @@
     "location": "DevFest Lecce 2025",
     "api": {
       "badgeEndpoint": "https://api.devfest.gdglecce.it/badges/@scan",
-      "gameCompletionSecret": "LECCE_DIGITAL_QUEST_2025_SIGILLO_MASTER_KEY_DEVFEST_COMPLETION_BADGE_ULTIMATE_SEAL"
+      "gameCompletionSecret": "community"
     }
   },
   "challenges": [
     {
       "id": "guild-builder",
-      "title": "La Taverna dei Compagni",
+      "title": "La taverna dei compagni",
+      "shortTitle": "Taverna",
       "type": "matching-quiz",
       "description": "Forma una squadra di 3 compagni in grado di affrontare la sfida richiesta. Ogni compagno ha un ruolo unico e una descrizione. Scegli con attenzione!",
       "emoji": "🛡️",
@@ -31,7 +32,11 @@
         "requirement": {
           "id": "req-social-boost",
           "text": "Migliora la visibilità sui social con una squadra bilanciata",
-          "roles": ["Social Media Wizard", "Designer", "Speaker"]
+          "roles": [
+            "Social Media Wizard",
+            "Designer",
+            "Speaker"
+          ]
         }
       },
       "settings": {
@@ -48,7 +53,9 @@
       "rewards": {
         "points": 180,
         "badge": "Gemma dell'Alleanza",
-        "unlocks": ["retro-puzzle"]
+        "unlocks": [
+          "retro-puzzle"
+        ]
       },
       "gemImage": "@assets/images/gem-of-alliance.png",
       "completion": {
@@ -58,7 +65,8 @@
     },
     {
       "id": "retro-puzzle",
-      "title": "Retro Puzzle",
+      "title": "La Cripta degli Antichi",
+      "shortTitle": "Cripta",
       "type": "puzzle",
       "description": "Nel puzzle antico, ogni connessione rivela un frammento di saggezza. Abbina i termini alle loro categorie per raccogliere la Gemma della Conoscenza.",
       "emoji": "🧩",
@@ -132,7 +140,8 @@
     },
     {
       "id": "debug-dungeon",
-      "title": "Debug Dungeon",
+      "title": "Il Labirinto dei Bug",
+      "shortTitle": "Labirinto",
       "type": "quiz",
       "description": "Nel Debug Dungeon, ogni risposta corretta illumina il sentiero verso la conoscenza. Supera il quiz per conquistare la Gemma del Sapere.",
       "emoji": "⚔️",
@@ -295,7 +304,8 @@
     },
     {
       "id": "social-arena",
-      "title": "Social Arena",
+      "title": "L'arena della Comunità",
+      "shortTitle": "Arena",
       "type": "social",
       "description": "Davanti allo Stand, il tuo gesto diventa simbolo: cattura la foto con il gadget e attiva l'epilogo della leggenda.",
       "emoji": "📱",
