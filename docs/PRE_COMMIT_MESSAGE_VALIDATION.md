@@ -47,6 +47,36 @@ npm run commit-help
 - Lo scope è opzionale ma raccomandato
 - Usa il presente imperativo ("add" non "added")
 
+## Eccezioni Automatiche
+
+I seguenti tipi di commit vengono **automaticamente accettati** senza validazione del formato:
+
+### Merge Commits
+```bash
+Merge branch 'feature/new-feature' into main
+Merge pull request #123 from user/feature
+```
+
+### Revert Commits
+```bash
+Revert "feat: add new feature"
+Revert "Previous commit message"
+```
+
+### Squash and Merge
+```bash
+feat: add new feature (#123)
+```
+
+### Altri Messaggi Automatici
+- `Initial commit`
+- `fixup!` commits
+- `squash!` commits
+- Messaggi che iniziano con `Merge`
+- Messaggi che iniziano con `Revert`
+
+Questi messaggi vengono generati automaticamente da Git o da piattaforme come GitHub e non richiedono il formato Conventional Commits.
+
 ## Come Correggere un Commit
 
 Se il tuo commit viene rifiutato, puoi correggerlo con:
@@ -57,7 +87,7 @@ git commit --amend -m "nuovo messaggio corretto"
 
 ## File Coinvolti
 
-- `.husky/commit-msg` - Hook per validazione del formato
+- `.husky/commit-msg` - Hook per validazione del formato con eccezioni automatiche
 - `scripts/commit-help.js` - Script di aiuto per i formati
 - `package.json` - Script npm `commit-help`
 
@@ -68,6 +98,8 @@ git commit --amend -m "nuovo messaggio corretto"
 ```bash
 git commit -m "messaggio" --no-verify
 ```
+
+Nota: Le eccezioni automatiche riducono la necessità di usare `--no-verify` per i merge e revert.
 
 ## Testing della Validazione
 

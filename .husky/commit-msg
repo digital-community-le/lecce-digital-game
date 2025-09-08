@@ -1,7 +1,21 @@
-# Leggi il messaggio del commit
+# Leggi il messaggio del commit dal file
+commit_message=$(cat "$1")
+
+# Definisci le eccezioni per messaggi generati automaticamente
+# Messaggi che iniziano con questi pattern sono considerati validi
+exceptions_regex='^(Merge |Revert |Squash |Initial commit|fixup!|squash!|Amend |Auto-generated |Automated |GitHub Actions:|Dependabot:|Co-authored-by:|Signed-off-by:)'
+
+# Regex principale per i commit manuali
 commit_regex='^(feat|fix|docs|style|refactor|test|chore)(\(.+\))?: .{1,50}'
 
-if ! grep -qE "$commit_regex" "$1"; then
+# Controlla prima se il commit è un'eccezione
+if echo "$commit_message" | grep -qE "$exceptions_regex"; then
+    echo "✅ Automated commit message detected - validation skipped"
+    exit 0
+fi
+
+# Se non è un'eccezione, applica la validazione normale
+if ! echo "$commit_message" | grep -qE "$commit_regex"; then
     echo ""
     echo "🚫 COMMIT MESSAGE FORMAT ERROR!"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -32,6 +46,15 @@ if ! grep -qE "$commit_regex" "$1"; then
     echo "   • Description must be 1-50 characters"
     echo "   • Use lowercase for type and description"
     echo "   • Scope is optional but recommended"
+    echo ""
+    echo "🤖 AUTOMATIC EXEMPTIONS:"
+    echo "   These commit patterns are automatically allowed:"
+    echo "   • Merge commits (Merge branch...)"
+    echo "   • Revert commits (Revert \"...\")"
+    echo "   • Squash commits (Squash...)"
+    echo "   • Initial repository setup"
+    echo "   • GitHub Actions and Dependabot"
+    echo "   • Co-authored commits"
     echo ""
     echo "🔄 TO FIX: Edit your commit message and try again"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
