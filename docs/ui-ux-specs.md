@@ -368,6 +368,16 @@ Requisiti principali:
 - **Battery awareness**: ridurre animazioni su batteria bassa, notifiche smart.
 - **Network awareness**: adattare qualità media (es. immagini più piccole su 3G).
 
+### Flusso di completion (nuovo)
+
+- Quando un player completa una challenge, viene mostrato un modal celebrativo fullscreen che comunica la conquista della gemma.
+- Il modal è bloccante (aria-modal, focus trap) e contiene: immagine della gemma, titolo celebrativo, messaggio di descrizione e un singolo pulsante CTA con label "Continua l'avventura".
+- All'apertura del modal la UI può mostrare micro-animazioni (particelle pixel, glow) rispettando `prefers-reduced-motion`.
+- Quando l'utente preme "Continua l'avventura" il modal si chiude e l'app esegue un redirect verso la mappa di gioco (route `/map` o equivalente), senza avviare animazioni avatar aggiuntive in linea se non esplicitamente richieste.
+- Il modal deve essere accessibile da tastiera (invio/space per attivare il CTA) e chiudibile con ESC come fallback, con comportamento pari al pulsante (redirect alla mappa).
+
+Nota implementativa: il flusso replace il precedente comportamento dove il pulsante poteva semplicemente chiudere il dialog e lasciare l'utente sulla challenge; ora il destino primario è tornare alla mappa per favorire continuità di esplorazione.
+
 ---
 
 ## Acceptance criteria UI/UX

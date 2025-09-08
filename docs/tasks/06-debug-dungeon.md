@@ -10,11 +10,8 @@ Implementare la UI unit `DebugDungeonView` con lifecycle di un run: `createRun` 
 
 ## Acceptance criteria
 
-- Il quiz carica `questionsPerRun` da `game-data.json` e crea una run persistente.
-- Risposte valutate client-side e punteggio calcolato correttamente.
-- Resume da run incompleto ripristina stato.
-- Respect `maxAttempts` e `passThresholdPercent` per determinare pass/fail.
-
+ Risultati: punteggio finale, calcolo percentuale, pass/fail basato su `passThresholdPercent`.
+ Al termine del run, la UI deve mostrare il modal celebrativo fullscreen (gemma + messaggio). Il pulsante "Continua l'avventura" all'interno del modal chiude il dialog e reindirizza l'utente alla mappa principale.
 ## Game-data fields
 
 - `challenges[].settings.questionsPerRun`, `passThresholdPercent`, `maxAttempts`, `shuffleQuestions`

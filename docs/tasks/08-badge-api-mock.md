@@ -12,6 +12,7 @@ Creare un mock service locale che emuli le API DevFest per: GET /badges/:id e PO
 
 - Mock risponde a GET/POST con payload plausibili.
 - App chiama il mock all'avvio e alla completion (se `remoteBackend` configurato per testing).
+ - App chiama il mock all'avvio e alla completion (se `remoteBackend` configurato per testing). Il flusso di completion prevede un modal fullscreen che notifica la conquista della gemma e, al click del pulsante "Continua l'avventura", l'app fa redirect verso la mappa: il mock dovrebbe supportare eventuali chiamate POST/claim durante questo evento.
 - Il mock è facilmente sostituibile da un endpoint reale tramite variabile di configurazione.
 
 ## Game-data fields

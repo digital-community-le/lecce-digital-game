@@ -13,6 +13,8 @@ Implementare la UI unit `RetroPuzzleView` single-screen per match term→categor
 - Caricamento delle coppie funzionante.
 - Matching tap→category aggiorna stato, incrementa score o applica penalty.
 - Al completion lo stato viene salvato in `ldc:progress:{userId}` e la UI mostra summary.
+- Al completion lo stato viene salvato in `ldc:progress:{userId}` e la UI mostra summary.
+- Il summary deve presentare il modal celebrativo fullscreen con gemma e un pulsante "Continua l'avventura" che, una volta premuto, reindirizza l'utente alla mappa principale.
 - Persistenza su reload: `PuzzleState` ripristinabile.
 
 ## Game-data fields
