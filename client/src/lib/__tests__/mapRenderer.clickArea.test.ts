@@ -79,7 +79,7 @@ describe('MapRenderer - Click Area Detection', () => {
 
     it('should calculate badge dimensions based on title length', () => {
       const clickableAreas = calculateClickableAreas(mockNodeRects);
-      
+
       const guildBadge = clickableAreas['guild-builder'].badgeArea;
       const puzzleBadge = clickableAreas['retro-puzzle'].badgeArea;
 
@@ -104,7 +104,7 @@ describe('MapRenderer - Click Area Detection', () => {
 
     it('should detect clicks within node area', () => {
       const guildNodeCenter = { x: 160, y: 180 };
-      
+
       expect(isPointInClickableArea(guildNodeCenter.x, guildNodeCenter.y, clickableAreas['guild-builder']))
         .toBe(true);
     });
@@ -115,7 +115,7 @@ describe('MapRenderer - Click Area Detection', () => {
         x: guildBadgeArea.x + guildBadgeArea.width / 2,
         y: guildBadgeArea.y + guildBadgeArea.height / 2
       };
-      
+
       expect(isPointInClickableArea(badgeCenter.x, badgeCenter.y, clickableAreas['guild-builder']))
         .toBe(true);
     });
@@ -124,18 +124,18 @@ describe('MapRenderer - Click Area Detection', () => {
       // Point far away from both node and badge
       expect(isPointInClickableArea(50, 50, clickableAreas['guild-builder']))
         .toBe(false);
-      
+
       // Point between node and badge (should be false)
       const guildArea = clickableAreas['guild-builder'];
       const betweenY = guildArea.nodeArea.y + guildArea.nodeArea.height + 5;
-      
+
       expect(isPointInClickableArea(160, betweenY, guildArea))
         .toBe(false);
     });
 
     it('should handle edge cases gracefully', () => {
       const guildArea = clickableAreas['guild-builder'];
-      
+
       // Click exactly on node border
       expect(isPointInClickableArea(
         guildArea.nodeArea.x,

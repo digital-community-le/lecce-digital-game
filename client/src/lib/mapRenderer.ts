@@ -640,7 +640,7 @@ export const calculateClickableAreas = (nodeRects: Record<string, NodeRect>): Re
     const badgeTitle = nr.title || '';
     const maxBadgeWidth = Math.max(nr.w, 100);
     const badgeDimensions = calculateBadgeDimensions(badgeTitle, maxBadgeWidth);
-    
+
     // Badge position calculation (matching the logic in renderMap)
     const by = nr.cy - nr.h / 2; // top of node box
     const boxH = nr.h;
@@ -669,7 +669,7 @@ export const calculateClickableAreas = (nodeRects: Record<string, NodeRect>): Re
 export const isPointInClickableArea = (x: number, y: number, challengeArea: ChallengeClickableArea): boolean => {
   const isInRect = (px: number, py: number, rect: ClickableRect): boolean => {
     return px >= rect.x && px <= rect.x + rect.width &&
-           py >= rect.y && py <= rect.y + rect.height;
+      py >= rect.y && py <= rect.y + rect.height;
   };
 
   return isInRect(x, y, challengeArea.nodeArea) || isInRect(x, y, challengeArea.badgeArea);
