@@ -152,6 +152,16 @@ export const challengeConfigSchema = z.object({
 
 export type ChallengeConfig = z.infer<typeof challengeConfigSchema>;
 
+// DevFest API Submission Schema
+export const devfestApiSubmissionSchema = z.object({
+  success: z.boolean(),
+  submittedAt: z.string(),
+  badge: z.any().optional(),
+  error: z.string().optional(),
+});
+
+export type DevFestApiSubmission = z.infer<typeof devfestApiSubmissionSchema>;
+
 // Game Progress Schema
 export const gameProgressSchema = z.object({
   userId: z.string(),
@@ -161,6 +171,7 @@ export const gameProgressSchema = z.object({
   startedAt: z.string(),
   lastUpdated: z.string(),
   gameCompleted: z.boolean(),
+  devfestApiSubmission: devfestApiSubmissionSchema.optional(),
 });
 
 export type GameProgress = z.infer<typeof gameProgressSchema>;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { useGameStore } from '@/hooks/use-game-store';
-import { submitGameCompletion } from '@/services/completionService';
+import { submitGameCompletion, getDevFestBadge, isDevFestSubmissionSuccessful } from '@/services/completionService';
 import gameData from '@/assets/game-data.json';
 import sealWithGemsImage from '@assets/images/seal-with-gems.png';
 
@@ -20,22 +20,29 @@ const GameComplete: React.FC = () => {
       return;
     }
 
-    // Submit completion to DevFest API
-    (async () => {
-      try {
-        console.log('🚀 Submitting game completion to DevFest API...');
-        const result = await submitGameCompletion();
-        
-        if (result.success && result.badge) {
-          console.log('🏆 DevFest badge received:', result.badge);
-          setBadgeInfo(result.badge);
-        } else {
-          console.error('❌ Game completion failed:', result.error);
+    // Check if we already have a successful DevFest badge
+    const existingBadge = getDevFestBadge();
+    if (existingBadge) {
+      console.log('🏆 DevFest badge already obtained:', existingBadge);
+      setBadgeInfo(existingBadge);
+    } else if (!isDevFestSubmissionSuccessful()) {
+      // Only submit if we haven't successfully submitted before
+      (async () => {
+        try {
+          console.log('🚀 Submitting game completion to DevFest API...');
+          const result = await submitGameCompletion();
+          
+          if (result.success && result.badge) {
+            console.log('🏆 DevFest badge received:', result.badge);
+            setBadgeInfo(result.badge);
+          } else {
+            console.error('❌ Game completion failed:', result.error);
+          }
+        } catch (e) {
+          console.warn('💥 Game completion submission error:', e);
         }
-      } catch (e) {
-        console.warn('💥 Game completion submission error:', e);
-      }
-    })();
+      })();
+    }
 
     // Sequential animation phases
     setAnimationPhase('seal');

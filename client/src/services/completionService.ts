@@ -53,6 +53,11 @@ export function queueRequest(item: Omit<SyncQueueItem, 'id' | 'attempts' | 'last
 /**
  * Submit game completion to DevFest API and get the official badge
  * This is the new primary completion method using the real DevFest API
+ * 
+ * Implements persistence logic:
+ * - If submission was already successful, returns cached result
+ * - If submission failed previously, retries the API call
+ * - Saves the result in game progress for future reference
  */
 export async function submitGameCompletion(): Promise<{
   success: boolean;
@@ -65,21 +70,138 @@ export async function submitGameCompletion(): Promise<{
     console.log('🧪 TEST MODE - Game completion submission');
   }
 
+  // Get current game progress to check submission status
+  const currentProgress = gameStorage.getProgress(getCurrentUserId());
+  
+  if (!currentProgress) {
+    console.error('❌ Game progress not found');
+    return {
+      success: false,
+      error: 'Game progress not found'
+    };
+  }
+
+  // Check if API submission was already successful
+  if (currentProgress.devfestApiSubmission?.success) {
+    console.log('✅ Game completion already submitted successfully, returning cached result');
+    return {
+      success: true,
+      badge: currentProgress.devfestApiSubmission.badge
+    };
+  }
+
+  // Previous submission failed or never attempted, try (again)
+  if (currentProgress.devfestApiSubmission?.success === false) {
+    console.log('🔄 Previous API submission failed, retrying...');
+  } else {
+    console.log('🚀 First-time API submission...');
+  }
+
   try {
     const result = await handleGameCompletion();
     
+    // Update game progress with submission result
+    const updatedProgress = {
+      ...currentProgress,
+      devfestApiSubmission: {
+        success: result.success,
+        submittedAt: new Date().toISOString(),
+        ...(result.badge && { badge: result.badge }),
+        ...(result.error && { error: result.error }),
+      },
+      lastUpdated: new Date().toISOString(),
+    };
+    
+    gameStorage.saveProgress(updatedProgress);
+    
     if (result.success && result.badge) {
       console.log('🏆 Game completion successful! Badge received:', result.badge);
+    } else {
+      console.log('❌ Game completion failed, will retry on next attempt:', result.error);
     }
     
     return result;
   } catch (error) {
     console.error('💥 Game completion failed:', error);
+    
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    
+    // Update game progress with failed submission
+    const updatedProgress = {
+      ...currentProgress,
+      devfestApiSubmission: {
+        success: false,
+        submittedAt: new Date().toISOString(),
+        error: errorMessage,
+      },
+      lastUpdated: new Date().toISOString(),
+    };
+    
+    gameStorage.saveProgress(updatedProgress);
+    
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: errorMessage
     };
   }
+}
+
+/**
+ * Helper function to get current user ID from stored profile
+ */
+function getCurrentUserId(): string {
+  const lastProfile = gameStorage.getLastProfile();
+  return lastProfile?.userId || 'anonymous';
+}
+
+/**
+ * Get the DevFest badge information from stored game progress
+ * Returns null if no successful submission or badge data is found
+ * 
+ * @param userId - Optional user ID, defaults to current user
+ * @returns Badge information or null
+ */
+export function getDevFestBadge(userId?: string): any | null {
+  const targetUserId = userId || getCurrentUserId();
+  const progress = gameStorage.getProgress(targetUserId);
+  
+  if (!progress?.devfestApiSubmission?.success) {
+    return null;
+  }
+  
+  return progress.devfestApiSubmission.badge || null;
+}
+
+/**
+ * Check if DevFest API submission was successful
+ * 
+ * @param userId - Optional user ID, defaults to current user
+ * @returns True if submission was successful, false otherwise
+ */
+export function isDevFestSubmissionSuccessful(userId?: string): boolean {
+  const targetUserId = userId || getCurrentUserId();
+  const progress = gameStorage.getProgress(targetUserId);
+  
+  return progress?.devfestApiSubmission?.success === true;
+}
+
+/**
+ * Get the full DevFest submission status and data
+ * Useful for debugging and detailed UI information
+ * 
+ * @param userId - Optional user ID, defaults to current user
+ * @returns DevFest submission data or null
+ */
+export function getDevFestSubmissionStatus(userId?: string): {
+  success: boolean;
+  submittedAt: string;
+  badge?: any;
+  error?: string;
+} | null {
+  const targetUserId = userId || getCurrentUserId();
+  const progress = gameStorage.getProgress(targetUserId);
+  
+  return progress?.devfestApiSubmission || null;
 }
 
 /**
