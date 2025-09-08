@@ -8,6 +8,9 @@ import {
   determineSafePositionForChallenge,
   NodeRect,
   preloadMapIcons,
+  calculateClickableAreas,
+  isPointInClickableArea,
+  ChallengeClickableArea,
 } from "@/lib/mapRenderer";
 
 // Import atlas semplificato e configurazione tiles
@@ -154,6 +157,11 @@ const CanvasMap: React.FC = () => {
     Record<string, { left: string; top: string }>
   >({});
 
+  // Clickable areas for both node and badge areas of each challenge
+  const [clickableAreas, setClickableAreas] = useState<
+    Record<string, ChallengeClickableArea>
+  >({});
+
   useEffect(() => {
     drawMap();
 
@@ -229,22 +237,22 @@ const CanvasMap: React.FC = () => {
     setSafePositions(newPositions);
     setNodeRectsState(nodeRects);
 
+    // Calculate clickable areas for both node and badge areas
+    const newClickableAreas = calculateClickableAreas(nodeRects);
+    setClickableAreas(newClickableAreas);
+
     // Set up click handler mapping canvas clicks to node interactions
     const handleCanvasClick = (ev: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
       const x = ev.clientX - rect.left;
       const y = ev.clientY - rect.top;
+      
+      // Check click against both node and badge areas for each challenge
       for (const node of gameState.challenges) {
-        const nr = nodeRects[node.id];
-        if (!nr) continue;
-        const halfW = nr.w / 2;
-        const halfH = nr.h / 2;
-        if (
-          x >= nr.cx - halfW &&
-          x <= nr.cx + halfW &&
-          y >= nr.cy - halfH &&
-          y <= nr.cy + halfH
-        ) {
+        const challengeArea = newClickableAreas[node.id];
+        if (!challengeArea) continue;
+        
+        if (isPointInClickableArea(x, y, challengeArea)) {
           handleChallengeClick(node);
           return;
         }

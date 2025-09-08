@@ -567,6 +567,114 @@ export const prepareCanvas = (
  */
 export type NodeRect = { cx: number; cy: number; w: number; h: number; bgColor?: string; title?: string; emoji?: string; shortTitle?: string };
 
+/**
+ * Rectangle area definition for click detection
+ */
+export interface ClickableRect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+/**
+ * Combined clickable areas for a challenge node
+ */
+export interface ChallengeClickableArea {
+  nodeArea: ClickableRect;
+  badgeArea: ClickableRect;
+}
+
+/**
+ * Calculate badge dimensions based on title text
+ * This should match the logic in drawChallengeBadge function
+ */
+const calculateBadgeDimensions = (title: string, maxWidth: number = 120): { width: number; height: number } => {
+  if (!title || title.length === 0) {
+    return { width: 0, height: 0 };
+  }
+
+  // Badge styling constants (matching drawChallengeBadge)
+  const padding = 8;
+  const baseFontSize = 11;
+  const fontSize = Math.max(baseFontSize, Math.min(16, maxWidth / 8));
+
+  // Approximate text width calculation (more accurate would require canvas context)
+  // Using a rough approximation based on character count and font size
+  const avgCharWidth = fontSize * 0.6; // Monospace font approximation
+  let textWidth = title.length * avgCharWidth;
+
+  // Handle long titles by truncating if necessary (matching the original logic)
+  let displayTitle = title;
+  if (textWidth > maxWidth - padding * 2) {
+    const maxChars = Math.floor((maxWidth - padding * 2 - 20) / avgCharWidth); // -20 for ellipsis
+    if (maxChars > 3) {
+      displayTitle = title.slice(0, maxChars - 3) + '...';
+      textWidth = displayTitle.length * avgCharWidth;
+    }
+  }
+
+  // Badge dimensions
+  const badgeWidth = Math.min(maxWidth, textWidth + padding * 2);
+  const badgeHeight = fontSize + padding * 2;
+
+  return { width: badgeWidth, height: badgeHeight };
+};
+
+/**
+ * Calculate clickable areas for all challenges including both node and badge areas
+ */
+export const calculateClickableAreas = (nodeRects: Record<string, NodeRect>): Record<string, ChallengeClickableArea> => {
+  const clickableAreas: Record<string, ChallengeClickableArea> = {};
+
+  for (const [nodeId, nr] of Object.entries(nodeRects)) {
+    // Node area (original clickable area)
+    const nodeArea: ClickableRect = {
+      x: nr.cx - nr.w / 2,
+      y: nr.cy - nr.h / 2,
+      width: nr.w,
+      height: nr.h
+    };
+
+    // Badge area (new clickable area)
+    const badgeTitle = nr.title || '';
+    const maxBadgeWidth = Math.max(nr.w, 100);
+    const badgeDimensions = calculateBadgeDimensions(badgeTitle, maxBadgeWidth);
+    
+    // Badge position calculation (matching the logic in renderMap)
+    const by = nr.cy - nr.h / 2; // top of node box
+    const boxH = nr.h;
+    const badgeCenterX = nr.cx;
+    const badgeCenterY = by + boxH + 20; // Position badge below the node with margin
+
+    const badgeArea: ClickableRect = {
+      x: badgeCenterX - badgeDimensions.width / 2,
+      y: badgeCenterY - badgeDimensions.height / 2,
+      width: badgeDimensions.width,
+      height: badgeDimensions.height
+    };
+
+    clickableAreas[nodeId] = {
+      nodeArea,
+      badgeArea
+    };
+  }
+
+  return clickableAreas;
+};
+
+/**
+ * Check if a point is within either the node area or badge area of a challenge
+ */
+export const isPointInClickableArea = (x: number, y: number, challengeArea: ChallengeClickableArea): boolean => {
+  const isInRect = (px: number, py: number, rect: ClickableRect): boolean => {
+    return px >= rect.x && px <= rect.x + rect.width &&
+           py >= rect.y && py <= rect.y + rect.height;
+  };
+
+  return isInRect(x, y, challengeArea.nodeArea) || isInRect(x, y, challengeArea.badgeArea);
+};
+
 export const renderMap = (
   canvas: HTMLCanvasElement,
   challenges: MapNode[],
