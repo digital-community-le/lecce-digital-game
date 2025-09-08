@@ -63,13 +63,9 @@ const ChallengeContentLayout: React.FC<ChallengeContentLayoutProps> = ({
 
   return (
     <div>
-      <div className="p-4">
+      <div className="p-4 pt-0">
         {/* Challenge description */}
         <div className="mb-6">
-          <h3 className="text-sm mb-3 flex items-center justify-start">
-            <img src={gemIcon} alt={gemTitle} className="mr-4 h-8" />
-            <span className="block font-retro">{gemTitle}</span>
-          </h3>
           <p className="text-sm mb-4">
             {description}
           </p>
