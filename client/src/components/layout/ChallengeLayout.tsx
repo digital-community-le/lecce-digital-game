@@ -14,9 +14,17 @@ interface ChallengeLayoutProps {
 }
 
 /**
- * Mappa dei challenge ID ai nomi delle challenge
+ * Restituisce il titolo della challenge prendendolo dal game-data (gameState.challenges).
+ * Se non è presente, usa una mappa di fallback per valori noti o 'Challenge' come default.
  */
-const getChallengeTitle = (challengeId: string) => {
+const getChallengeTitle = (
+  challengeId: string,
+  challenges: Array<{ id: string; title?: string }>
+) => {
+  const fromData = challenges.find(c => c.id === challengeId);
+  if (fromData && fromData.title) return fromData.title;
+
+  // Fallback semantico per compatibilità con titoli brevi usati nell'app
   switch (challengeId) {
     case 'guild-builder':
       return 'Taverna';
@@ -111,12 +119,12 @@ const ChallengeLayout: React.FC<ChallengeLayoutProps> = ({
     );
   }
 
-  const challengeTitle = getChallengeTitle(challengeId);
+  const challengeTitle = getChallengeTitle(challengeId, gameState.challenges);
 
   return (
     <>
       {/* Barra di navigazione stile retro con pulsante back */}
-      <nav className="bg-card border-b-4 border-border">
+      <nav className="border-b-4 border-border">
         <div className="container mx-auto px-4 py-3">
           {/* Pulsante Torna alla mappa e titolo challenge */}
           <div className="flex items-center gap-4">
@@ -126,7 +134,7 @@ const ChallengeLayout: React.FC<ChallengeLayoutProps> = ({
               aria-label="Torna alla mappa"
               data-testid="button-back-to-map"
             >
-              <i className="nes-icon caret-left is-small mr-2" aria-hidden="true" />
+              &lt;
               <span className="hidden sm:inline">Mappa</span>
             </button>
             
