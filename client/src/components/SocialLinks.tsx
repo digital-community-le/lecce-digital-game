@@ -11,7 +11,7 @@ const SocialLinks = () => {
       <div className="flex justify-center gap-4 mt-1">
         <div>
           <a
-            href="#"
+            href="https://www.instagram.com/lecce_digital_community/"
             aria-label="Instagram"
             target="_blank"
             rel="noopener noreferrer"
@@ -21,7 +21,7 @@ const SocialLinks = () => {
         </div>
         <div>
           <a
-            href="#"
+            href="https://www.facebook.com/groups/leccedigitalcommunity"
             aria-label="Facebook"
             target="_blank"
             rel="noopener noreferrer"
@@ -31,7 +31,7 @@ const SocialLinks = () => {
         </div>
         <div>
           <a
-            href="#"
+            href="https://chat.whatsapp.com/DM5VwweGi7h5lkJK3xQHEj?mode=ems_copy_t"
             aria-label="Whatsapp"
             target="_blank"
             rel="noopener noreferrer"
