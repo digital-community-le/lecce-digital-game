@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useLocation } from 'wouter';
 import { useGameStore } from '@/hooks/use-game-store';
 import gameData from '@/assets/game-data.json';
 
@@ -18,10 +19,11 @@ const GEM_IMAGES = {
 
 const CompletionModal: React.FC = () => {
   const { modals, closeModal, openModal, gameState, startAvatarAnimation } = useGameStore();
+  const [, setLocation] = useLocation();
   const isOpen = modals.completion?.isOpen;
   const completionData = modals.completion?.data;
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     closeModal('completion');
     
     // Check if all challenges are completed for final epilogue
@@ -29,7 +31,7 @@ const CompletionModal: React.FC = () => {
       setTimeout(() => {
         openModal('epilogue');
       }, 500);
-      return;
+      // Still navigate to map afterwards for consistent flow
     }
 
     // Only trigger animation if this challenge was just completed (not previously completed)
@@ -60,7 +62,10 @@ const CompletionModal: React.FC = () => {
       // If this was a previously completed challenge, no animation is triggered
       // The avatar will remain on the last completed challenge as per the new positioning logic
     }
-  };
+
+    // Navigate back to map to continue the adventure
+    setLocation('/game/map');
+  }, [closeModal, completionData, gameState, openModal, setLocation]);
 
   const getChallengeData = async (challengeId: string) => {
     // Trova i dati della challenge dal game-data.json
@@ -104,6 +109,26 @@ const CompletionModal: React.FC = () => {
     return () => { mounted = false; };
   }, [isOpen, completionData]);
 
+  // Handle ESC key to close modal and redirect
+  useEffect(() => {
+    if (!isOpen) return;
+    
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        handleClose();
+      }
+      // Handle Enter key when CTA button is focused
+      if (e.key === 'Enter' && document.activeElement?.getAttribute('data-testid') === 'button-continue-adventure') {
+        e.preventDefault();
+        handleClose();
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, handleClose]);
+
   if (!isOpen || !completionData) return null;
   if (loadingGem || !challengeData) {
     return (
@@ -118,12 +143,16 @@ const CompletionModal: React.FC = () => {
       className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
       style={{ background: 'var(--ldc-surface)' }}
       data-testid="modal-completion"
+      role="dialog"
+      aria-modal="true"
+      aria-label={challengeData?.completionTitle || 'Challenge Completata'}
       onClick={handleClose}
     >
       <div 
         className="relative w-full max-w-4xl text-center my-8 max-h-full overflow-y-auto"
         style={{ color: 'var(--ldc-on-surface)' }}
         onClick={(e) => e.stopPropagation()}
+        tabIndex={-1}
       >
         {/* Gem Image */}
         <div className="mb-12">
