@@ -22,7 +22,7 @@ describe('completionService - DevFest API Persistence', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Mock localStorage
     Object.defineProperty(window, 'localStorage', {
       value: {
@@ -68,7 +68,7 @@ describe('completionService - DevFest API Persistence', () => {
     // Assert
     expect(result.success).toBe(true);
     expect(result.badge).toEqual(mockBadge);
-    
+
     // Verify that progress was updated with API submission data
     expect(mockGameStorage.saveProgress).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -108,7 +108,7 @@ describe('completionService - DevFest API Persistence', () => {
     // Assert
     expect(result.success).toBe(false);
     expect(result.error).toBe(mockError);
-    
+
     // Verify that progress was updated with failed submission data
     expect(mockGameStorage.saveProgress).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -148,10 +148,10 @@ describe('completionService - DevFest API Persistence', () => {
     // Assert
     expect(result.success).toBe(true);
     expect(result.badge).toEqual(mockBadge);
-    
+
     // Verify that API was NOT called again
     expect(mockHandleGameCompletion).not.toHaveBeenCalled();
-    
+
     // Verify that progress was NOT updated again
     expect(mockGameStorage.saveProgress).not.toHaveBeenCalled();
   });
@@ -185,10 +185,10 @@ describe('completionService - DevFest API Persistence', () => {
     // Assert
     expect(result.success).toBe(true);
     expect(result.badge).toEqual(mockBadge);
-    
+
     // Verify that API was called again
     expect(mockHandleGameCompletion).toHaveBeenCalled();
-    
+
     // Verify that progress was updated with new successful submission
     expect(mockGameStorage.saveProgress).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -213,7 +213,7 @@ describe('completionService - DevFest API Persistence', () => {
     // Assert
     expect(result.success).toBe(false);
     expect(result.error).toBe('Game progress not found');
-    
+
     // Verify that API was NOT called
     expect(mockHandleGameCompletion).not.toHaveBeenCalled();
     expect(mockGameStorage.saveProgress).not.toHaveBeenCalled();

@@ -35,7 +35,7 @@ describe('DevFest Badge Persistence Integration Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockLocalStorage.clear();
-    
+
     // Setup a test profile
     gameStorage.saveProfile({
       userId: testUserId,
@@ -69,11 +69,11 @@ describe('DevFest Badge Persistence Integration Tests', () => {
     // Assert
     const retrievedProgress = gameStorage.getProgress(testUserId);
     expect(retrievedProgress).toEqual(gameProgress);
-    
+
     // Test utility functions
     expect(isDevFestSubmissionSuccessful()).toBe(true);
     expect(getDevFestBadge()).toEqual(mockBadge);
-    
+
     const submissionStatus = getDevFestSubmissionStatus();
     expect(submissionStatus).toEqual({
       success: true,
@@ -105,11 +105,11 @@ describe('DevFest Badge Persistence Integration Tests', () => {
     // Assert
     const retrievedProgress = gameStorage.getProgress(testUserId);
     expect(retrievedProgress).toEqual(gameProgress);
-    
+
     // Test utility functions
     expect(isDevFestSubmissionSuccessful()).toBe(false);
     expect(getDevFestBadge()).toBe(null);
-    
+
     const submissionStatus = getDevFestSubmissionStatus();
     expect(submissionStatus).toEqual({
       success: false,
@@ -144,7 +144,7 @@ describe('DevFest Badge Persistence Integration Tests', () => {
     // Arrange
     const user1Id = 'user-1';
     const user2Id = 'user-2';
-    
+
     const gameProgress1 = {
       userId: user1Id,
       currentChallengeIndex: 4,
@@ -182,14 +182,14 @@ describe('DevFest Badge Persistence Integration Tests', () => {
     // Assert
     expect(isDevFestSubmissionSuccessful(user1Id)).toBe(true);
     expect(getDevFestBadge(user1Id)).toEqual(mockBadge);
-    
+
     expect(isDevFestSubmissionSuccessful(user2Id)).toBe(false);
     expect(getDevFestBadge(user2Id)).toBe(null);
-    
+
     const status1 = getDevFestSubmissionStatus(user1Id);
     expect(status1?.success).toBe(true);
     expect(status1?.badge).toEqual(mockBadge);
-    
+
     const status2 = getDevFestSubmissionStatus(user2Id);
     expect(status2?.success).toBe(false);
     expect(status2?.error).toBe('Network timeout');

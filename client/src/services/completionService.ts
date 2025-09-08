@@ -8,7 +8,7 @@ function isTestMode(): boolean {
   // Check URL params first
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('test') === '1') return true;
-  
+
   // Check localStorage for persisted test flag
   try {
     const storedGame = localStorage.getItem('lecce-digital-game');
@@ -19,7 +19,7 @@ function isTestMode(): boolean {
   } catch (e) {
     // ignore parsing errors
   }
-  
+
   return false;
 }
 
@@ -65,14 +65,14 @@ export async function submitGameCompletion(): Promise<{
   error?: string;
 }> {
   const testMode = isTestMode();
-  
+
   if (testMode) {
     console.log('🧪 TEST MODE - Game completion submission');
   }
 
   // Get current game progress to check submission status
   const currentProgress = gameStorage.getProgress(getCurrentUserId());
-  
+
   if (!currentProgress) {
     console.error('❌ Game progress not found');
     return {
@@ -99,7 +99,7 @@ export async function submitGameCompletion(): Promise<{
 
   try {
     const result = await handleGameCompletion();
-    
+
     // Update game progress with submission result
     const updatedProgress = {
       ...currentProgress,
@@ -111,21 +111,21 @@ export async function submitGameCompletion(): Promise<{
       },
       lastUpdated: new Date().toISOString(),
     };
-    
+
     gameStorage.saveProgress(updatedProgress);
-    
+
     if (result.success && result.badge) {
       console.log('🏆 Game completion successful! Badge received:', result.badge);
     } else {
       console.log('❌ Game completion failed, will retry on next attempt:', result.error);
     }
-    
+
     return result;
   } catch (error) {
     console.error('💥 Game completion failed:', error);
-    
+
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    
+
     // Update game progress with failed submission
     const updatedProgress = {
       ...currentProgress,
@@ -136,9 +136,9 @@ export async function submitGameCompletion(): Promise<{
       },
       lastUpdated: new Date().toISOString(),
     };
-    
+
     gameStorage.saveProgress(updatedProgress);
-    
+
     return {
       success: false,
       error: errorMessage
@@ -164,11 +164,11 @@ function getCurrentUserId(): string {
 export function getDevFestBadge(userId?: string): any | null {
   const targetUserId = userId || getCurrentUserId();
   const progress = gameStorage.getProgress(targetUserId);
-  
+
   if (!progress?.devfestApiSubmission?.success) {
     return null;
   }
-  
+
   return progress.devfestApiSubmission.badge || null;
 }
 
@@ -181,7 +181,7 @@ export function getDevFestBadge(userId?: string): any | null {
 export function isDevFestSubmissionSuccessful(userId?: string): boolean {
   const targetUserId = userId || getCurrentUserId();
   const progress = gameStorage.getProgress(targetUserId);
-  
+
   return progress?.devfestApiSubmission?.success === true;
 }
 
@@ -200,7 +200,7 @@ export function getDevFestSubmissionStatus(userId?: string): {
 } | null {
   const targetUserId = userId || getCurrentUserId();
   const progress = gameStorage.getProgress(targetUserId);
-  
+
   return progress?.devfestApiSubmission || null;
 }
 
@@ -285,10 +285,10 @@ export async function flushSyncQueue(): Promise<void> {
     try {
       // limit attempts to avoid infinite retries
       if ((item.attempts || 0) >= 5) {
-        console.warn(`⚠️ Giving up on queue item after 5 attempts:`, { 
-          url: item.url, 
-          method: item.method, 
-          attempts: item.attempts 
+        console.warn(`⚠️ Giving up on queue item after 5 attempts:`, {
+          url: item.url,
+          method: item.method,
+          attempts: item.attempts
         });
         continue;
       }
@@ -339,7 +339,7 @@ export async function flushSyncQueue(): Promise<void> {
   // Clear existing queue and write remaining
   gameStorage.clearSyncQueue();
   remaining.forEach((i) => gameStorage.addToSyncQueue(i));
-  
+
   if (testMode && queue.length > 0) {
     console.log(`🧪 TEST MODE - Processed ${queue.length} queue items (all simulated)`);
   }
