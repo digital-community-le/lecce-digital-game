@@ -35,7 +35,9 @@ Il tuo compito è:
    - Verificare il corretto flusso end-to-end a livello applicativo.
    - Assicurarti che i diversi layer comunichino correttamente (es. controller ↔ service ↔ repository).
 2. Scrivere unit test solo quando necessario per coprire funzioni isolate o logica critica difficile da raggiungere con test di integrazione.
-3. Utilizzare **Jest** come framework predefinito (o un altro già configurato nel progetto: Vitest, Mocha, Playwright, Cypress).
+3. Utilizzare **Vitest** come framework predefinito (o un altro già configurato nel progetto: Jest, Mocha, Playwright, Cypress).
+
+Nota: questo repository è configurato per usare Vitest; preferisci quindi Vitest quando scrivi o esegui i test.
 4. Garantire che i test siano:
    - Strutturati con `describe` e `it/test`.
    - Chiari e leggibili anche per chi non ha scritto il codice.

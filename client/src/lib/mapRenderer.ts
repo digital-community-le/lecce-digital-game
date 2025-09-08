@@ -31,7 +31,7 @@ export const preloadMapIcons = (challenges: MapNode[]): Promise<void[]> => {
         resolve();
         return;
       }
-      
+
       const img = new Image();
       img.onload = () => {
         iconCache.set(iconPath, img);
@@ -99,6 +99,90 @@ export const determineTileType = (x: number, y: number, mapWidth: number, mapHei
 };
 
 /**
+ * Draw a retro-style badge below a challenge node with the challenge title.
+ * The badge has a retro 8-bit appearance with rounded corners and contrasting colors.
+ * 
+ * @param ctx - Canvas 2D rendering context
+ * @param title - Challenge title to display in the badge
+ * @param centerX - X coordinate of the badge center
+ * @param centerY - Y coordinate of the badge center  
+ * @param maxWidth - Maximum width for the badge
+ */
+const drawChallengeBadge = (
+  ctx: CanvasRenderingContext2D,
+  title: string,
+  centerX: number,
+  centerY: number,
+  maxWidth: number = 120
+) => {
+  if (!title || title.length === 0) return;
+
+  // Badge styling constants
+  const padding = 8;
+  const borderWidth = 2;
+  const cornerRadius = 4;
+
+  // Calculate font size based on available space
+  const baseFontSize = 11;
+  const fontSize = Math.max(baseFontSize, Math.min(16, maxWidth / 8));
+  ctx.font = `${fontSize}px monospace`;
+
+  // Measure text to determine badge size
+  const textMetrics = ctx.measureText(title);
+  let textWidth = textMetrics.width;
+
+  // Handle long titles by truncating if necessary
+  let displayTitle = title;
+  if (textWidth > maxWidth - padding * 2) {
+    // Try to fit the text by truncating and adding ellipsis
+    let truncated = title;
+    while (textWidth > maxWidth - padding * 2 - 20 && truncated.length > 3) {
+      truncated = truncated.slice(0, -1);
+      displayTitle = truncated + '...';
+      textWidth = ctx.measureText(displayTitle).width;
+    }
+  }
+
+  // Badge dimensions
+  const badgeWidth = Math.min(maxWidth, textWidth + padding * 2);
+  const badgeHeight = fontSize + padding * 2;
+
+  // Badge position
+  const badgeX = centerX - badgeWidth / 2;
+  const badgeY = centerY - badgeHeight / 2;
+
+  // Draw badge background with retro style
+  // Outer border (darker)
+  ctx.fillStyle = '#2d3748'; // Dark gray border
+  ctx.fillRect(badgeX - borderWidth, badgeY - borderWidth, badgeWidth + borderWidth * 2, badgeHeight + borderWidth * 2);
+
+  // Inner background (lighter)
+  ctx.fillStyle = '#4a5568'; // Medium gray background
+  ctx.fillRect(badgeX, badgeY, badgeWidth, badgeHeight);
+
+  // Top highlight for 3D effect
+  ctx.fillStyle = '#718096'; // Light gray highlight
+  ctx.fillRect(badgeX, badgeY, badgeWidth, 2);
+
+  // Left highlight for 3D effect  
+  ctx.fillStyle = '#718096';
+  ctx.fillRect(badgeX, badgeY, 2, badgeHeight);
+
+  // Draw text
+  ctx.fillStyle = '#ffffff'; // White text
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  // Add text shadow for better readability
+  ctx.fillStyle = '#000000';
+  ctx.fillText(displayTitle, centerX + 1, centerY + 1);
+
+  // Main text
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText(displayTitle, centerX, centerY);
+};
+
+/**
  * Convert challenge positions (percentage strings) into pixel path segments.
  * Side-effect free - depends only on inputs.
  */
@@ -141,7 +225,7 @@ const findNearestAllowedTile = (
   for (let r = 1; r <= maxRadius; r++) {
     for (let dx = -r; dx <= r; dx++) {
       const dy = r - Math.abs(dx);
-      const candidates = [ [sx + dx, sy + dy], [sx + dx, sy - dy] ];
+      const candidates = [[sx + dx, sy + dy], [sx + dx, sy - dy]];
       for (const [cx, cy] of candidates) {
         if (cx < 0 || cy < 0 || cx >= mapWidth || cy >= mapHeight) continue;
         const t = determineTileType(cx, cy, mapWidth, mapHeight);
@@ -200,10 +284,10 @@ const findTilePath = (
   used: Set<string>
 ) => {
   const key = (x: number, y: number, d: number | null) => `${x},${y},${d === null ? 'n' : d}`;
-  const dirs = [ [0, -1], [1, 0], [0, 1], [-1, 0] ];
+  const dirs = [[0, -1], [1, 0], [0, 1], [-1, 0]];
   const turnPenalty = 5; // Increased penalty to favor straight paths
 
-  const open: Array<{ x: number; y: number; g: number; f: number; dir: number | null }>= [];
+  const open: Array<{ x: number; y: number; g: number; f: number; dir: number | null }> = [];
   const cameFrom = new Map<string, string | null>();
   const gScore = new Map<string, number>();
 
@@ -571,7 +655,7 @@ export const renderMap = (
   // This ensures perfect alignment between road endpoints and visible node positions
   const nodePixelPositions = challenges.map(ch => {
     let pixelX, pixelY, tx, ty;
-    
+
     if (actualNodeRects && actualNodeRects[ch.id]) {
       // Use exact coordinates from where the node is actually drawn
       const nr = actualNodeRects[ch.id];
@@ -597,13 +681,13 @@ export const renderMap = (
       tx = Math.floor((leftPct / 100) * mapWidth);
       ty = Math.floor((topPct / 100) * mapHeight);
     }
-    
+
     return { pixelX, pixelY, tx, ty, challenge: ch };
   });
 
   // Track node tiles where road overlaps are allowed (for convergence at nodes)
   const nodeTiles = new Set<string>();
-  
+
   // Ensure the tile directly under each node is marked as a road tile
   // This ensures roads visually connect to where nodes are actually rendered
   for (const nodePos of nodePixelPositions) {
@@ -611,7 +695,7 @@ export const renderMap = (
       const nodeTileKey = `${nodePos.tx},${nodePos.ty}`;
       roadTiles.add(nodeTileKey);
       nodeTiles.add(nodeTileKey); // Mark this as a node tile where overlaps are allowed
-      
+
       // NO adjacent tiles - this was creating the crosses around nodes!
     }
   }
@@ -623,10 +707,10 @@ export const renderMap = (
     // Prefer the exact tile under the node as the road endpoint
     let start = { x: nodeA.tx, y: nodeA.ty };
     let goal = { x: nodeB.tx, y: nodeB.ty };
-    
+
     const startType = determineTileType(start.x, start.y, mapWidth, mapHeight);
     const goalType = determineTileType(goal.x, goal.y, mapWidth, mapHeight);
-    
+
     if (forbiddenForRoads.includes(startType)) {
       const s = findNearestAllowedTile(start.x, start.y, mapWidth, mapHeight, forbiddenForRoads);
       if (!s) continue;
@@ -641,28 +725,28 @@ export const renderMap = (
     // Enhanced exclusion: prevent roads from crossing existing roads
     // EXCEPT on node tiles where convergence is allowed
     const excludedDueToAdjacency = new Set<string>();
-    
+
     // Block tiles adjacent to used roads to prevent crossings
     for (const usedKey of Array.from(usedRoadTiles)) {
       // Skip anti-crossing logic if this is a node tile (overlaps allowed)
       if (nodeTiles.has(usedKey)) continue;
-      
+
       const [ux, uy] = usedKey.split(',').map(s => parseInt(s, 10));
       // Only block adjacent tiles in cross pattern to allow parallel roads
-      const crossKeys = [`${ux-1},${uy}`, `${ux+1},${uy}`, `${ux},${uy-1}`, `${ux},${uy+1}`];
+      const crossKeys = [`${ux - 1},${uy}`, `${ux + 1},${uy}`, `${ux},${uy - 1}`, `${ux},${uy + 1}`];
       for (const k of crossKeys) {
         // Don't block node tiles - roads can converge there
         if (nodeTiles.has(k)) continue;
-        
+
         if (k.split(',').every(coord => {
           const c = parseInt(coord, 10);
-          return c >= 0 && c < (k.includes(',0') || k.includes(`,${mapHeight-1}`) ? mapHeight : mapWidth);
+          return c >= 0 && c < (k.includes(',0') || k.includes(`,${mapHeight - 1}`) ? mapHeight : mapWidth);
         })) {
           excludedDueToAdjacency.add(k);
         }
       }
     }
-    
+
     // Always allow endpoints
     excludedDueToAdjacency.delete(`${start.x},${start.y}`);
     excludedDueToAdjacency.delete(`${goal.x},${goal.y}`);
@@ -674,7 +758,7 @@ export const renderMap = (
         restrictedUsedRoadTiles.add(usedTile);
       }
     }
-    
+
     let path = findTilePath(start, goal, mapWidth, mapHeight, forbiddenForRoads, excludedDueToAdjacency, restrictedUsedRoadTiles);
     if (!path) {
       // Fallback: less strict adjacency rules but still respect node-only overlaps
@@ -772,67 +856,69 @@ export const renderMap = (
       const bx = nr.cx - boxW / 2;
       const by = nr.cy - boxH / 2;
 
-  // Background: try to draw the challenge's nodeIcon (preferred) or the
-  const mapIconPath = ch.nodeIcon;
-  let drewImage = false;
-  
-  if (mapIconPath) {
-    const cached = iconCache.get(mapIconPath);
-    
-    if (cached && cached.complete && cached.naturalWidth > 0) {
-      // draw image centered and covering the node box
-      ctx.drawImage(cached, bx, by, boxW, boxH);
-      drewImage = true;
-    } else if (!cached) {
-      // start loading and store placeholder in cache to avoid duplicate loads
-      const img = new Image();
-      // Attach handlers before setting src to avoid missing the load event
-      img.onload = () => {
-        iconCache.set(mapIconPath, img);
-        try { window.dispatchEvent(new CustomEvent('map-icon-loaded', { detail: { path: mapIconPath } })); } catch (e) {}
-      };
-      img.onerror = (err) => {
-        console.warn('[mapRenderer] Image failed to load', mapIconPath, err);
-        try { window.dispatchEvent(new CustomEvent('map-icon-loaded', { detail: { path: mapIconPath, error: true } })); } catch (e) {}
-      };
-      img.src = mapIconPath;
-      iconCache.set(mapIconPath, img);
-      // If the image is already complete (e.g. browser cache), trigger redraw now
-      try {
-        if (img.complete && img.naturalWidth > 0) {
-          try { window.dispatchEvent(new CustomEvent('map-icon-loaded', { detail: { path: mapIconPath } })); } catch (e) {}
+      // Background: try to draw the challenge's nodeIcon (preferred) or the
+      const mapIconPath = ch.nodeIcon;
+      let drewImage = false;
+
+      if (mapIconPath) {
+        const cached = iconCache.get(mapIconPath);
+
+        if (cached && cached.complete && cached.naturalWidth > 0) {
+          // draw image centered and covering the node box
+          ctx.drawImage(cached, bx, by, boxW, boxH);
+          drewImage = true;
+        } else if (!cached) {
+          // start loading and store placeholder in cache to avoid duplicate loads
+          const img = new Image();
+          // Attach handlers before setting src to avoid missing the load event
+          img.onload = () => {
+            iconCache.set(mapIconPath, img);
+            try { window.dispatchEvent(new CustomEvent('map-icon-loaded', { detail: { path: mapIconPath } })); } catch (e) { }
+          };
+          img.onerror = (err) => {
+            console.warn('[mapRenderer] Image failed to load', mapIconPath, err);
+            try { window.dispatchEvent(new CustomEvent('map-icon-loaded', { detail: { path: mapIconPath, error: true } })); } catch (e) { }
+          };
+          img.src = mapIconPath;
+          iconCache.set(mapIconPath, img);
+          // If the image is already complete (e.g. browser cache), trigger redraw now
+          try {
+            if (img.complete && img.naturalWidth > 0) {
+              try { window.dispatchEvent(new CustomEvent('map-icon-loaded', { detail: { path: mapIconPath } })); } catch (e) { }
+            }
+          } catch (e) { }
         }
-      } catch (e) {}
-    }
-  }
+      }
 
-  if (!drewImage) {
-    // No filled background per design request — leave the node box transparent
-    // so the underlying tile or the node icon is visible. We keep the border
-    // below so the node is still visually defined.
-  }
-  // No border: nodes should render without a surrounding rectangle per request.
+      if (!drewImage) {
+        // No filled background per design request — leave the node box transparent
+        // so the underlying tile or the node icon is visible. We keep the border
+        // below so the node is still visually defined.
+      }
+      // No border: nodes should render without a surrounding rectangle per request.
 
-  // Only render emoji as fallback when no image was drawn
-  if (!drewImage && nr.emoji) {
-    // Emoji / icon: draw a faint white stroke behind the emoji for contrast
-    // then fill with black for legibility on varied backgrounds.
-    ctx.font = `${Math.floor(boxH * 0.5)}px serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    const emojiY = by + boxH * 0.45;
-    // stroke for contrast
-    ctx.lineWidth = Math.max(2, Math.floor(boxH * 0.08));
-    ctx.strokeStyle = 'rgba(255,255,255,0.85)';
-    ctx.strokeText(nr.emoji, bx + boxW / 2, emojiY);
-    ctx.fillStyle = '#000';
-    ctx.fillText(nr.emoji, bx + boxW / 2, emojiY);
-  }
+      // Only render emoji as fallback when no image was drawn
+      if (!drewImage && nr.emoji) {
+        // Emoji / icon: draw a faint white stroke behind the emoji for contrast
+        // then fill with black for legibility on varied backgrounds.
+        ctx.font = `${Math.floor(boxH * 0.5)}px serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        const emojiY = by + boxH * 0.45;
+        // stroke for contrast
+        ctx.lineWidth = Math.max(2, Math.floor(boxH * 0.08));
+        ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+        ctx.strokeText(nr.emoji, bx + boxW / 2, emojiY);
+        ctx.fillStyle = '#000';
+        ctx.fillText(nr.emoji, bx + boxW / 2, emojiY);
+      }
 
-  // Title small (subtle, no stroke)
-  ctx.font = `${Math.floor(boxH * 0.15)}px serif`;
-  ctx.fillStyle = '#000';
-  ctx.fillText(nr.title || '', bx + boxW / 2, by + boxH * 0.85);
+      // Draw retro-style badge below the node with challenge title
+      const badgeCenterX = nr.cx;
+      const badgeCenterY = by + boxH + 20; // Position badge below the node with some margin
+      const maxBadgeWidth = Math.max(boxW, 100); // Ensure badge is at least as wide as the node
+
+      drawChallengeBadge(ctx, nr.title || '', badgeCenterX, badgeCenterY, maxBadgeWidth);
     }
   }
 
@@ -884,11 +970,11 @@ export const renderMap = (
 
     // Draw segment from road center toward node center, but stop short so
     // the node border reveals the connection. Length is min(dist, tile*0.75)
-  const ux = dx / dist;
-  const uy = dy / dist;
-  // Endpoint should sit on the border of the node box (nodeRadius from center)
-  const ex = nodeCenterX - ux * nodeRadius;
-  const ey = nodeCenterY - uy * nodeRadius;
+    const ux = dx / dist;
+    const uy = dy / dist;
+    // Endpoint should sit on the border of the node box (nodeRadius from center)
+    const ex = nodeCenterX - ux * nodeRadius;
+    const ey = nodeCenterY - uy * nodeRadius;
 
     ctx.strokeStyle = '#654321';
     ctx.lineWidth = Math.max(2, Math.floor(actualTileSize / 8));

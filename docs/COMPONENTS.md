@@ -34,8 +34,18 @@ drawMap(): void
 ```
 - **Responsiveness**: Calcola dimensioni dinamiche del canvas
 - **Performance**: Disabilita smoothing per pixel-perfect
-- **Layer**: Terreno → Strade → Overlay interattivo
+- **Layer**: Terreno → Strade → Nodi Challenge → Badge Challenge
 - **Redraw**: Automatico su resize finestra
+
+#### Challenge Badge Rendering
+```typescript
+drawChallengeBadge(ctx: CanvasRenderingContext2D, x: number, y: number, title: string, maxWidth: number): void
+```
+- **Posizionamento**: Dinamico sotto ogni nodo challenge
+- **Stile**: Retro 8-bit con bordi pixelati e colori contrastanti
+- **Testo**: Titolo challenge leggibile con font serif
+- **Dimensioni**: Adattive in base alla lunghezza del titolo
+- **Colori**: Sfondo nero semi-trasparente, testo bianco, bordo grigio chiaro
 
 ### Configurazione
 

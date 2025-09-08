@@ -17,7 +17,7 @@
   "challenges": [
     {
       "id": "guild-builder",
-      "title": "Guild Builder — La Taverna dei Compagni",
+      "title": "La Taverna dei Compagni",
       "type": "matching-quiz",
       "description": "Forma una squadra di 3 compagni in grado di affrontare la sfida richiesta. Ogni compagno ha un ruolo unico e una descrizione. Scegli con attenzione!",
       "emoji": "🛡️",

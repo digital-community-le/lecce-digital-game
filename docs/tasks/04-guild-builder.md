@@ -1,4 +1,4 @@
-# Task: Guild Builder 2.0 — La Taverna dei Compagni (final)
+# Task: Guild Builder 2.0 — La Taverna dei Compagni
 
 - Owner: Coding Agent (CA)
 - Priority: High
