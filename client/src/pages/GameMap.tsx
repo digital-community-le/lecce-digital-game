@@ -5,7 +5,7 @@ import CanvasMap from '@/components/CanvasMap';
 
 const GameMapPage: React.FC = () => {
   const [, setLocation] = useLocation();
-  const { gameState, toasts, removeToast, acknowledgeCompletion } = useGameStore();
+  const { gameState, toasts, removeToast } = useGameStore();
 
     
 
@@ -22,10 +22,7 @@ const GameMapPage: React.FC = () => {
       setLocation('/game-complete');
       return;
     }
-    
-    // When the map mounts, surface any pending completion modal queued by store
-    acknowledgeCompletion();
-  }, [gameState.currentUser.userId, gameState.gameProgress.completedChallenges.length, setLocation, acknowledgeCompletion]);
+  }, [gameState.currentUser.userId, gameState.gameProgress.completedChallenges.length, setLocation]);
 
   // Prevent rendering if redirecting
   if (!gameState.currentUser.userId || gameState.gameProgress.completedChallenges.length === 4) {

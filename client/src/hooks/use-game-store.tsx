@@ -295,7 +295,8 @@ function createGameStore(deps?: { storage?: StorageService }) {
             time: new Date().toLocaleTimeString(),
           };
 
-          setModals((prevModals) => ({ ...prevModals, pendingCompletion: { id: "pendingCompletion", isOpen: true, data: completionData } }));
+          // Open completion modal immediately instead of pending
+          setModals((prevModals) => ({ ...prevModals, completion: { id: "completion", isOpen: true, data: completionData } }));
 
           return { ...prev, challenges: updatedChallenges, gameProgress: { completedChallenges: newCompleted, totalScore: gameProgress.totalScore, gameCompleted: gameProgress.gameCompleted } };
         }
