@@ -93,6 +93,15 @@ const getInitialState = (): GameState => ({
 });
 
 /**
+ * Toast ID generator with counter to ensure uniqueness
+ */
+let toastCounter = 0;
+
+function generateToastId(): string {
+  return `toast_${Date.now()}_${++toastCounter}`;
+}
+
+/**
  * Hook to manage toasts. Single responsibility for toast lifecycle.
  */
 function useToastManager() {
@@ -100,7 +109,7 @@ function useToastManager() {
 
   const showToast = useCallback(
     (message: string, type: Toast["type"] = "info", duration = 3000) => {
-      const toast: Toast = { id: `toast_${Date.now()}`, message, type, duration };
+      const toast: Toast = { id: generateToastId(), message, type, duration };
       setToasts((s) => [...s, toast]);
 
       if (duration > 0) {
