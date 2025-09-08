@@ -64,7 +64,7 @@ const CanvasMap: React.FC = () => {
 
   // Preload map icons when component mounts
   useEffect(() => {
-    preloadMapIcons(gameState.challenges).catch((err: Error) => {
+    preloadMapIcons(gameState.challenges).catch(err => {
       console.warn('[CanvasMap] Some map icons failed to preload:', err);
     });
     

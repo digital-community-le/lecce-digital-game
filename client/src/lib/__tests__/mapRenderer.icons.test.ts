@@ -18,7 +18,7 @@ describe('MapRenderer Icons', () => {
       naturalWidth: 0,
       naturalHeight: 0,
     };
-
+    
     global.Image = vi.fn(() => mockImage);
   });
 
@@ -103,7 +103,7 @@ describe('MapRenderer Icons', () => {
     ];
 
     const result = await preloadMapIcons(challenges);
-
+    
     // Should resolve immediately with no images to load
     expect(result).toEqual([]);
     expect(global.Image).not.toHaveBeenCalled();
