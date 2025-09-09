@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { useLocation } from "wouter";
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'wouter';
 import useNavigateWithTransition from '@/hooks/use-navigate-with-transition';
-import { useGameStore } from "@/hooks/use-game-store";
-import ProfileCreationForm from "@/components/ProfileCreationForm";
-import UiDialog from "@/components/UiDialog";
+import { useGameStore } from '@/hooks/use-game-store';
+import ProfileCreationForm from '@/components/ProfileCreationForm';
+import UiDialog from '@/components/UiDialog';
 // Import static game data
 import gameData from '@/assets/game-data.json';
+import sealWithoutGems from '@assets/images/seal-without-gems.png';
 
 const IntroPage: React.FC = () => {
   const [, setLocation] = useLocation();
@@ -20,9 +21,9 @@ const IntroPage: React.FC = () => {
   const storyText =
     cfg.storyText ??
     "Un'antica forza dorme sotto le pietre della città. Solo chi saprà unire mente, coraggio e comunità potrà riaccendere il Sigillo. Accetta la chiamata e scrivi la tua leggenda.";
-  const titleText = cfg.title ?? "Il Sigillo di Lecce";
-  const subtitleText = cfg.subtitle ?? "Risveglio";
-  const buttonText = cfg.buttonText ?? "Inizia la tua leggenda";
+  const titleText = cfg.title ?? 'Il Sigillo di Lecce';
+  const subtitleText = cfg.subtitle ?? 'Risveglio';
+  const buttonText = cfg.buttonText ?? 'Inizia la tua leggenda';
 
   useEffect(() => {
     // Check if user already has a profile
@@ -56,15 +57,33 @@ const IntroPage: React.FC = () => {
     // Close dialog then navigate with transition
     setShowProfileForm(false);
     try {
-  await navigateWithTransition('/game/map');
+      await navigateWithTransition('/game/map');
     } catch (e) {
       // fallback
-  setLocation('/game/map');
+      setLocation('/game/map');
     }
   };
 
   return (
-  <div className="intro-screen fixed inset-0 flex flex-col items-center justify-center z-10" style={{ background: 'linear-gradient(to bottom, var(--ldc-primary-dark), var(--ldc-surface))', color: 'var(--ldc-on-surface)' }}>
+    <div
+      className="intro-screen fixed inset-0 flex flex-col items-center justify-center z-10"
+      style={{
+        background:
+          'linear-gradient(to bottom, var(--ldc-primary-dark), var(--ldc-surface))',
+        color: 'var(--ldc-on-surface)',
+      }}
+    >
+      {/* Sigillo Image */}
+      <div className="text-center mb-8">
+        <div className="w-32 h-32 mx-auto mb-4">
+          <img
+            src={sealWithoutGems}
+            alt="Sigillo di Lecce"
+            className="w-full h-full object-contain"
+            style={{ imageRendering: 'pixelated' }}
+          />
+        </div>
+      </div>
       {/* Title */}
       <div className="text-center mb-8">
         <h1
@@ -87,7 +106,7 @@ const IntroPage: React.FC = () => {
       <div className="max-w-md mx-auto px-6 text-center">
         <div
           className={`transition-opacity duration-1000 ${
-            textRevealed ? "opacity-100" : "opacity-0"
+            textRevealed ? 'opacity-100' : 'opacity-0'
           }`}
           data-testid="text-story-intro"
         >
@@ -111,15 +130,15 @@ const IntroPage: React.FC = () => {
         <div className="flex gap-2">
           <div
             className="w-2 h-2 bg-yellow-400 pixel-pop"
-            style={{ animationDelay: "0s" }}
+            style={{ animationDelay: '0s' }}
           ></div>
           <div
             className="w-2 h-2 bg-purple-400 pixel-pop"
-            style={{ animationDelay: "0.2s" }}
+            style={{ animationDelay: '0.2s' }}
           ></div>
           <div
             className="w-2 h-2 bg-pink-400 pixel-pop"
-            style={{ animationDelay: "0.4s" }}
+            style={{ animationDelay: '0.4s' }}
           ></div>
         </div>
       </div>
