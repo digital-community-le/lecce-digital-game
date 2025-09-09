@@ -28,6 +28,7 @@ jobs:
       contains(github.event.head_commit.message, 'fix:') || 
       contains(github.event.head_commit.message, 'BREAKING CHANGE:')
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     outputs:
       validation_passed: ${{ steps.validation.outputs.passed }}
     steps:
@@ -51,6 +52,7 @@ jobs:
     needs: [pre-validation]
     if: always()
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
       pr_created: ${{ steps.release.outputs.pr_created }}
