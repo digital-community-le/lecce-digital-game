@@ -121,63 +121,34 @@ jobs:
               
               console.log(`✅ PR #${prNumber} approved`);
 
-              // 2. Enable auto-merge
-              try {
-                await github.rest.pulls.enableAutoMerge({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  pull_number: prNumber,
-                  merge_method: 'squash'
-                });
+              // 2. Direct merge (simplified approach)
+              console.log(`🔄 Proceeding with direct merge for PR #${prNumber}...`);
+              
+              await github.rest.pulls.merge({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+                merge_method: 'squash',
+                commit_title: `🚀 Release: ${prInfo.title}`,
+                commit_message: 'Automatically merged by Release workflow'
+              });
 
-                console.log(`✅ Auto-merge enabled for PR #${prNumber}`);
+              console.log(`✅ PR #${prNumber} merged successfully`);
+              
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: `🚀 **Release PR merged successfully!**
                 
-                // Commenta il successo
-                await github.rest.issues.createComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: prNumber,
-                  body: `🤖 **Auto-merge enabled**
-                  
-                  ✅ Pre-validation passed
-                  ✅ PR approved automatically  
-                  ✅ Auto-merge configured with squash method
-                  
-                  This PR will be merged automatically when all checks pass.
-                  Once merged, the deployment pipeline will start automatically.`
-                });
-
-              } catch (autoMergeError) {
-                console.log('⚠️ Auto-merge failed, attempting direct merge...');
-                console.log('Auto-merge error:', autoMergeError.message);
+                ✅ Pre-validation passed
+                ✅ PR approved and merged automatically
+                ✅ Deployment pipeline will start shortly
                 
-                // 3. Fallback: Direct merge
-                await github.rest.pulls.merge({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  pull_number: prNumber,
-                  merge_method: 'squash',
-                  commit_title: `🚀 Release: ${prInfo.title}`,
-                  commit_message: 'Automatically merged by Release workflow'
-                });
-
-                console.log(`✅ PR #${prNumber} merged directly`);
-                
-                await github.rest.issues.createComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: prNumber,
-                  body: `🚀 **Release PR merged successfully!**
-                  
-                  ✅ Pre-validation passed
-                  ✅ PR approved and merged automatically
-                  ✅ Deployment pipeline will start shortly
-                  
-                  **Next steps:**
-                  - Monitor deployment in the Actions tab
-                  - New release will be tagged automatically`
-                });
-              }
+                **Next steps:**
+                - Monitor deployment in the Actions tab
+                - New release will be tagged automatically`
+              });
               
             } catch (error) {
               console.error('❌ Failed to process release PR:', error.message);
