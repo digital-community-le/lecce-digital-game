@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;800&family=Press+Start+2P&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;800&family=Press+Start+2P&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -7,26 +7,26 @@
 :root {
   /* LDC 8-bit Palette (adapted) */
   /* Primary: magenta */
-  --ldc-primary: #BD1F76; /* colore primario */
-  --ldc-primary-dark: #7A144D; /* variante scura (ombra) */
-  --ldc-primary-light: #F28DA3; /* variante chiara (highlight) */
+  --ldc-primary: #bd1f76; /* colore primario */
+  --ldc-primary-dark: #7a144d; /* variante scura (ombra) */
+  --ldc-primary-light: #f28da3; /* variante chiara (highlight) */
 
   /* Secondary: blu */
-  --ldc-secondary: #2D2E82; /* colore secondario */
-  --ldc-secondary-dark: #1A1A4D; /* variante scura (ombra) */
-  --ldc-secondary-light: #6B3E8A; /* variante chiara (highlight) */
+  --ldc-secondary: #2d2e82; /* colore secondario */
+  --ldc-secondary-dark: #1a1a4d; /* variante scura (ombra) */
+  --ldc-secondary-light: #6b3e8a; /* variante chiara (highlight) */
 
   /* Accent & complementary */
-  --ldc-accent: #F25D27; /* arancione per accenti */
-  --ldc-contrast-yellow: #F2C641; /* giallo caldo di contrasto */
-  --ldc-info: #41A6F2; /* blu complementare acceso */
-  --ldc-rpg-green: #2F8C2F; /* verde brillante RPG */
+  --ldc-accent: #f25d27; /* arancione per accenti */
+  --ldc-contrast-yellow: #f2c641; /* giallo caldo di contrasto */
+  --ldc-info: #41a6f2; /* blu complementare acceso */
+  --ldc-rpg-green: #2f8c2f; /* verde brillante RPG */
 
   /* Neutral / UI surfaces */
-  --ldc-background: #E0E0E0; /* grigio chiaro neutro */
+  --ldc-background: #e0e0e0; /* grigio chiaro neutro */
   --ldc-surface: #2b1624; /* dark plum, coherent with the magenta primary but less attention-grabbing */
   --ldc-on-background: #000000;
-  --ldc-on-surface: #E0E0E0;
+  --ldc-on-surface: #e0e0e0;
 
   /* Status colors */
   --ldc-error: #ff3366; /* keep existing red for errors */
@@ -61,7 +61,9 @@
 
   /* Typography */
   --ldc-font-title: 'Press Start 2P', cursive;
-  --ldc-font-body: 'Nunito', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  --ldc-font-body:
+    'Nunito', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue',
+    Arial;
   --font-retro: var(--ldc-font-title);
   --font-sans: var(--ldc-font-body);
 
@@ -72,7 +74,7 @@
 
   /* Header */
   --ldc-header-height: 56px;
-  
+
   /* Colori terrain migliorati per mappa più vivace */
   --terrain-grass-base: #32cd32;
   --terrain-grass-detail: #228b22;
@@ -98,9 +100,9 @@
   --ldc-on-background: #f7f7f7;
   --ldc-on-surface: #f7f7f7;
   /* Dark theme: lighter plum-tinted borders to match surface while keeping contrast */
-  --ldc-border: rgba(189, 31, 118, 0.10);
-  --ldc-surface-shadow: 0 6px 18px rgba(0,0,0,0.6);
-  --ldc-elevated-border: rgba(255,255,255,0.06);
+  --ldc-border: rgba(189, 31, 118, 0.1);
+  --ldc-surface-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+  --ldc-elevated-border: rgba(255, 255, 255, 0.06);
 
   /* Full palette overrides for dark theme */
   --ldc-primary: #9c4b8a; /* brighter on dark */
@@ -112,9 +114,9 @@
   --ldc-success-dark: #0e7a34;
   --ldc-warning: #f0b000;
   --ldc-warning-dark: #b07f00;
-  --ldc-neutral-dark: rgba(255,255,255,0.12);
+  --ldc-neutral-dark: rgba(255, 255, 255, 0.12);
   --ldc-focus: #ff7abf;
-  
+
   --background: var(--ldc-background);
   --foreground: var(--ldc-on-background);
   --card: var(--ldc-surface);
@@ -130,7 +132,7 @@
   --ldc-primary: #6b1d61; /* più scuro per maggiore contrasto */
   --ldc-accent: #ff4f91; /* evidenza più vivida */
   --ldc-border: #000000;
-  
+
   --background: var(--ldc-background);
   --foreground: var(--ldc-on-background);
   --card: var(--ldc-surface);
@@ -151,7 +153,10 @@
     padding: 0;
   }
 
-  h1, h2, h3, .ldc-title {
+  h1,
+  h2,
+  h3,
+  .ldc-title {
     font-family: var(--ldc-font-title);
     letter-spacing: 0.02em;
     line-height: 1.4;
@@ -175,12 +180,12 @@
 
   .nes-btn::after {
     /* default subtle shadow for normal buttons */
-    box-shadow: inset -4px -4px rgba(0,0,0,0.3) !important;
+    box-shadow: inset -4px -4px rgba(0, 0, 0, 0.3) !important;
   }
 
   /* When button is pressed reduce the offset to simulate press */
   .nes-btn:active::after {
-    box-shadow: inset -4px -4px rgba(0,0,0,0.18) !important;
+    box-shadow: inset -4px -4px rgba(0, 0, 0, 0.18) !important;
     bottom: -3px;
   }
 
@@ -233,7 +238,7 @@
     .nes-container.is-rounded {
       border-image-repeat: stretch !important;
     }
-    
+
     .nes-btn {
       border-image-repeat: stretch !important;
     }
@@ -307,10 +312,11 @@
   }
 
   @keyframes avatar-glow {
-    0%, 100% { 
+    0%,
+    100% {
       box-shadow: 0 0 4px rgba(59, 130, 246, 0.4);
     }
-    50% { 
+    50% {
       box-shadow: 0 0 16px rgba(59, 130, 246, 0.8);
     }
   }
@@ -320,13 +326,13 @@
   }
 
   @keyframes trail-sparkle {
-    0% { 
-      opacity: 1; 
-      transform: scale(1) rotate(0deg); 
+    0% {
+      opacity: 1;
+      transform: scale(1) rotate(0deg);
     }
-    100% { 
-      opacity: 0; 
-      transform: scale(0.3) rotate(180deg); 
+    100% {
+      opacity: 0;
+      transform: scale(0.3) rotate(180deg);
     }
   }
 
@@ -351,14 +357,14 @@
     max-width: 90vw;
     max-height: 90vh;
     overflow-y: auto;
-  box-shadow: var(--ldc-surface-shadow);
-  border: 1px solid var(--ldc-elevated-border);
+    box-shadow: var(--ldc-surface-shadow);
+    border: 1px solid var(--ldc-elevated-border);
   }
 
   /* Semantic background utilities: ensure matching foreground color for contrast */
   .bg-card {
-  background-color: var(--card);
-  color: var(--card-foreground) !important;
+    background-color: var(--card);
+    color: var(--card-foreground) !important;
   }
 
   .text-card-foreground {
@@ -366,8 +372,8 @@
   }
 
   .bg-muted {
-  background-color: var(--muted);
-  color: var(--muted-foreground) !important;
+    background-color: var(--muted);
+    color: var(--muted-foreground) !important;
   }
 
   .bg-background {
@@ -420,7 +426,7 @@
     z-index: 200;
     /* grid lets the video fill the whole overlay while centering the viewfinder/control stack */
     display: grid;
-    grid-template-areas: "overlay";
+    grid-template-areas: 'overlay';
     place-items: center; /* centers children both horizontally and vertically */
   }
 
@@ -470,7 +476,7 @@
     color: var(--card-foreground) !important;
     box-shadow: var(--ldc-surface-shadow);
     width: min(95%, 680px);
-    margin: 0 auto;;
+    margin: 0 auto;
   }
 
   /* Variant colors (keep readable in themes) */
@@ -478,21 +484,21 @@
   .toast.nes-container.is-success {
     background-color: var(--ldc-success);
     color: var(--ldc-on-surface) !important;
-    border-color: rgba(0,0,0,0.08) !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
   }
 
   .toast.is-error .nes-container,
   .toast.nes-container.is-error {
     background-color: var(--ldc-error);
     color: var(--ldc-on-surface) !important;
-    border-color: rgba(0,0,0,0.08) !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
   }
 
   .toast.is-warning .nes-container,
   .toast.nes-container.is-warning {
     background-color: var(--ldc-contrast-yellow);
     color: var(--ldc-on-background) !important;
-    border-color: rgba(0,0,0,0.04) !important;
+    border-color: rgba(0, 0, 0, 0.04) !important;
   }
 
   .toast.is-light .nes-container,
@@ -505,9 +511,15 @@
 @layer utilities {
   /* Animation for retro effects */
   @keyframes pixelPop {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.2); }
-    100% { transform: scale(1); }
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.2);
+    }
+    100% {
+      transform: scale(1);
+    }
   }
 
   .pixel-pop {
@@ -515,8 +527,14 @@
   }
 
   @keyframes fadeInRetro {
-    0% { opacity: 0; transform: translateY(8px); }
-    100% { opacity: 1; transform: translateY(0); }
+    0% {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   .fade-in-retro {
@@ -536,12 +554,12 @@
     .ldc-header__title--mobile-hidden {
       display: none;
     }
-    
+
     .map-node {
       width: 60px;
       height: 60px;
     }
-    
+
     .player-avatar {
       width: 36px;
       height: 36px;
@@ -581,13 +599,21 @@
      and can be stepped for a pixelated feel. Animations use 'forwards' so the
      final opacity is preserved after the animation completes. */
   @keyframes route-fade-in {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
   }
 
   @keyframes route-fade-out {
-    0% { opacity: 1; }
-    100% { opacity: 0; }
+    0% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
   }
 
   .route-transition-overlay.visible {
@@ -604,8 +630,9 @@
   .route-transition-overlay.pixel {
     /* Use a CSS image-rendering trick and a layered background to simulate scanlines */
     image-rendering: pixelated;
-    background-image: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)),
-                      repeating-linear-gradient(transparent 0 2px, rgba(0,0,0,0.08) 2px 4px);
+    background-image:
+      linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.85)),
+      repeating-linear-gradient(transparent 0 2px, rgba(0, 0, 0, 0.08) 2px 4px);
     background-blend-mode: normal;
     backdrop-filter: contrast(0.9) saturate(0.9);
   }
@@ -626,9 +653,13 @@
   .route-transition-overlay.pixel.scan-strong {
     /* Stronger scanlines and a subtle pixel grid overlay for chunky pixels */
     background-image:
-      linear-gradient(rgba(0,0,0,0.95), rgba(0,0,0,0.95)),
-      repeating-linear-gradient(transparent 0 3px, rgba(0,0,0,0.14) 3px 6px),
-      radial-gradient(circle at 10% 10%, rgba(255,255,255,0.02) 1px, transparent 1px);
+      linear-gradient(rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.95)),
+      repeating-linear-gradient(transparent 0 3px, rgba(0, 0, 0, 0.14) 3px 6px),
+      radial-gradient(
+        circle at 10% 10%,
+        rgba(255, 255, 255, 0.02) 1px,
+        transparent 1px
+      );
     background-blend-mode: normal, normal, overlay;
     image-rendering: pixelated;
   }
@@ -648,52 +679,77 @@
 
   /* Grass tiles (default background) */
   .terrain-grass {
-    background: 
+    background:
       radial-gradient(circle at 20% 20%, #4ade80 2px, transparent 2px),
       radial-gradient(circle at 60% 80%, #22c55e 1px, transparent 1px),
       linear-gradient(0deg, #16a34a 0%, #22c55e 50%, #4ade80 100%);
-    background-size: 16px 16px, 12px 12px, 100% 100%;
+    background-size:
+      16px 16px,
+      12px 12px,
+      100% 100%;
     opacity: 1;
   }
 
   /* Forest tiles */
   .terrain-forest {
-    background: 
+    background:
       radial-gradient(circle at 30% 30%, #166534 3px, transparent 3px),
       radial-gradient(circle at 70% 70%, #15803d 2px, transparent 2px),
       radial-gradient(circle at 50% 50%, #22c55e 1px, transparent 1px),
       linear-gradient(45deg, #052e16 0%, #166534 50%, #15803d 100%);
-    background-size: 20px 20px, 16px 16px, 8px 8px, 100% 100%;
+    background-size:
+      20px 20px,
+      16px 16px,
+      8px 8px,
+      100% 100%;
     opacity: 1;
   }
 
   /* Mountain tiles */
   .terrain-mountain {
-    background: 
+    background:
       linear-gradient(45deg, #6b7280 25%, transparent 25%),
       linear-gradient(-45deg, #6b7280 25%, transparent 25%),
       linear-gradient(45deg, transparent 75%, #374151 75%),
       linear-gradient(-45deg, transparent 75%, #374151 75%),
       linear-gradient(0deg, #9ca3af 0%, #6b7280 50%, #374151 100%);
-    background-size: 16px 16px, 16px 16px, 16px 16px, 16px 16px, 100% 100%;
-    background-position: 0 0, 0 8px, 8px -8px, -8px 0px, 0 0;
+    background-size:
+      16px 16px,
+      16px 16px,
+      16px 16px,
+      16px 16px,
+      100% 100%;
+    background-position:
+      0 0,
+      0 8px,
+      8px -8px,
+      -8px 0px,
+      0 0;
     opacity: 1;
   }
 
   /* Lake tiles */
   .terrain-lake {
-    background: 
+    background:
       radial-gradient(circle at 25% 25%, #3b82f6 2px, transparent 2px),
       radial-gradient(circle at 75% 75%, #1d4ed8 1px, transparent 1px),
       linear-gradient(45deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%);
-    background-size: 24px 24px, 16px 16px, 100% 100%;
+    background-size:
+      24px 24px,
+      16px 16px,
+      100% 100%;
     opacity: 1;
     animation: water-shimmer 4s ease-in-out infinite;
   }
 
   @keyframes water-shimmer {
-    0%, 100% { opacity: 0.7; }
-    50% { opacity: 0.9; }
+    0%,
+    100% {
+      opacity: 0.7;
+    }
+    50% {
+      opacity: 0.9;
+    }
   }
 
   /* Road path styling */
@@ -703,7 +759,7 @@
 
   /* Channel content layout */
   .challenge-content-layout {
-      .challenge-description {
+    .challenge-description {
       background-color: var(--ldc-secondary);
       color: var(--ldc-on-surface);
     }
@@ -754,24 +810,32 @@
 
   @keyframes gemGlow {
     0% {
-      filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.8)) drop-shadow(0 0 60px rgba(255, 255, 255, 0.4));
+      filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.8))
+        drop-shadow(0 0 60px rgba(255, 255, 255, 0.4));
     }
     100% {
-      filter: drop-shadow(0 0 40px rgba(255, 215, 0, 1)) drop-shadow(0 0 80px rgba(255, 255, 255, 0.6));
+      filter: drop-shadow(0 0 40px rgba(255, 215, 0, 1))
+        drop-shadow(0 0 80px rgba(255, 255, 255, 0.6));
     }
   }
 
   @keyframes titlePulse {
-    0%, 100% {
-      text-shadow: 3px 3px 0px rgba(0,0,0,0.8), 0 0 20px rgba(255, 215, 0, 0.6);
+    0%,
+    100% {
+      text-shadow:
+        3px 3px 0px rgba(0, 0, 0, 0.8),
+        0 0 20px rgba(255, 215, 0, 0.6);
     }
     50% {
-      text-shadow: 3px 3px 0px rgba(0,0,0,0.8), 0 0 30px rgba(255, 215, 0, 0.9);
+      text-shadow:
+        3px 3px 0px rgba(0, 0, 0, 0.8),
+        0 0 30px rgba(255, 215, 0, 0.9);
     }
   }
 
   @keyframes float {
-    0%, 100% {
+    0%,
+    100% {
       transform: translateY(0px);
     }
     50% {
@@ -792,12 +856,31 @@
   }
 
   .retro-border {
-    border-image: 
-      linear-gradient(45deg, 
-        transparent 30%, 
-        currentColor 30%, 
-        currentColor 70%, 
+    border-image: linear-gradient(
+        45deg,
+        transparent 30%,
+        currentColor 30%,
+        currentColor 70%,
         transparent 70%
-      ) 1;
+      )
+      1;
+  }
+}
+
+.flash-green {
+  animation: flash-blink 0.4s linear 3;
+}
+
+@keyframes flash-blink {
+  0%,
+  50% {
+    opacity: 1 !important;
+  }
+  51%,
+  99% {
+    opacity: 0 !important;
+  }
+  100% {
+    opacity: 1 !important;
   }
 }

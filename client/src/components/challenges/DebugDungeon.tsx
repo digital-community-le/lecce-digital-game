@@ -13,6 +13,9 @@ const DebugDungeon: React.FC = () => {
   const [showExplanation, setShowExplanation] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  const [flashing, setFlashing] = useState(false);
+  const [flashCount, setFlashCount] = useState(0);
+
   const QUESTIONS_COUNT = 10;
   const PASS_THRESHOLD = 70; // 70% to pass
 
@@ -95,6 +98,25 @@ const DebugDungeon: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameState.currentUser.userId]);
 
+  useEffect(() => {
+    if (flashing) {
+      let blinkCount = 0;
+      const blinkInterval = setInterval(() => {
+        blinkCount++;
+        setFlashCount(blinkCount);
+
+        if (blinkCount >= 6) {
+          // 3 blinks complete (on-off-on-off-on-off)
+          clearInterval(blinkInterval);
+          setFlashing(false);
+          setFlashCount(0);
+        }
+      }, 200); // 200ms per ogni cambio stato
+
+      return () => clearInterval(blinkInterval);
+    }
+  }, [flashing]);
+
   const submitAnswer = (answerIndex: number) => {
     if (!quizState) return;
 
@@ -114,7 +136,10 @@ const DebugDungeon: React.FC = () => {
     gameStorage.saveQuizState(gameState.currentUser.userId, updatedState);
     setShowExplanation(true);
 
-    if (!isCorrect) {
+    if (isCorrect) {
+      setFlashing(true);
+      setFlashCount(0);
+    } else {
       showToast('Risposta sbagliata', 'error');
     }
   };
@@ -168,6 +193,8 @@ const DebugDungeon: React.FC = () => {
 
     setSelectedAnswer(null);
     setShowExplanation(false);
+    setFlashing(false);
+    setFlashCount(0);
   };
 
   const handleRestart = async () => {
@@ -189,6 +216,8 @@ const DebugDungeon: React.FC = () => {
       gameStorage.saveQuizState(gameState.currentUser.userId, newState);
       setSelectedAnswer(null);
       setShowExplanation(false);
+      setFlashing(false);
+      setFlashCount(0);
       showToast('Quiz riavviato!', 'info');
       return;
     }
@@ -196,6 +225,8 @@ const DebugDungeon: React.FC = () => {
     // No questions available locally: try to re-fetch from game-data.json
     setSelectedAnswer(null);
     setShowExplanation(false);
+    setFlashing(false);
+    setFlashCount(0);
     setLoadError(null);
     const success = await fetchAndInit();
     if (success) showToast('Quiz riavviato!', 'info');
@@ -323,37 +354,42 @@ const DebugDungeon: React.FC = () => {
       <div>
         {/* Question */}
         <div className="mb-6">
-          <div className="nes-container with-title mb-4">
+          <div className="nes-container with-title mb-4 bg-white">
             <p className="title">
               Domanda {quizState.currentQuestionIndex + 1}
             </p>
-            <p className="text-sm p-3" data-testid="question-text">
+            <p className="text-sm" data-testid="question-text">
               {currentQuestion.question}
             </p>
           </div>
 
           {/* Options */}
-          <div className="space-y-2" data-testid="answer-options">
+          <div className="flex flex-col gap-1" data-testid="answer-options">
             {currentQuestion.options.map((option, index) => {
-              let buttonClass =
-                'w-full p-3 border-2 border-black text-left text-sm transition-colors';
+              let buttonClass = 'nes-btn p-3 text-left transition-colors';
 
               if (showExplanation) {
                 if (index === currentQuestion.correctAnswer) {
-                  buttonClass += ' bg-green-200 text-green-800';
+                  if (flashing && flashCount % 2 === 1) {
+                    // Hidden state during blink - will use style visibility: hidden
+                    buttonClass += ' is-success';
+                  } else {
+                    // Visible state - green
+                    buttonClass += ' is-success';
+                  }
                 } else if (
                   index === selectedAnswer &&
                   index !== currentQuestion.correctAnswer
                 ) {
-                  buttonClass += ' bg-red-200 text-red-800';
+                  buttonClass += ' is-error';
                 } else {
-                  buttonClass += ' bg-muted cursor-not-allowed';
+                  buttonClass += ' is-disabled';
                 }
               } else {
                 if (selectedAnswer === index) {
-                  buttonClass += ' bg-primary text-white';
+                  buttonClass += ' is-primary';
                 } else {
-                  buttonClass += ' bg-muted hover:bg-primary hover:text-white';
+                  buttonClass += ' hover:bg-primary hover:text-white';
                 }
               }
 
@@ -361,18 +397,18 @@ const DebugDungeon: React.FC = () => {
                 <button
                   key={index}
                   className={buttonClass}
+                  style={
+                    flashing &&
+                    index === currentQuestion.correctAnswer &&
+                    flashCount % 2 === 1
+                      ? { visibility: 'hidden' }
+                      : {}
+                  }
                   onClick={() => !showExplanation && handleAnswerSelect(index)}
                   disabled={showExplanation}
                   data-testid={`answer-option-${index}`}
                 >
                   {String.fromCharCode(65 + index)}. {option}
-                  {showExplanation &&
-                    index === currentQuestion.correctAnswer &&
-                    ' ✓'}
-                  {showExplanation &&
-                    index === selectedAnswer &&
-                    index !== currentQuestion.correctAnswer &&
-                    ' ✗'}
                 </button>
               );
             })}
