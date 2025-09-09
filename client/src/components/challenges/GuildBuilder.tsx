@@ -381,19 +381,19 @@ const GuildBuilder: React.FC = () => {
       {!isCompleted ? (
         <div className="flex flex-col gap-6">
           {/* Quest display */}
-          <div className="nes-container is-rounded">
-            <h4 className="font-retro text-base mb-2">📜 Quest:</h4>
+          <div className="nes-container is-rounded with-title bg-white">
+            <h4 className="title font-retro text-base">Quest</h4>
             <p>{questText}</p>
           </div>
 
           {/* Companion Slots */}
           <div className="mb-6">
-            <h4
-              className="font-retro text-base mb-4"
+            <h3
+              className="font-retro text-sm mb-4 text-center"
               style={{ color: '#212529' }}
             >
               Forma la tua squadra
-            </h4>
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {Array.from({ length: TEAM_SIZE }, (_, index) => (
                 <CompanionSlot
