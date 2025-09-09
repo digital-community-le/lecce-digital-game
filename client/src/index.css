@@ -11,6 +11,11 @@
   --ldc-primary-dark: #7A144D; /* variante scura (ombra) */
   --ldc-primary-light: #F28DA3; /* variante chiara (highlight) */
 
+  /* Secondary: blu */
+  --ldc-secondary: #2D2E82; /* colore secondario */
+  --ldc-secondary-dark: #1A1A4D; /* variante scura (ombra) */
+  --ldc-secondary-light: #6B3E8A; /* variante chiara (highlight) */
+
   /* Accent & complementary */
   --ldc-accent: #F25D27; /* arancione per accenti */
   --ldc-contrast-yellow: #F2C641; /* giallo caldo di contrasto */
@@ -41,7 +46,7 @@
   --card-foreground: var(--ldc-on-surface);
   --primary: var(--ldc-primary);
   --primary-foreground: var(--ldc-surface);
-  --secondary: var(--ldc-primary-dark);
+  --secondary: var(--ldc-secondary);
   --secondary-foreground: var(--ldc-surface);
   --muted: hsl(0, 0%, 96%);
   --muted-foreground: hsl(0, 0%, 45%);
@@ -231,6 +236,10 @@
     
     .nes-btn {
       border-image-repeat: stretch !important;
+    }
+
+    .nes-balloon {
+      border-image-repeat: stretch;
     }
   }
 
@@ -690,6 +699,14 @@
   /* Road path styling */
   .road-segment {
     z-index: 5;
+  }
+
+  /* Channel content layout */
+  .challenge-content-layout {
+      .challenge-description {
+      background-color: var(--ldc-secondary);
+      color: var(--ldc-on-surface);
+    }
   }
 
   /* Pixel-perfect retro game animations for CompletionModal */

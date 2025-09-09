@@ -62,23 +62,24 @@ const ChallengeContentLayout: React.FC<ChallengeContentLayoutProps> = ({
   }
 
   return (
-    <div>
-      <div className="p-4 pt-0">
+    <div className="challenge-content-layout">
+      <div className='challenge-description p-8 mb-6 flex flex-col gap-6'>
         {/* Challenge description */}
-        <div className="mb-6">
-          <p className="text-sm mb-4">
-            {description}
+        <p className="text-sm">
+          {description}
+        </p>
+
+        {/* Challenge tip */}
+        <div className="nes-container is-rounded bg-yellow-100 flex items-center">
+          <span className="text-2xl mr-2 pixelated">💡</span>
+          <p className="text-xs text-gray-700 m-0">
+              {tip}
           </p>
-          <div className="nes-container is-dark p-3 mb-4">
-            <p className="text-xs">
-              💡 {tip}
-            </p>
-          </div>
         </div>
 
         {/* Progress indicator - only show if progress props are provided */}
         {(progress !== undefined && total !== undefined && progressLabel) && (
-          <div className="mb-6">
+          <div>
             <div className="flex justify-between text-sm mb-2">
               <span>{progressLabel}</span>
               <span data-testid="challenge-progress">
@@ -100,6 +101,9 @@ const ChallengeContentLayout: React.FC<ChallengeContentLayoutProps> = ({
           </div>
         )}
 
+      </div>
+
+      <div className="p-8 pt-4">
         {/* Main challenge content */}
         {!isCompleted ? (
           <div className="mb-6">

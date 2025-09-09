@@ -139,7 +139,7 @@ const ChallengeLayout: React.FC<ChallengeLayoutProps> = ({
             </button>
             
             {/* Titolo principale della challenge */}
-            <h1 className="text-xl font-retro" data-testid="challenge-title">
+            <h1 className="font-retro" data-testid="challenge-title">
               {challengeTitle}
             </h1>
           </div>
@@ -147,7 +147,7 @@ const ChallengeLayout: React.FC<ChallengeLayoutProps> = ({
       </nav>
 
       {/* Container principale con padding responsivo */}
-      <main className={`container mx-auto px-4 py-6 ${className}`}>
+      <main className={`container mx-auto ${className}`}>
         <div className="max-w-4xl mx-auto">
           {children}
         </div>
