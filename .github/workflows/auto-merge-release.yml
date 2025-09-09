@@ -135,37 +135,49 @@ jobs:
 
               console.log(`✅ PR #${prNumber} merged successfully`);
               
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: prNumber,
-                body: `🚀 **Release PR merged successfully!**
-                
-                ✅ Pre-validation passed
-                ✅ PR approved and merged automatically
-                ✅ Deployment pipeline will start shortly
-                
-                **Next steps:**
-                - Monitor deployment in the Actions tab
-                - New release will be tagged automatically`
-              });
+              // Prova a commentare il successo
+              try {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: prNumber,
+                  body: `🚀 **Release PR merged successfully!**
+                  
+                  ✅ Pre-validation passed
+                  ✅ PR approved and merged automatically
+                  ✅ Deployment pipeline will start shortly
+                  
+                  **Next steps:**
+                  - Monitor deployment in the Actions tab
+                  - New release will be tagged automatically`
+                });
+                console.log(`✅ Success comment posted to PR #${prNumber}`);
+              } catch (commentError) {
+                console.log(`⚠️ Could not post success comment: ${commentError.message}`);
+              }
               
             } catch (error) {
               console.error('❌ Failed to process release PR:', error.message);
               
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: prNumber,
-                body: `❌ **Auto-merge failed**
-                
-                **Error:** ${error.message}
-                
-                **Manual action required:**
-                1. Check the [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details
-                2. Manually review and merge this PR if appropriate
-                3. Consider investigating the auto-merge setup`
-              });
+              // Prova a commentare l'errore
+              try {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: prNumber,
+                  body: `❌ **Auto-merge failed**
+                  
+                  **Error:** ${error.message}
+                  
+                  **Manual action required:**
+                  1. Check the [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details
+                  2. Manually review and merge this PR if appropriate
+                  3. Consider investigating the auto-merge setup`
+                });
+                console.log(`✅ Error comment posted to PR #${prNumber}`);
+              } catch (commentError) {
+                console.log(`⚠️ Could not post error comment: ${commentError.message}`);
+              }
               
               core.setFailed(`Auto-merge failed: ${error.message}`);
             }
@@ -186,22 +198,28 @@ jobs:
 
             console.log(`⏳ PR #${prNumber} not ready for auto-merge: ${reasons.join(', ')}`);
 
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: prNumber,
-              body: `⏳ **Auto-merge not ready**
-              
-              **Reasons:**
-              ${reasons.map(r => `- ❌ ${r}`).join('\n')}
-              
-              **What happens next:**
-              - This workflow will retry when PR is updated or commented
-              - Once conditions are met, auto-merge will be enabled automatically
-              - You can also merge manually if needed
-              
-              **Troubleshooting:**
-              - Check if pre-validation workflow is still running
-              - Verify there are no merge conflicts
-              - Look for validation failure comments above`
-            });
+            // Prova a commentare lo stato di non pronto
+            try {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: `⏳ **Auto-merge not ready**
+                
+                **Reasons:**
+                ${reasons.map(r => `- ❌ ${r}`).join('\n')}
+                
+                **What happens next:**
+                - This workflow will retry when PR is updated or commented
+                - Once conditions are met, auto-merge will be enabled automatically
+                - You can also merge manually if needed
+                
+                **Troubleshooting:**
+                - Check if pre-validation workflow is still running
+                - Verify there are no merge conflicts
+                - Look for validation failure comments above`
+              });
+              console.log(`✅ Not ready comment posted to PR #${prNumber}`);
+            } catch (commentError) {
+              console.log(`⚠️ Could not post not ready comment: ${commentError.message}`);
+            }

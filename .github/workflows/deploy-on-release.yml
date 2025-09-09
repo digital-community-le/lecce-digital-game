@@ -117,35 +117,42 @@ jobs:
             console.log(`📅 Deployed at: ${timestamp}`);
             console.log(`🔄 Triggered by: ${eventType}`);
 
-            // Se è stato triggerato da PR, commenta sulla PR
+            // Se è stato triggerato da PR, prova a commentare sulla PR
             if (eventType === 'pull_request') {
-              const pr = context.payload.pull_request;
-              const mergedBy = pr.merged_by ? pr.merged_by.login : 'unknown';
-              const isAutoMerge = mergedBy === 'github-actions[bot]' || 
-                                 mergedBy === pr.user.login;
-              const mergeType = isAutoMerge ? 'automatically' : `manually by @${mergedBy}`;
-              
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.payload.pull_request.number,
-                body: `🚀 **Deployment completed!**
+              try {
+                const pr = context.payload.pull_request;
+                const mergedBy = pr.merged_by ? pr.merged_by.login : 'unknown';
+                const isAutoMerge = mergedBy === 'github-actions[bot]' || 
+                                   mergedBy === pr.user.login;
+                const mergeType = isAutoMerge ? 'automatically' : `manually by @${mergedBy}`;
                 
-                ✅ Version \`${version}\` deployed successfully to production
-                📅 Deployed at: \`${timestamp}\`
-                🌐 Live URL: https://lecce-digital-game.web.app
-                
-                **What happened:**
-                1. ✅ Release PR merged ${mergeType}
-                2. ✅ Production build completed  
-                3. ✅ Firebase hosting deployment successful
-                4. ✅ Application is now live
-                
-                **Merge details:**
-                - 👤 Merged by: ${mergedBy}
-                - 🤖 Method: ${isAutoMerge ? 'Auto-merge' : 'Manual merge'}
-                - 📅 Merged at: ${pr.merged_at}`
-              });
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.payload.pull_request.number,
+                  body: `🚀 **Deployment completed!**
+                  
+                  ✅ Version \`${version}\` deployed successfully to production
+                  📅 Deployed at: \`${timestamp}\`
+                  🌐 Live URL: https://lecce-digital-game.web.app
+                  
+                  **What happened:**
+                  1. ✅ Release PR merged ${mergeType}
+                  2. ✅ Production build completed  
+                  3. ✅ Firebase hosting deployment successful
+                  4. ✅ Application is now live
+                  
+                  **Merge details:**
+                  - 👤 Merged by: ${mergedBy}
+                  - 🤖 Method: ${isAutoMerge ? 'Auto-merge' : 'Manual merge'}
+                  - 📅 Merged at: ${pr.merged_at}`
+                });
+                console.log(`✅ Success notification posted to PR #${context.payload.pull_request.number}`);
+              } catch (error) {
+                console.log(`⚠️ Could not post comment to PR: ${error.message}`);
+                console.log(`ℹ️ This is likely due to permissions. Deployment was successful anyway.`);
+                // Non fallire il workflow per un errore di commento
+              }
             }
 
             // Crea una release note se non esiste (per trigger da tag)
@@ -182,19 +189,29 @@ jobs:
 
             console.log(`❌ Deployment failed for version ${version}`);
 
-            // Se è stato triggerato da PR, commenta sulla PR
+            // Se è stato triggerato da PR, prova a commentare sulla PR
             if (eventType === 'pull_request') {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.payload.pull_request.number,
-                body: `❌ **Deployment failed!**
-                
-                Version \`${version}\` deployment to production failed.
-                
-                **Next steps:**
-                1. Check the [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details
-                2. Fix any issues and manually redeploy if needed
-                3. Consider creating a hotfix if critical`
-              });
+              try {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.payload.pull_request.number,
+                  body: `❌ **Deployment failed!**
+                  
+                  Version \`${version}\` deployment to production failed.
+                  
+                  **Next steps:**
+                  1. Check the [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details
+                  2. Fix any issues and manually redeploy if needed
+                  3. Consider creating a hotfix if critical`
+                });
+                console.log(`✅ Failure notification posted to PR #${context.payload.pull_request.number}`);
+              } catch (error) {
+                console.log(`⚠️ Could not post comment to PR: ${error.message}`);
+                console.log(`ℹ️ This is likely due to permissions. Check GitHub repository settings.`);
+                // Non fallire il workflow per un errore di commento
+              }
+            } else {
+              console.log(`ℹ️ Deployment failed for ${eventType} trigger - no PR to comment on`);
+            }
             }

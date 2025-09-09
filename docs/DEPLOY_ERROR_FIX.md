@@ -1,53 +1,61 @@
 # Fix per errore "Resource not accessible by integration" nel deployment
 
-## Problema
+## Problema Specifico
 
-Il workflow di deployment stava fallendo con l'errore:
+Il workflow di deployment stava fallendo con l'errore completo:
 
 ```
-Unhandled error: HttpError: Resource not accessible by integration
+RequestError [HttpError]: Resource not accessible by integration
+    at /home/runner/work/_actions/actions/github-script/v7/dist/index.js:9537:21
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error: Unhandled error: HttpError: Resource not accessible by integration
+    status: 403,
+    url: 'https://api.github.com/repos/digital-community-le/lecce-digital-game/issues/5/comments'
 ```
 
-## Causa
+## Causa Identificata
 
-L'errore era causato da problemi di permessi GitHub Actions nel workflow `auto-merge-release.yml`. Specificamente:
+L'errore era causato da **problemi di permessi per commentare su issue/PR**. Specificamente:
 
-1. **API `enableAutoMerge`**: Questa API richiede permessi speciali che potrebbero non essere sempre disponibili
-2. **Permessi insufficienti**: Il workflow aveva permessi limitati per alcune operazioni
-3. **Logica complessa**: Il fallback tra auto-merge e merge diretto creava potenziali race conditions
+1. **Commenti su PR/Issue**: Il token `GITHUB_TOKEN` non aveva permessi per commentare su issue/PR specifiche
+2. **Workflow failure**: I workflow fallivano quando tentavano di commentare, anche se il deployment era riuscito
+3. **Gestione errori mancante**: Nessun try-catch attorno alle operazioni di commento
 
 ## Soluzione implementata
 
-### 1. Semplificazione della logica di merge
+### 1. Protezione dei commenti con try-catch
 
-**File modificato**: `.github/workflows/auto-merge-release.yml`
+**File modificati**:
 
-**Prima** (logica complessa con fallback):
+- `.github/workflows/deploy-on-release.yml`
+- `.github/workflows/auto-merge-release.yml`
 
-```yaml
-# 2. Enable auto-merge
-try {
-  await github.rest.pulls.enableAutoMerge({...});
-  // commenti di successo
-} catch (autoMergeError) {
-  // 3. Fallback: Direct merge
-  await github.rest.pulls.merge({...});
-  // commenti di fallback
-}
-```
-
-**Dopo** (logica diretta):
+**Prima** (commenti non protetti):
 
 ```yaml
-# 2. Direct merge (simplified approach)
-await github.rest.pulls.merge({
+await github.rest.issues.createComment({
   owner: context.repo.owner,
   repo: context.repo.repo,
-  pull_number: prNumber,
-  merge_method: 'squash',
-  commit_title: `🚀 Release: ${prInfo.title}`,
-  commit_message: 'Automatically merged by Release workflow'
+  issue_number: prNumber,
+  body: "Messaggio..."
 });
+```
+
+**Dopo** (commenti protetti):
+
+```yaml
+try {
+  await github.rest.issues.createComment({
+    owner: context.repo.owner,
+    repo: context.repo.repo,
+    issue_number: prNumber,
+    body: "Messaggio..."
+  });
+  console.log(`✅ Comment posted successfully`);
+} catch (commentError) {
+  console.log(`⚠️ Could not post comment: ${commentError.message}`);
+  // Non fallire il workflow per un errore di commento
+}
 ```
 
 ### 2. Aggiornamento dei permessi
