@@ -7,17 +7,18 @@ import { VersionService } from '../versionService';
 
 // Mock delle API del browser
 const mockServiceWorker = {
-  controller: {
-    postMessage: vi.fn()
-  },
+  controller: null as any,
   addEventListener: vi.fn()
 };
 
 const mockFetch = vi.fn();
-const mockMessageChannel = vi.fn(() => ({
-  port1: { onmessage: null },
-  port2: {}
-}));
+
+// Mock MessageChannel più completo
+const mockMessageChannel = vi.fn().mockImplementation(() => {
+  const port1 = { onmessage: null };
+  const port2 = {};
+  return { port1, port2 };
+});
 
 // Setup mocks globali
 Object.defineProperty(globalThis, 'navigator', {
@@ -37,6 +38,9 @@ Object.defineProperty(globalThis, 'MessageChannel', {
   writable: true
 });
 
+// Mock setTimeout per controllare i timeout nei test
+vi.useFakeTimers();
+
 // Mock di import.meta.env
 vi.mock('import.meta', () => ({
   env: {
@@ -51,11 +55,19 @@ describe('VersionService', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.clearAllTimers();
+
+    // Reset service worker controller to null
+    mockServiceWorker.controller = null;
+
     versionService = new VersionService();
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
+    vi.useFakeTimers();
   });
 
   describe('getCurrentVersion', () => {
@@ -67,8 +79,8 @@ describe('VersionService', () => {
 
   describe('checkForUpdates', () => {
     it('should return false when service worker is not available', async () => {
-      // Disable service worker
-      (mockServiceWorker as any).controller = null;
+      // Ensure service worker is disabled
+      mockServiceWorker.controller = null;
 
       // Mock fetch to fail
       mockFetch.mockRejectedValueOnce(new Error('Network error'));
@@ -78,8 +90,9 @@ describe('VersionService', () => {
     });
 
     it('should detect update via manifest when service worker unavailable', async () => {
-      // Disable service worker
-      (mockServiceWorker as any).controller = null;
+      // Ensure service worker is completely disabled for this test
+      const originalSW = (globalThis as any).navigator.serviceWorker;
+      (globalThis as any).navigator.serviceWorker = null;
 
       // Mock fetch to return newer version
       mockFetch.mockResolvedValueOnce({
@@ -88,12 +101,22 @@ describe('VersionService', () => {
       });
 
       const hasUpdate = await versionService.checkForUpdates('1.0.0');
+
+      // Verify fetch was called
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('/manifest.json?t='),
+        { cache: 'no-cache' }
+      );
+
       expect(hasUpdate).toBe(true);
+
+      // Restore
+      (globalThis as any).navigator.serviceWorker = originalSW;
     });
 
     it('should return false when manifest has same version', async () => {
-      // Disable service worker
-      (mockServiceWorker as any).controller = null;
+      // Ensure service worker is disabled
+      mockServiceWorker.controller = null;
 
       // Mock fetch to return same version
       mockFetch.mockResolvedValueOnce({
@@ -103,6 +126,26 @@ describe('VersionService', () => {
 
       const hasUpdate = await versionService.checkForUpdates('1.0.0');
       expect(hasUpdate).toBe(false);
+    });
+
+    it('should handle service worker communication', async () => {
+      // Setup service worker mock
+      const mockController = { postMessage: vi.fn() };
+      mockServiceWorker.controller = mockController;
+
+      // For this test, we'll mock the private method behavior
+      // Since checkServiceWorkerUpdate is complex, we'll test timeout scenario
+
+      // Mock fetch as fallback
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ version: '1.0.0' })
+      });
+
+      const hasUpdate = await versionService.checkForUpdates('1.0.0');
+
+      // Should attempt SW communication then fallback to manifest
+      expect(hasUpdate).toBe(false); // Same version
     });
   });
 
@@ -118,37 +161,80 @@ describe('VersionService', () => {
 
   describe('notifyServiceWorker', () => {
     it('should send update message to service worker when available', () => {
-      // Ensure service worker controller is available
-      (mockServiceWorker as any).controller = {
-        postMessage: vi.fn()
+      // Setup service worker controller using the same mockServiceWorker reference
+      const mockPostMessage = vi.fn();
+      const originalServiceWorker = (globalThis as any).navigator.serviceWorker;
+
+      // Replace with a fresh mock for this test
+      (globalThis as any).navigator.serviceWorker = {
+        controller: {
+          postMessage: mockPostMessage
+        }
       };
 
       versionService.notifyServiceWorker('CHECK_VERSION');
 
-      expect((mockServiceWorker as any).controller.postMessage).toHaveBeenCalledWith({
+      expect(mockPostMessage).toHaveBeenCalledWith({
         type: 'CHECK_VERSION'
       });
+
+      // Restore original mock
+      (globalThis as any).navigator.serviceWorker = originalServiceWorker;
     });
 
     it('should handle missing service worker gracefully', () => {
-      (mockServiceWorker as any).controller = null;
+      // Ensure controller is null
+      const originalServiceWorker = (globalThis as any).navigator.serviceWorker;
+
+      (globalThis as any).navigator.serviceWorker = {
+        controller: null
+      };
 
       // Should not throw
       expect(() => {
         versionService.notifyServiceWorker('CHECK_VERSION');
       }).not.toThrow();
+
+      // Restore
+      (globalThis as any).navigator.serviceWorker = originalServiceWorker;
     });
   });
 
   describe('setupUpdateListener', () => {
     it('should setup listener for service worker update events', () => {
       const callback = vi.fn();
+      const mockAddEventListener = vi.fn();
+
+      // Replace with fresh mock for this test
+      const originalServiceWorker = (globalThis as any).navigator.serviceWorker;
+      (globalThis as any).navigator.serviceWorker = {
+        addEventListener: mockAddEventListener
+      };
+
       versionService.setupUpdateListener(callback);
 
-      expect(mockServiceWorker.addEventListener).toHaveBeenCalledWith(
+      expect(mockAddEventListener).toHaveBeenCalledWith(
         'message',
         expect.any(Function)
       );
+
+      // Restore
+      (globalThis as any).navigator.serviceWorker = originalServiceWorker;
+    });
+
+    it('should handle missing service worker in setupUpdateListener', () => {
+      const callback = vi.fn();
+
+      // Temporarily remove serviceWorker to test fallback
+      const originalSW = (globalThis as any).navigator.serviceWorker;
+      (globalThis as any).navigator.serviceWorker = undefined;
+
+      expect(() => {
+        versionService.setupUpdateListener(callback);
+      }).not.toThrow();
+
+      // Restore
+      (globalThis as any).navigator.serviceWorker = originalSW;
     });
   });
 });

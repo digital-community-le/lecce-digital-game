@@ -18,9 +18,13 @@ const mockVersionService = {
   applyUpdate: vi.fn()
 };
 
+// Setup fake timers
+vi.useFakeTimers();
+
 describe('useVersionCheck', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.clearAllTimers();
     (VersionService as any).mockImplementation(() => mockVersionService);
 
     mockVersionService.getCurrentVersion.mockReturnValue('1.0.0');
@@ -32,6 +36,9 @@ describe('useVersionCheck', () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
+    vi.useFakeTimers();
   });
 
   it('should initialize with current version info', () => {
@@ -114,9 +121,9 @@ describe('useVersionCheck', () => {
       checkInterval: 100
     }));
 
-    // Wait for initial auto check
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 150));
+    // Fast forward past the initial check interval
+    act(() => {
+      vi.advanceTimersByTime(150);
     });
 
     expect(mockVersionService.checkForUpdates).toHaveBeenCalled();
