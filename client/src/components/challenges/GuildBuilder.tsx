@@ -243,6 +243,16 @@ const GuildBuilder: React.FC = () => {
           }
         });
 
+      // If no team is saved, randomize initial selection
+      if (Object.keys(state.team).length === 0) {
+        const shuffledCompanions = [...companions].sort(
+          () => Math.random() - 0.5
+        );
+        for (let i = 0; i < 3; i++) {
+          newSelectedCompanions[i] = shuffledCompanions[i];
+        }
+      }
+
       setSelectedCompanions(newSelectedCompanions);
       setGuildState(state);
       setIsLoading(false);
