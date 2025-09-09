@@ -19,16 +19,53 @@ permissions:
 
 jobs:
   deploy:
-    # Solo se PR di release mergiata oppure push di tag
+    # Solo se PR di release mergiata (automatica o manuale) oppure push di tag
     if: |
       (github.event_name == 'pull_request' && 
        github.event.pull_request.merged == true &&
-       startsWith(github.event.pull_request.title, 'chore') && 
-       contains(github.event.pull_request.title, 'release')) ||
+       (
+         (startsWith(github.event.pull_request.title, 'chore') && contains(github.event.pull_request.title, 'release')) ||
+         startsWith(github.event.pull_request.head.ref, 'release-please--') ||
+         contains(github.event.pull_request.body, 'Release-As:') ||
+         github.event.pull_request.user.login == 'github-actions[bot]'
+       )) ||
       (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v'))
     runs-on: ubuntu-latest
-    environment: production
     steps:
+      - name: Log deployment trigger
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const eventType = '${{ github.event_name }}';
+
+            if (eventType === 'pull_request') {
+              const pr = context.payload.pull_request;
+              const mergedBy = pr.merged_by ? pr.merged_by.login : 'unknown';
+              const isBot = pr.user.login === 'github-actions[bot]';
+              const mergeMethod = pr.merge_commit_sha ? 'merge commit' : 'unknown';
+              
+              console.log('🚀 DEPLOYMENT TRIGGERED BY PR MERGE');
+              console.log(`📋 PR #${pr.number}: ${pr.title}`);
+              console.log(`👤 Created by: ${pr.user.login} ${isBot ? '(bot)' : '(human)'}`);
+              console.log(`✅ Merged by: ${mergedBy}`);
+              console.log(`🔧 Merge method: ${mergeMethod}`);
+              console.log(`📅 Merged at: ${pr.merged_at}`);
+              console.log(`🌿 Branch: ${pr.head.ref} → ${pr.base.ref}`);
+              
+              // Determina se è merge automatico o manuale
+              const isAutoMerge = mergedBy === 'github-actions[bot]' || 
+                                 mergedBy === pr.user.login;
+              
+              const mergeType = isAutoMerge ? 'AUTOMATIC' : 'MANUAL';
+              console.log(`🤖 Merge type: ${mergeType}`);
+              
+            } else if (eventType === 'push') {
+              console.log('🚀 DEPLOYMENT TRIGGERED BY TAG PUSH');
+              console.log(`🏷️ Tag: ${{ github.ref_name }}`);
+              console.log(`👤 Pushed by: ${{ github.actor }}`);
+            }
+
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -80,6 +117,12 @@ jobs:
 
             // Se è stato triggerato da PR, commenta sulla PR
             if (eventType === 'pull_request') {
+              const pr = context.payload.pull_request;
+              const mergedBy = pr.merged_by ? pr.merged_by.login : 'unknown';
+              const isAutoMerge = mergedBy === 'github-actions[bot]' || 
+                                 mergedBy === pr.user.login;
+              const mergeType = isAutoMerge ? 'automatically' : `manually by @${mergedBy}`;
+              
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -91,10 +134,15 @@ jobs:
                 🌐 Live URL: https://lecce-digital-game.web.app
                 
                 **What happened:**
-                1. ✅ Release PR merged automatically
+                1. ✅ Release PR merged ${mergeType}
                 2. ✅ Production build completed  
                 3. ✅ Firebase hosting deployment successful
-                4. ✅ Application is now live`
+                4. ✅ Application is now live
+                
+                **Merge details:**
+                - 👤 Merged by: ${mergedBy}
+                - 🤖 Method: ${isAutoMerge ? 'Auto-merge' : 'Manual merge'}
+                - 📅 Merged at: ${pr.merged_at}`
               });
             }
 
