@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { useGameStore } from '@/hooks/use-game-store';
-import { submitGameCompletion, getDevFestBadge, isDevFestSubmissionSuccessful } from '@/services/completionService';
 import gameData from '@/assets/game-data.json';
 import sealWithGemsImage from '@assets/images/seal-with-gems.png';
 
@@ -9,7 +8,6 @@ const GameComplete: React.FC = () => {
   const { gameState } = useGameStore();
   const [, setLocation] = useLocation();
   const [animationPhase, setAnimationPhase] = useState<'seal' | 'title' | 'description'>('seal');
-  const [badgeInfo, setBadgeInfo] = useState<any>(null);
   
   const { finalCompletion } = gameData;
 
@@ -18,30 +16,6 @@ const GameComplete: React.FC = () => {
     if (!gameState.gameProgress.gameCompleted) {
       setLocation('/game');
       return;
-    }
-
-    // Check if we already have a successful DevFest badge
-    const existingBadge = getDevFestBadge();
-    if (existingBadge) {
-      console.log('🏆 DevFest badge already obtained:', existingBadge);
-      setBadgeInfo(existingBadge);
-    } else if (!isDevFestSubmissionSuccessful()) {
-      // Only submit if we haven't successfully submitted before
-      (async () => {
-        try {
-          console.log('🚀 Submitting game completion to DevFest API...');
-          const result = await submitGameCompletion();
-          
-          if (result.success && result.badge) {
-            console.log('🏆 DevFest badge received:', result.badge);
-            setBadgeInfo(result.badge);
-          } else {
-            console.error('❌ Game completion failed:', result.error);
-          }
-        } catch (e) {
-          console.warn('💥 Game completion submission error:', e);
-        }
-      })();
     }
 
     // Sequential animation phases
@@ -120,37 +94,27 @@ const GameComplete: React.FC = () => {
           </p>
         </div>
 
-        {/* DevFest Badge Section */}
-        {badgeInfo && (
-          <div 
-            className={`mb-8 transition-all duration-1000 delay-500 ${
-              animationPhase === 'seal' || animationPhase === 'title'
-                ? 'opacity-0 translate-y-8'
-                : 'opacity-100 translate-y-0'
-            }`}
+        {/* View Badge Button */}
+        <div 
+          className={`transition-all duration-1000 delay-500 ${
+            animationPhase === 'seal' || animationPhase === 'title'
+              ? 'opacity-0 translate-y-8'
+              : 'opacity-100 translate-y-0'
+          }`}
+        >
+          <button 
+            className="nes-btn is-success font-retro text-xl px-12 py-6 hover:scale-110 transition-transform duration-300"
+            onClick={() => setLocation('/badge')}
+            data-testid="button-view-badge"
+            style={{
+              textShadow: '2px 2px 0px rgba(0,0,0,0.8)',
+              boxShadow: '0 8px 0 #4a5568, 0 12px 20px rgba(0,0,0,0.4)',
+              animation: animationPhase !== 'seal' && animationPhase !== 'title' ? 'pixel-pop 2s ease-in-out infinite 2s' : 'none'
+            }}
           >
-            <div className="nes-container is-rounded is-success mx-4 md:mx-8">
-              <div className="flex flex-col items-center text-center">
-                <div className="mb-3">
-                  <img 
-                    src={badgeInfo.picture} 
-                    alt={badgeInfo.name}
-                    className="w-16 h-16 object-contain"
-                    style={{ imageRendering: 'pixelated' }}
-                  />
-                </div>
-                <h3 className="font-retro text-sm mb-2" style={{ color: 'var(--ldc-success)' }}>
-                  🏆 BADGE DEVFEST OTTENUTO!
-                </h3>
-                <p className="font-retro text-xs mb-1">{badgeInfo.name}</p>
-                <p className="text-xs opacity-75">{badgeInfo.description}</p>
-                <p className="text-xs opacity-50 mt-2">
-                  Ottenuto: {new Date(badgeInfo.owned).toLocaleDateString('it-IT')}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
+            🏆 Vedi il Tuo Badge DevFest
+          </button>
+        </div>
 
       </div>
     </div>

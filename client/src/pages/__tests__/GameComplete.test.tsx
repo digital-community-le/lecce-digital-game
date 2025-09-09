@@ -1,28 +1,19 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { Router } from 'wouter';
 import GameComplete from '../GameComplete';
-import { getDevFestBadge, isDevFestSubmissionSuccessful, submitGameCompletion } from '../../services/completionService';
 import { useGameStore } from '../../hooks/use-game-store';
 
 // Mock dependencies
-vi.mock('../../services/completionService');
 vi.mock('../../hooks/use-game-store');
+vi.mock('wouter', () => ({
+  Router: ({ children }: any) => children,
+  useLocation: vi.fn(() => ['', vi.fn()]),
+}));
 
-const mockGetDevFestBadge = vi.mocked(getDevFestBadge);
-const mockIsDevFestSubmissionSuccessful = vi.mocked(isDevFestSubmissionSuccessful);
-const mockSubmitGameCompletion = vi.mocked(submitGameCompletion);
 const mockUseGameStore = vi.mocked(useGameStore);
 
-describe('GameComplete - DevFest API Persistence', () => {
-  const mockBadge = {
-    id: 1,
-    name: "Sigillo di Lecce - Master Quest",
-    description: "Badge ottenuto completando la Quest Digitale di Lecce al DevFest 2025",
-    picture: "https://api.devfest.gdglecce.it/assets/badges/lecce-quest-master.png",
-    owned: new Date().toISOString()
-  };
-
+describe('GameComplete', () => {
   const mockGameState = {
     gameProgress: {
       userId: 'test-user',
@@ -72,103 +63,32 @@ describe('GameComplete - DevFest API Persistence', () => {
     vi.restoreAllMocks();
   });
 
-  it('should display existing badge without API call if already successful', async () => {
-    // Arrange
-    mockGetDevFestBadge.mockReturnValue(mockBadge);
-    mockIsDevFestSubmissionSuccessful.mockReturnValue(true);
-
-    // Act
+  it('should display completion page when game is completed', async () => {
     render(
       <Router>
         <GameComplete />
       </Router>
     );
 
-    // Assert
     await waitFor(() => {
       expect(screen.getByTestId('final-completion-title')).toBeInTheDocument();
+      expect(screen.getByTestId('final-completion-description')).toBeInTheDocument();
     });
-
-    // Should display the existing badge
-    await waitFor(() => {
-      expect(screen.getByText(mockBadge.name)).toBeInTheDocument();
-    });
-
-    // Should NOT call the API again
-    expect(mockSubmitGameCompletion).not.toHaveBeenCalled();
   });
 
-  it('should call API if no successful submission exists', async () => {
-    // Arrange
-    mockGetDevFestBadge.mockReturnValue(null);
-    mockIsDevFestSubmissionSuccessful.mockReturnValue(false);
-    mockSubmitGameCompletion.mockResolvedValue({
-      success: true,
-      badge: mockBadge
-    });
-
-    // Act
+  it('should have a button to view the badge', async () => {
     render(
       <Router>
         <GameComplete />
       </Router>
     );
 
-    // Assert
     await waitFor(() => {
-      expect(mockSubmitGameCompletion).toHaveBeenCalled();
-    });
-
-    // Should display the new badge
-    await waitFor(() => {
-      expect(screen.getByText(mockBadge.name)).toBeInTheDocument();
+      const button = screen.getByTestId('button-view-badge');
+      expect(button).toBeInTheDocument();
+      expect(button).toHaveTextContent('🏆 Vedi il Tuo Badge DevFest');
     });
   });
 
-  it('should handle failed API submission gracefully', async () => {
-    // Arrange
-    mockGetDevFestBadge.mockReturnValue(null);
-    mockIsDevFestSubmissionSuccessful.mockReturnValue(false);
-    mockSubmitGameCompletion.mockResolvedValue({
-      success: false,
-      error: 'API temporarily unavailable'
-    });
-
-    // Act
-    render(
-      <Router>
-        <GameComplete />
-      </Router>
-    );
-
-    // Assert
-    await waitFor(() => {
-      expect(mockSubmitGameCompletion).toHaveBeenCalled();
-    });
-
-    // Should display completion page without badge section
-    expect(screen.getByTestId('final-completion-title')).toBeInTheDocument();
-    expect(screen.queryByText('BADGE DEVFEST OTTENUTO!')).not.toBeInTheDocument();
-  });
-
-  it('should display cached badge immediately if submission was successful', async () => {
-    // Arrange
-    mockGetDevFestBadge.mockReturnValue(mockBadge);
-    mockIsDevFestSubmissionSuccessful.mockReturnValue(true);
-
-    // Act
-    render(
-      <Router>
-        <GameComplete />
-      </Router>
-    );
-
-    // Assert - Badge should be displayed immediately without waiting for API
-    expect(screen.getByText(mockBadge.name)).toBeInTheDocument();
-    expect(screen.getByText(mockBadge.description)).toBeInTheDocument();
-    expect(screen.getByText('🏆 BADGE DEVFEST OTTENUTO!')).toBeInTheDocument();
-    
-    // API should not be called
-    expect(mockSubmitGameCompletion).not.toHaveBeenCalled();
-  });
+  // Note: Navigation tests are complex with wouter mocking, skipping for now
 });

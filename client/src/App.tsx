@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import IntroPage from "@/pages/Intro";
 import GameMapPage from "@/pages/GameMap";
 import GameCompletePage from "@/pages/GameComplete";
+import BadgePage from "@/pages/BadgePage";
 import StatisticsPage from "@/pages/Statistics";
 import GameLayout from "@/components/layout/GameLayout";
 import GuildBuilderPage from "@/pages/challenges/GuildBuilder";
@@ -88,6 +89,14 @@ function Router() {
         {() => (
           <AuthProtectedRoute>
             <GameCompletePage />
+          </AuthProtectedRoute>
+        )}
+      </Route>
+
+      <Route path="/badge">
+        {() => (
+          <AuthProtectedRoute>
+            <BadgePage />
           </AuthProtectedRoute>
         )}
       </Route>
