@@ -1,51 +1,47 @@
-name: Full Test Suite
+# ⚠️ DISABLED: Funzionalità integrate nel nuovo sistema CI/CD
+# Nuovo sistema: ci.yml con comprehensive-test on-demand
+# Scheduled tests: scheduled-tests.yml per health check
 
-on:
-  workflow_dispatch: # Manual trigger
-    inputs:
-      reason:
-        description: 'Reason for running full test suite'
-        required: false
-        default: 'Manual verification'
-  schedule:
-    # Run full tests every Sunday at 2 AM UTC
-    - cron: '0 2 * * 0'
+name: '[DISABLED] Full Test Suite'
+
+# Workflow disabilitato - nessun trigger attivo
+on: []
 
 jobs:
   full-test:
     runs-on: ubuntu-latest
-    
+
     strategy:
       matrix:
         node-version: [20.x, 22.x]
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Full history for comprehensive analysis
-        
+
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
-          
+
       - name: Install dependencies
         run: npm ci
-        
+
       - name: Run type checking
         run: npm run check
-        
+
       - name: Run full test suite
         run: npm run test:run
-        
+
       - name: Generate comprehensive coverage
         run: npm run test:coverage
-        
+
       - name: Build application
         run: npm run build
-        
+
       - name: Upload coverage reports
         if: matrix.node-version == '20.x'
         uses: codecov/codecov-action@v4
@@ -53,7 +49,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
           verbose: true
-          
+
       - name: Archive test results
         if: always()
         uses: actions/upload-artifact@v4
@@ -63,14 +59,14 @@ jobs:
             coverage/
             test-results.xml
           retention-days: 30
-          
+
       - name: Comment on trigger (if manual)
         if: github.event_name == 'workflow_dispatch' && matrix.node-version == '20.x'
         uses: actions/github-script@v7
         with:
           script: |
             const reason = '${{ github.event.inputs.reason }}' || 'Manual verification';
-            
+
             // Se è stato triggerato da un commit, commenta
             if (context.sha) {
               await github.rest.repos.createCommitComment({
