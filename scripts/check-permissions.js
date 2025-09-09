@@ -5,7 +5,8 @@
  * Esegui con: node scripts/check-permissions.js
  */
 
-const { execSync } = require('child_process');
+import { execSync } from 'child_process';
+import { existsSync } from 'fs';
 
 console.log('🔍 Verifica permessi GitHub Actions...\n');
 
@@ -49,10 +50,9 @@ console.log('   - Verifica che tutti i test passino');
 console.log('');
 
 // Verifica se abbiamo un workflow di test
-const fs = require('fs');
 const testWorkflowPath = '.github/workflows/test-permissions.yml';
 
-if (fs.existsSync(testWorkflowPath)) {
+if (existsSync(testWorkflowPath)) {
   console.log('✅ Workflow di test permessi trovato!');
   console.log(`   Esegui: https://github.com/${owner}/${repo}/actions/workflows/test-permissions.yml`);
 } else {
