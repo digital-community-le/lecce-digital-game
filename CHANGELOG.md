@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/digital-community-le/lecce-digital-game/compare/v1.1.0...v1.1.1) (2025-09-09)
+
+
+### Bug Fixes
+
+* improve JWT persistence and add debugging tools ([c23a33a](https://github.com/digital-community-le/lecce-digital-game/commit/c23a33aa7a8f61f809537d592b90b4d98633d0e5))
+
 ## [1.1.0](https://github.com/digital-community-le/lecce-digital-game/compare/v1.0.0...v1.1.0) (2025-09-09)
 
 
