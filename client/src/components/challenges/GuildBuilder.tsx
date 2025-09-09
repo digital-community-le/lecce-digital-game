@@ -87,7 +87,8 @@ const companions: GuildCompanion[] = [
 export const getSuggestion = (
   wrongRole: string,
   requiredRoles: string[],
-  questText: string
+  questText: string,
+  selectedRoles: string[]
 ): string => {
   // Analisi del testo della quest per fornire suggerimenti contestuali
   const lowerQuestText = questText.toLowerCase();
@@ -145,8 +146,10 @@ export const getSuggestion = (
     },
   };
 
-  // Trova il primo ruolo richiesto che non è quello sbagliato
-  const suggestedRole = requiredRoles.find((role) => role !== wrongRole);
+  // Trova il primo ruolo richiesto che non è quello sbagliato e non è già selezionato
+  const suggestedRole = requiredRoles.find(
+    (role) => role !== wrongRole && !selectedRoles.includes(role)
+  );
 
   if (suggestedRole && roleSuggestions[wrongRole]?.[suggestedRole]) {
     const reason = roleSuggestions[wrongRole][suggestedRole];
@@ -341,7 +344,8 @@ const GuildBuilder: React.FC = () => {
         const suggestion = getSuggestion(
           firstWrongRole,
           requiredRoles,
-          questText
+          questText,
+          selectedRoles
         );
         setCurrentSuggestion(suggestion);
         setPointsLost(actualPointsLost);
