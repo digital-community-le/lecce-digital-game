@@ -1,0 +1,152 @@
+name: Test GitHub Permissions
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_type:
+        description: 'Type of permission test'
+        required: true
+        default: 'comment'
+        type: choice
+        options:
+          - comment
+          - pr_creation
+          - all
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  actions: read
+
+jobs:
+  test-permissions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Test Repository Access
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            console.log('🔍 Testing GitHub API permissions...')
+
+            // Test 1: Repository read access
+            try {
+              const repo = await github.rest.repos.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo
+              });
+              console.log('✅ Repository read access: OK')
+              console.log(`Repository: ${repo.data.full_name}`)
+            } catch (error) {
+              console.log('❌ Repository read access: FAILED')
+              console.log(`Error: ${error.message}`)
+            }
+
+            // Test 2: Issues/PR list access
+            try {
+              const issues = await github.rest.issues.listForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                per_page: 1
+              });
+              console.log('✅ Issues list access: OK')
+            } catch (error) {
+              console.log('❌ Issues list access: FAILED')
+              console.log(`Error: ${error.message}`)
+            }
+
+      - name: Test Comment Creation (if requested)
+        if: ${{ inputs.test_type == 'comment' || inputs.test_type == 'all' }}
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            console.log('🔍 Testing comment creation permissions...')
+
+            // Trova una issue/PR esistente per testare
+            try {
+              const issues = await github.rest.issues.listForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'all',
+                per_page: 5
+              });
+              
+              if (issues.data.length === 0) {
+                console.log('⚠️ No issues/PRs found to test comment on')
+                return;
+              }
+              
+              const testIssue = issues.data[0];
+              console.log(`Found issue/PR #${testIssue.number} for testing`);
+              
+              // Test comment creation (che poi eliminiamo)
+              const comment = await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: testIssue.number,
+                body: `🤖 **Permissions Test Comment**
+                
+                This is an automated test comment to verify GitHub Actions permissions.
+                
+                - ✅ Comment creation: SUCCESS
+                - 🕒 Test time: ${new Date().toISOString()}
+                - 🔧 Workflow: ${{ github.workflow }}
+                - 🏃 Run: ${{ github.run_id }}
+                
+                _This comment will be deleted automatically._`
+              });
+              
+              console.log(`✅ Comment created successfully: ${comment.data.html_url}`);
+              
+              // Elimina il commento di test dopo 5 secondi
+              await new Promise(resolve => setTimeout(resolve, 5000));
+              
+              await github.rest.issues.deleteComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: comment.data.id
+              });
+              
+              console.log('🧹 Test comment deleted successfully');
+              
+            } catch (error) {
+              console.log('❌ Comment creation test: FAILED')
+              console.log(`Error: ${error.message}`)
+              console.log(`Status: ${error.status}`)
+              
+              if (error.status === 403) {
+                console.log('')
+                console.log('🔧 SOLUTION NEEDED:')
+                console.log('1. Go to Repository Settings → Actions → General')
+                console.log('2. Set "Workflow permissions" to "Read and write permissions"')
+                console.log('3. Enable "Allow GitHub Actions to create and approve pull requests"')
+                console.log('')
+              }
+            }
+
+      - name: Test Results Summary
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            console.log('')
+            console.log('📊 PERMISSION TEST SUMMARY')
+            console.log('========================')
+            console.log('')
+            console.log('If all tests passed:')
+            console.log('✅ Your workflows should be able to comment on issues/PRs')
+            console.log('')
+            console.log('If comment test failed with 403:')
+            console.log('🔧 Configure repository permissions as shown above')
+            console.log('')
+            console.log('Current workflow permissions:')
+            console.log('- contents: read')
+            console.log('- pull-requests: write') 
+            console.log('- issues: write')
+            console.log('- actions: read')
+            console.log('')
