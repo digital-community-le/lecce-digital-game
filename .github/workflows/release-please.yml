@@ -10,11 +10,36 @@ permissions:
   pull-requests: write
 
 jobs:
+  # Pre-validation veloce per commit che potrebbero creare release
+  pre-validation:
+    if: |
+      contains(github.event.head_commit.message, 'feat:') || 
+      contains(github.event.head_commit.message, 'fix:') || 
+      contains(github.event.head_commit.message, 'BREAKING CHANGE:')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci
+      - name: Quick validation before release
+        run: |
+          npm run check
+          npm run test:smart
+
   release-please:
+    needs: [pre-validation]
+    # Esegue sempre, ma ha info su pre-validation
+    if: always()
     runs-on: ubuntu-latest
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
       tag_name: ${{ steps.release.outputs.tag_name }}
+      pre_validation_passed: ${{ needs.pre-validation.result == 'success' || needs.pre-validation.result == 'skipped' }}
     steps:
       - uses: google-github-actions/release-please-action@v4
         id: release
@@ -24,8 +49,10 @@ jobs:
 
   # Deploy su release - include tutti i check necessari
   deploy:
-    needs: release-please
-    if: ${{ needs.release-please.outputs.release_created }}
+    needs: [release-please]
+    if: |
+      needs.release-please.outputs.release_created == 'true' &&
+      needs.release-please.outputs.pre_validation_passed == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -45,10 +72,10 @@ jobs:
       - name: Run type checking
         run: npm run check
 
-      - name: Run complete test suite (release deployment)
-        run: npm run test:smart:all
+      - name: Run complete test suite (ALL tests for production deploy)
+        run: npm run test:run
 
-      - name: Run tests with coverage
+      - name: Generate comprehensive coverage report
         run: npm run test:coverage
 
       - name: Build application with version
@@ -72,9 +99,37 @@ jobs:
               commit_sha: context.sha,
               body: `🚀 **Release ${{ needs.release-please.outputs.tag_name }} deployed successfully!**
               
+              ✅ Pre-validation passed
               ✅ All tests passed
               ✅ Coverage verified
               ✅ Deployed to Firebase Hosting
               
               View at: https://lecce-digital-legends.web.app`
+            })
+
+  # Job di fallback se pre-validation fallisce ma release è creata
+  release-rollback:
+    needs: [release-please]
+    if: |
+      needs.release-please.outputs.release_created == 'true' &&
+      needs.release-please.outputs.pre_validation_passed == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify failed pre-validation
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.repos.createCommitComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha,
+              body: `⚠️ **Release ${{ needs.release-please.outputs.tag_name }} created but NOT deployed**
+              
+              ❌ Pre-validation failed
+              🛠️ Fix issues and trigger deploy manually
+              
+              To deploy manually after fixes:
+              \`\`\`bash
+              gh workflow run release-please.yml
+              \`\`\``
             })
