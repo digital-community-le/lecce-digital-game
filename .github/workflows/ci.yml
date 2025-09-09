@@ -1,61 +1,168 @@
 name: Continuous Integration
 
 on:
-  push:
-    branches: [ develop ]
   pull_request:
-    branches: [ main, develop ]
+    branches:
+      - main
+    paths:
+      - 'client/**'
+      - 'server/**'
+      - 'shared/**'
+      - 'public/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'vite.config.ts'
+      - 'tsconfig.json'
+      - 'tailwind.config.ts'
+      - 'postcss.config.js'
+      - '!docs/**'
+      - '!README.md'
+      - '!replit.md'
+
+  # Trigger manuale per test su main (senza deploy)
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Motivo per eseguire CI su main'
+        required: false
+        default: 'Manual trigger'
 
 jobs:
-  test:
+  # Job di validazione veloce per PR
+  validate:
     runs-on: ubuntu-latest
-    
-    strategy:
-      matrix:
-        node-version: [20.x, 22.x]
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
-      - name: Setup Node.js ${{ matrix.node-version }}
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '20'
           cache: 'npm'
-          
+
       - name: Install dependencies
         run: npm ci
-        
+
+      - name: Check prerequisites
+        run: npm run check:prerequisites
+
       - name: Run type checking
         run: npm run check
-        
-      - name: Run linting (if available)
-        run: npm run lint || echo "No lint script found, skipping..."
-        continue-on-error: true
-        
-      - name: Run smart test strategy
-        run: CI=true npm run test:smart
-        
-      - name: Generate test coverage (Node 20.x only)
-        if: matrix.node-version == '20.x'
+
+      - name: Run smart test suite
+        run: npm run test:smart
+
+      - name: Build application
+        run: npm run build
+
+  # Job di test approfonditi per PR critiche
+  comprehensive-test:
+    runs-on: ubuntu-latest
+    if: |
+      contains(github.event.pull_request.labels.*.name, 'comprehensive-test') || 
+      github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check prerequisites
+        run: npm run check:prerequisites
+
+      - name: Run type checking
+        run: npm run check
+
+      - name: Run complete test suite
+        run: npm run test:smart:all
+
+      - name: Run tests with coverage
         run: npm run test:coverage
-        
+
       - name: Upload coverage reports to Codecov
-        if: matrix.node-version == '20.x'
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
           verbose: true
-          
+
+      - name: Build application with production config
+        run: npm run build:prod
+
+  # Preview deploy per PR (opzionale)
+  preview-deploy:
+    runs-on: ubuntu-latest
+    if: |
+      contains(github.event.pull_request.labels.*.name, 'preview-deploy') &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    needs: validate
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
       - name: Build application
-        run: npm run build
-        
-      - name: Check for build artifacts
-        run: |
-          if [ ! -d "dist" ]; then
-            echo "Build failed - dist directory not found"
-            exit 1
-          fi
-          echo "Build successful - dist directory created"
+        run: npm run build:prod
+
+      - name: Deploy to Firebase Preview
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_LECCE_DIGITAL_LEGENDS }}'
+          projectId: lecce-digital-legends
+
+      - name: Comment PR with preview URL
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+            });
+
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('🔍 Preview deployment')
+            );
+
+            const body = `🔍 **Preview deployment ready!**
+
+            ✅ Build successful
+            ✅ Tests passed
+
+            📱 Preview URL will be available in the Firebase action logs above.
+
+            _This preview will be automatically cleaned up when the PR is closed._`;
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body
+              });
+            }

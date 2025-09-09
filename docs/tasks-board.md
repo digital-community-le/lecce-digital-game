@@ -6,6 +6,16 @@ Questo file aggrega le 10 task già presenti in `docs/tasks/` in un formato Kanb
 
 Implementare l'MVP mobile-first con OCR client-side (Social Arena), persistenza offline per immagini e flussi core (profile → map → challenge) senza backend attivo.
 
+## 🎯 Task Completate di Recente
+
+| ID  | Task                                     | Status       | Data       |
+| --- | ---------------------------------------- | ------------ | ---------- |
+| 16  | **GitHub Actions Pipeline Optimization** | ✅ COMPLETED | 10/09/2025 |
+|     | ↳ Eliminazione ridondanze deploy         | ✅           |            |
+|     | ↳ Release Please integrato con Firebase  | ✅           |            |
+|     | ↳ CI granulare con labels per PR         | ✅           |            |
+|     | ↳ Documentazione completa                | ✅           |            |
+
 ## Backlog (ordine consigliato)
 
 | ID  |                          Task | Owner | Priorità | Stima |

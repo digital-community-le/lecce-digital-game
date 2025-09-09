@@ -22,12 +22,14 @@ jobs:
           release-type: node
           token: ${{ secrets.GITHUB_TOKEN }}
 
+  # Deploy su release - include tutti i check necessari
   deploy:
     needs: release-please
     if: ${{ needs.release-please.outputs.release_created }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -43,16 +45,36 @@ jobs:
       - name: Run type checking
         run: npm run check
 
-      - name: Run tests
-        run: npm run test:run
+      - name: Run complete test suite (release deployment)
+        run: npm run test:smart:all
+
+      - name: Run tests with coverage
+        run: npm run test:coverage
 
       - name: Build application with version
         run: npm run build:prod
 
-      - name: Deploy to Firebase
+      - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_LECCE_DIGITAL_LEGENDS }}'
           channelId: live
           projectId: lecce-digital-legends
+
+      - name: Create deployment comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.repos.createCommitComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha,
+              body: `🚀 **Release ${{ needs.release-please.outputs.tag_name }} deployed successfully!**
+              
+              ✅ All tests passed
+              ✅ Coverage verified
+              ✅ Deployed to Firebase Hosting
+              
+              View at: https://lecce-digital-legends.web.app`
+            })
