@@ -30,7 +30,7 @@ interface ChallengeContentLayoutProps {
 
 /**
  * Layout comune per il contenuto delle challenge
- * 
+ *
  * Fornisce la struttura standard con:
  * - Sezione descrizione con titolo gemma, testo e tip
  * - Indicatore di progresso uniforme
@@ -49,9 +49,10 @@ const ChallengeContentLayout: React.FC<ChallengeContentLayoutProps> = ({
   isCompleted = false,
   completionMessage,
   children,
-  progressInfo
+  progressInfo,
 }) => {
-  const progressPercentage = (total && progress) ? (total > 0 ? (progress / total) * 100 : 0) : 0;
+  const progressPercentage =
+    total && progress ? (total > 0 ? (progress / total) * 100 : 0) : 0;
 
   if (isLoading) {
     return (
@@ -63,22 +64,18 @@ const ChallengeContentLayout: React.FC<ChallengeContentLayoutProps> = ({
 
   return (
     <div className="challenge-content-layout">
-      <div className='challenge-description p-8 mb-6 flex flex-col gap-6'>
+      <div className="challenge-description p-8 mb-6 flex flex-col gap-6">
         {/* Challenge description */}
-        <p className="text-sm">
-          {description}
-        </p>
+        <p className="">{description}</p>
 
         {/* Challenge tip */}
         <div className="nes-container is-rounded bg-yellow-100 flex items-center">
           <span className="text-2xl mr-2 pixelated">💡</span>
-          <p className="text-xs text-gray-700 m-0">
-              {tip}
-          </p>
+          <p className="text-xs text-gray-700 m-0">{tip}</p>
         </div>
 
         {/* Progress indicator - only show if progress props are provided */}
-        {(progress !== undefined && total !== undefined && progressLabel) && (
+        {progress !== undefined && total !== undefined && progressLabel && (
           <div>
             <div className="flex justify-between text-sm mb-2">
               <span>{progressLabel}</span>
@@ -87,33 +84,29 @@ const ChallengeContentLayout: React.FC<ChallengeContentLayoutProps> = ({
               </span>
             </div>
             <div className="progress-custom">
-              <div 
-                className="progress-fill" 
+              <div
+                className="progress-fill"
                 style={{ width: `${Math.min(progressPercentage, 100)}%` }}
                 data-testid="progress-bar"
               ></div>
             </div>
-            {progressInfo && (
-              <div className="mt-2">
-                {progressInfo}
-              </div>
-            )}
+            {progressInfo && <div className="mt-2">{progressInfo}</div>}
           </div>
         )}
-
       </div>
 
       <div className="p-8 pt-4">
         {/* Main challenge content */}
         {!isCompleted ? (
-          <div className="mb-6">
-            {children}
-          </div>
+          <div className="mb-6">{children}</div>
         ) : (
           /* Completion message */
           <ChallengeCompleted
             title="Challenge Completata!"
-            message={completionMessage || 'Hai completato con successo questa challenge e guadagnato la gemma!'}
+            message={
+              completionMessage ||
+              'Hai completato con successo questa challenge e guadagnato la gemma!'
+            }
             emoji="🏆"
           />
         )}

@@ -59,7 +59,7 @@
       },
       "gemImage": "@assets/images/gem-of-alliance.png",
       "completion": {
-        "title": "Gemma dell'Alleanza Conquistata",
+        "title": "Gemma dell'Alleanza",
         "message": "Hai formato la squadra giusta per affrontare la sfida: la Gemma dell'Alleanza è tua. Il tuo gruppo ha dimostrato sinergia e solidarietà."
       }
     },
@@ -134,8 +134,8 @@
       },
       "gemImage": "@assets/images/gem-of-memory.png",
       "completion": {
-        "title": "Gemma della Conoscenza Conquistata",
-        "message": "La saggezza antica risuona nella gemma blu. Ogni connessione mentale tracciata nel puzzle rivela ora i segreti nascosti del sapere tecnologico."
+        "title": "Gemma della Conoscenza",
+        "message": "La saggezza antica risuona nella gemma viola. Ogni connessione mentale tracciata nel puzzle rivela ora i segreti nascosti del sapere tecnologico."
       }
     },
     {
@@ -298,8 +298,8 @@
       },
       "gemImage": "@assets/images/gem-of-wisdom.png",
       "completion": {
-        "title": "Gemma del Sapere Conquistata",
-        "message": "La gemma rossa pulsa con la forza del guerriero che ha affrontato le tenebre del Debug Dungeon. Ogni risposta corretta ha acceso una nuova fiamma di conoscenza."
+        "title": "Gemma del Sapere",
+        "message": "La gemma dorata pulsa con la forza del guerriero che ha affrontato le tenebre del Debug Dungeon. Ogni risposta corretta ha acceso una nuova fiamma di conoscenza."
       }
     },
     {
@@ -327,23 +327,23 @@
       },
       "rewards": {
         "points": 300,
-        "badge": "Sigillo di Lecce",
+        "badge": "Gemma della Comunità",
         "unlocks": []
       },
       "gemImage": "@assets/images/gem-of-community.png",
       "completion": {
-        "title": "Sigillo di Lecce Completato",
-        "message": "La gemma finale brilla di luce dorata. Il tuo gesto davanti allo Stand ha risvegliato l'antica magia. Il Sigillo di Lecce e ora completo e la leggenda e scritta."
+        "title": "Gemma della Comunità",
+        "message": "La gemma finale brilla di luce rossa. Il tuo gesto davanti allo Stand ha risvegliato l'antica magia."
       }
     }
   ],
   "rewards": {
     "badges": [
       {
-        "id": "networking-master",
+        "id": "guild-builder",
         "name": "Gemma dell'Alleanza",
-        "description": "Hai creato connessioni nel Networking Forest",
-        "icon": "🌲"
+        "description": "Hai formato la squadra giusta per affrontare la sfida",
+        "icon": "🛡️"
       },
       {
         "id": "puzzle-solver",
@@ -359,7 +359,7 @@
       },
       {
         "id": "social-champion",
-        "name": "Sigillo di Lecce",
+        "name": "Gemma della Comunità",
         "description": "Hai completato la prova finale",
         "icon": "💎"
       }
