@@ -53,6 +53,13 @@ export interface GameCompletionResult {
 }
 
 /**
+ * Auth service interface for retrieving JWT tokens
+ */
+export interface IAuthService {
+  getCurrentJwtToken(): string | null;
+}
+
+/**
  * DevFest API service interface
  */
 export interface IDevFestApiService {

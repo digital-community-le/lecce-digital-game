@@ -15,7 +15,7 @@ export class DevFestApiConfigProvider {
 
   getConfig(): IDevFestApiConfig {
     const config = this.gameData.gameConfig?.api;
-    
+
     if (!config || !config.badgeEndpoint || !config.gameCompletionSecret) {
       throw new Error('DevFest API configuration is missing in game-data.json');
     }

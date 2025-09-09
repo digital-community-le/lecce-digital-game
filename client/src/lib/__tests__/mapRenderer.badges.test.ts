@@ -262,7 +262,7 @@ describe('MapRenderer - Challenge Badges', () => {
         expect(Number.isFinite(width)).toBe(true);
         expect(Number.isFinite(height)).toBe(true);
       });
-    });
+    }, 3000);
   });
 
   describe('Badge Styling', () => {

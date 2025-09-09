@@ -40,17 +40,17 @@ export function getCurrentTokenInfo(): { hasLocal: boolean; localValid: boolean;
   if (!lastProfile?.userId) {
     return { hasLocal: false, localValid: false, userId: null };
   }
-  
+
   const localToken = getStoredToken(lastProfile.userId);
   if (!localToken) {
     return { hasLocal: false, localValid: false, userId: lastProfile.userId };
   }
-  
+
   const validation = validateJWT(localToken);
-  return { 
-    hasLocal: true, 
-    localValid: validation.valid, 
-    userId: lastProfile.userId 
+  return {
+    hasLocal: true,
+    localValid: validation.valid,
+    userId: lastProfile.userId
   };
 }
 
@@ -67,11 +67,11 @@ export function getCurrentTokenInfo(): { hasLocal: boolean; localValid: boolean;
 export function initAuthFromUrl(): AuthResult & { test?: boolean } {
   const params = readUrlAuthParams();
   const isTestMode = !!params.test;
-  
+
   let token = params.token;
   let error: string | null = null;
   let tokenSource: 'local' | 'url' | 'generated' = 'url';
-  
+
   // If URL token is present, always prefer it (external platform session)
   if (token) {
     const validation = validateJWT(token);
@@ -85,7 +85,7 @@ export function initAuthFromUrl(): AuthResult & { test?: boolean } {
         test: params.test
       };
     }
-    
+
     // Persist valid URL token
     const userId = getUserIdFromToken(token);
     if (userId) {
@@ -97,7 +97,7 @@ export function initAuthFromUrl(): AuthResult & { test?: boolean } {
         persistTokenForUser(lastProfile.userId, token);
       }
     }
-    
+
     tokenSource = 'url';
   } else {
     // No URL token, check for valid local token as fallback
@@ -112,14 +112,14 @@ export function initAuthFromUrl(): AuthResult & { test?: boolean } {
         }
       }
     }
-    
+
     // If still no valid token and test mode, generate fake
     if (!token && isTestMode) {
       token = generateFakeJWT('test-user-' + Date.now());
       tokenSource = 'generated';
     }
   }
-  
+
   // If not test mode and no token, it's an error
   if (!isTestMode && !token) {
     return {
@@ -131,7 +131,7 @@ export function initAuthFromUrl(): AuthResult & { test?: boolean } {
       test: params.test
     };
   }
-  
+
   return {
     success: true,
     token: token || null,
@@ -140,4 +140,34 @@ export function initAuthFromUrl(): AuthResult & { test?: boolean } {
     tokenSource,
     test: params.test
   };
+}
+
+/**
+ * Get the current JWT token from URL or local storage
+ * Returns the token that should be used for API calls
+ */
+export function getCurrentJwtToken(): string | null {
+  const params = readUrlAuthParams();
+
+  // Priority 1: URL token (external platform session)
+  if (params.token) {
+    const validation = validateJWT(params.token);
+    if (validation.valid) {
+      return params.token;
+    }
+  }
+
+  // Priority 2: Local stored token (fallback)
+  const lastProfile = gameStorage.getLastProfile();
+  if (lastProfile?.userId) {
+    const localToken = getStoredToken(lastProfile.userId);
+    if (localToken) {
+      const validation = validateJWT(localToken);
+      if (validation.valid) {
+        return localToken;
+      }
+    }
+  }
+
+  return null;
 }
