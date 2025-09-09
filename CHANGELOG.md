@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.1.0](https://github.com/digital-community-le/lecce-digital-game/compare/v1.0.0...v1.1.0) (2025-09-09)
+
+
+### Features
+
+* **ci:** aggiunge verifica completa tagging e release notes automatiche ([6000729](https://github.com/digital-community-le/lecce-digital-game/commit/6000729254259a311dfbd183e3091f99978bfd61))
+* **ci:** implementa architettura separata per auto-merge release ([70b4e5c](https://github.com/digital-community-le/lecce-digital-game/commit/70b4e5c079a4e43b6325b16bdfffe814eb2ba4f5))
+* **ci:** implementa auto-merge per release PR eliminando intervento manuale ([63a63a2](https://github.com/digital-community-le/lecce-digital-game/commit/63a63a250afdc207ea8891d210f39f843cbc6bfd))
+
+
+### Bug Fixes
+
+* **ci:** elimina ridondanze workflow push main ([81d10f4](https://github.com/digital-community-le/lecce-digital-game/commit/81d10f453c874feb5597a62dd7c8c623ce2aef50))
+
 ## 1.0.0 (2025-09-09)
 
 
