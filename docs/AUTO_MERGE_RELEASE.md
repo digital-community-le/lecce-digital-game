@@ -28,6 +28,61 @@ graph TD
 3. **Auto-approve & Merge** (30 sec): No human intervention
 4. **Deploy** (5-6 min): Complete tests + build + Firebase deploy
 
+## 🏷️ **Tagging e Release Notes Automatiche**
+
+### **🎯 Processo Completo di Release**
+
+Il workflow **automaticamente**:
+
+1. **📝 Analizza i commit** per determinare il tipo di release (patch/minor/major)
+2. **📋 Genera CHANGELOG.md** basato sui conventional commits
+3. **🏷️ Crea TAG Git** con la nuova versione (es. `v1.2.3`)
+4. **📄 Crea GitHub Release** con note di rilascio automatiche
+5. **🚀 Deploy in produzione** con link alla release
+
+### **📊 Informazioni Release Disponibili**
+
+```yaml
+Outputs disponibili:
+  - tag_name: 'v1.2.3'
+  - version: '1.2.3'
+  - html_url: 'https://github.com/owner/repo/releases/tag/v1.2.3'
+  - body: 'Release notes content'
+  - sha: 'commit SHA della release'
+  - upload_url: 'Per eventuali asset uploads'
+```
+
+### **📝 Formato Release Notes**
+
+Le note di rilascio sono generate automaticamente da:
+
+```markdown
+## Features
+
+- feat: add new component → ✨ New component added
+
+## Bug Fixes
+
+- fix: resolve payment issue → 🐛 Payment issue resolved
+
+## Performance Improvements
+
+- perf: optimize loading → ⚡ Loading optimized
+
+## Documentation
+
+- docs: update README → 📚 README updated
+```
+
+### **🔍 Verifica Tag e Release**
+
+Il workflow include un job `release-info` che:
+
+- ✅ Verifica che il tag sia stato creato nel repository
+- ✅ Conferma che le release notes siano disponibili
+- ✅ Logga tutte le informazioni della release
+- ✅ Fornisce URL diretti alla release GitHub
+
 ## 🤖 **Jobs Implementati**
 
 ### **1. auto-merge-release**
@@ -40,7 +95,18 @@ Steps:
   3. Commit title: "🚀 Release: Auto-merge PR #X"
 ```
 
-### **2. deploy (aggiornato)**
+### **4. release-info (nuovo)**
+
+```yaml
+# Triggered: Quando release effettivamente creata
+Actions:
+  - Verifica creazione tag Git
+  - Conferma disponibilità release notes
+  - Logga informazioni complete release
+  - Fornisce URL GitHub release
+```
+
+### **5. deploy (migliorato)**
 
 ```yaml
 # Triggered: Quando release effettivamente creata (dopo auto-merge)
@@ -50,10 +116,10 @@ Features:
   - Coverage report
   - Production build with versioning
   - Firebase deploy
-  - Enhanced notification comment
+  - Enhanced notification with release links
 ```
 
-### **3. release-rollback (aggiornato)**
+### **6. release-rollback (aggiornato)**
 
 ```yaml
 # Triggered: PR creata MA pre-validation fallita
