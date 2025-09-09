@@ -79,8 +79,9 @@ const BadgePage: React.FC = () => {
       <div className="container mx-auto max-w-2xl text-center">
         {/* Badge Display */}
         {badgeInfo ? (
-          <div className="nes-container is-rounded is-success mx-4 md:mx-8">
+          <div className="nes-container is-rounded is-success mx-4 md:mx-8 bg-white">
             <div className="flex flex-col items-center text-center">
+              <p className="mb-3">Hai ottenuto un nuovo badge!</p>
               <div className="mb-4">
                 <img
                   src={badgeInfo.picture}
@@ -135,18 +136,9 @@ const BadgePage: React.FC = () => {
 
         {/* Return to DevFest Button */}
         <div className="mt-8">
-          <a
-            href="https://devfest.gdglecce.it"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="nes-btn is-primary font-retro text-lg px-8 py-4 hover:scale-105 transition-transform duration-300"
-            style={{
-              textShadow: '2px 2px 0px rgba(0,0,0,0.8)',
-              boxShadow: '0 8px 0 #4a5568, 0 12px 20px rgba(0,0,0,0.4)',
-            }}
-          >
-            Torna all'app DevFest Lecce e Continua l'Avventura!
-          </a>
+          <p className="nes-balloon from-left text-gray-500">
+            Torna all'app DevFest Lecce e continua l'Avventura!
+          </p>
         </div>
       </div>
     </div>

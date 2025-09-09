@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Router } from 'wouter';
 import BadgePage from '../BadgePage';
@@ -45,11 +45,13 @@ describe('BadgePage', () => {
   it('should display the badge when available', async () => {
     (getDevFestBadge as any).mockReturnValue(mockBadge);
 
-    render(
-      <Router>
-        <BadgePage />
-      </Router>
-    );
+    await act(async () => {
+      render(
+        <Router>
+          <BadgePage />
+        </Router>
+      );
+    });
 
     await waitFor(() => {
       expect(screen.getByText('Badge COMMUNITY ottenuto!')).toBeInTheDocument();
@@ -59,8 +61,10 @@ describe('BadgePage', () => {
     });
   });
 
-  it('should display loading state when badge is not available', () => {
+  it('should display loading state when badge is not available', async () => {
     (getDevFestBadge as any).mockReturnValue(null);
+    (isDevFestSubmissionSuccessful as any).mockReturnValue(false);
+    (submitGameCompletion as any).mockReturnValue(new Promise(() => {})); // Never resolves
 
     render(
       <Router>
@@ -69,21 +73,6 @@ describe('BadgePage', () => {
     );
 
     expect(screen.getByText('Caricamento badge...')).toBeInTheDocument();
-  });
-
-  it('should have a button to return to DevFest app', () => {
-    (getDevFestBadge as any).mockReturnValue(mockBadge);
-
-    render(
-      <Router>
-        <BadgePage />
-      </Router>
-    );
-
-    const button = screen.getByRole('link', { name: /torna all'app devfest/i });
-    expect(button).toBeInTheDocument();
-    expect(button).toHaveAttribute('href', 'https://devfest.gdglecce.it');
-    expect(button).toHaveAttribute('target', '_blank');
   });
 
   it('should submit game completion if not already done', async () => {
