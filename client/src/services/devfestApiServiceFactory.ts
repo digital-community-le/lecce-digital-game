@@ -1,6 +1,7 @@
 import { DevFestApiService } from './implementations/devfestApiService';
 import { DevFestApiConfigProvider } from './implementations/devfestApiConfigProvider';
 import { TestModeChecker } from './implementations/testModeChecker';
+import { AuthServiceWrapper } from './implementations/authServiceWrapper';
 import { FetchHttpClient, MockHttpClient } from './implementations/httpClient';
 import { IDevFestApiService, GameCompletionResult } from './interfaces/devfestApi.interfaces';
 
@@ -13,7 +14,7 @@ class DevFestServiceFactory {
   private static instance: DevFestServiceFactory;
   private devFestApiService: IDevFestApiService | null = null;
 
-  private constructor() {}
+  private constructor() { }
 
   static getInstance(): DevFestServiceFactory {
     if (!DevFestServiceFactory.instance) {
@@ -31,9 +32,10 @@ class DevFestServiceFactory {
     const configProvider = new DevFestApiConfigProvider();
     const config = configProvider.getConfig();
     const testModeChecker = new TestModeChecker();
-    
+    const authService = new AuthServiceWrapper();
+
     // Choose HTTP client based on test mode
-    const httpClient = testModeChecker.isTestMode() 
+    const httpClient = testModeChecker.isTestMode()
       ? new MockHttpClient()
       : new FetchHttpClient();
 
@@ -52,7 +54,8 @@ class DevFestServiceFactory {
     this.devFestApiService = new DevFestApiService(
       config,
       testModeChecker,
-      httpClient
+      httpClient,
+      authService
     );
 
     return this.devFestApiService;
@@ -62,9 +65,10 @@ class DevFestServiceFactory {
   createDevFestApiServiceWithDependencies(
     config: any,
     testModeChecker: any,
-    httpClient: any
+    httpClient: any,
+    authService: any
   ): IDevFestApiService {
-    return new DevFestApiService(config, testModeChecker, httpClient);
+    return new DevFestApiService(config, testModeChecker, httpClient, authService);
   }
 }
 
