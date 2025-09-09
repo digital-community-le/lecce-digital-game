@@ -55,6 +55,25 @@ export function getCurrentTokenInfo(): { hasLocal: boolean; localValid: boolean;
 }
 
 /**
+ * Debug function to log current authentication state
+ */
+export function debugAuthState(): void {
+  const params = readUrlAuthParams();
+  const tokenInfo = getCurrentTokenInfo();
+  const lastProfile = gameStorage.getLastProfile();
+
+  console.log('🔍 Debug Auth State:', {
+    urlParams: params,
+    lastProfile: lastProfile ? {
+      userId: lastProfile.userId,
+      displayName: lastProfile.displayName
+    } : null,
+    tokenInfo,
+    currentJwt: getCurrentJwtToken() ? 'present' : 'missing'
+  });
+}
+
+/**
  * Initialize auth from URL params and validate/generate token as needed.
  * Returns auth result with validation status.
  * 
@@ -72,10 +91,17 @@ export function initAuthFromUrl(): AuthResult & { test?: boolean } {
   let error: string | null = null;
   let tokenSource: 'local' | 'url' | 'generated' = 'url';
 
+  console.log('🔐 Auth initialization:', {
+    hasUrlToken: !!token,
+    isTestMode,
+    urlParams: params
+  });
+
   // If URL token is present, always prefer it (external platform session)
   if (token) {
     const validation = validateJWT(token);
     if (!validation.valid) {
+      console.log('❌ URL token validation failed:', validation.error);
       return {
         success: false,
         token: null,
@@ -86,42 +112,57 @@ export function initAuthFromUrl(): AuthResult & { test?: boolean } {
       };
     }
 
+    console.log('✅ URL token is valid');
+
     // Persist valid URL token
     const userId = getUserIdFromToken(token);
     if (userId) {
       persistTokenForUser(userId, token);
+      console.log('💾 Token persisted for user:', userId);
     } else {
       // Fallback: use last profile to persist token
       const lastProfile = gameStorage.getLastProfile();
       if (lastProfile?.userId) {
         persistTokenForUser(lastProfile.userId, token);
+        console.log('💾 Token persisted for last profile:', lastProfile.userId);
       }
     }
 
     tokenSource = 'url';
   } else {
     // No URL token, check for valid local token as fallback
+    console.log('🔍 No URL token, checking local storage...');
     const lastProfile = gameStorage.getLastProfile();
     if (lastProfile?.userId) {
       const localToken = getStoredToken(lastProfile.userId);
       if (localToken) {
+        console.log('🗂️ Found local token for user:', lastProfile.userId);
         const localValidation = validateJWT(localToken);
         if (localValidation.valid) {
           token = localToken;
           tokenSource = 'local';
+          console.log('✅ Local token is valid, using it');
+        } else {
+          console.log('❌ Local token validation failed:', localValidation.error);
         }
+      } else {
+        console.log('❓ No local token found for user:', lastProfile.userId);
       }
+    } else {
+      console.log('❓ No last profile found');
     }
 
     // If still no valid token and test mode, generate fake
     if (!token && isTestMode) {
       token = generateFakeJWT('test-user-' + Date.now());
       tokenSource = 'generated';
+      console.log('🧪 Generated fake token for test mode');
     }
   }
 
   // If not test mode and no token, it's an error
   if (!isTestMode && !token) {
+    console.log('🚫 No valid token found in production mode');
     return {
       success: false,
       token: null,
@@ -132,6 +173,7 @@ export function initAuthFromUrl(): AuthResult & { test?: boolean } {
     };
   }
 
+  console.log('🎉 Auth successful:', { tokenSource, isTestMode });
   return {
     success: true,
     token: token || null,
