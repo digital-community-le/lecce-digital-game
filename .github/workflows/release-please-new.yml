@@ -66,7 +66,7 @@ jobs:
           script: |
             const prNumber = ${{ steps.release.outputs.pr_number }};
             const validationPassed = ${{ needs.pre-validation.outputs.validation_passed == 'true' }};
-            
+
             const comment = validationPassed 
               ? `✅ **Pre-validation passed** - This PR is ready for auto-merge
                  
@@ -146,24 +146,24 @@ jobs:
             const version = '${{ needs.release-please.outputs.version }}';
             const releaseUrl = '${{ needs.release-please.outputs.html_url }}';
             const deployUrl = 'https://lecce-digital-legends.web.app';
-            
+
             const deploymentInfo = `🚀 **Release ${tag} Deployed Successfully!**
-            
+
             ## 📦 Deployment Details
             - **Live Application**: [${deployUrl}](${deployUrl})
             - **Release Tag**: [\`${tag}\`](${releaseUrl})
             - **Version**: \`${version}\`
             - **Deployed At**: ${new Date().toISOString()}
             - **Commit SHA**: \`${context.sha.substring(0, 7)}\`
-            
+
             ## 🎯 Release Information  
             - **GitHub Release**: [View Release Notes](${releaseUrl})
             - **Changelog**: Updated automatically with conventional commits
             - **Tag Created**: ✅ \`${tag}\` available in repository
-            
+
             ## 🎉 Status
             ✅ **All systems operational** - Release is live and available to users!
-            
+
             ---
             *Automated deployment completed via Release workflow*`;
 

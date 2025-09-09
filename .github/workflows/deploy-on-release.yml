@@ -1,0 +1,150 @@
+name: Deploy on Release
+
+on:
+  # Trigger quando viene mergiata una PR di release
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+  # Trigger quando viene creato un release tag
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+  actions: read
+  checks: read
+
+jobs:
+  deploy:
+    # Solo se PR di release mergiata oppure push di tag
+    if: |
+      (github.event_name == 'pull_request' && 
+       github.event.pull_request.merged == true &&
+       startsWith(github.event.pull_request.title, 'chore') && 
+       contains(github.event.pull_request.title, 'release')) ||
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v'))
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          # Se è un tag, usa il tag; altrimenti usa main
+          ref: ${{ github.event_name == 'push' && github.ref || 'main' }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
+      - name: Deploy to Firebase
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_LECCE_DIGITAL_GAME }}
+          channelId: live
+          projectId: lecce-digital-game
+
+      - name: Get version info
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            VERSION="${{ github.ref_name }}"
+          else
+            VERSION=$(node -p "require('./package.json').version")
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Notify deployment success
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const version = '${{ steps.version.outputs.version }}';
+            const eventType = '${{ github.event_name }}';
+            const timestamp = new Date().toISOString();
+
+            console.log(`🚀 Deployment completed for version ${version}`);
+            console.log(`📅 Deployed at: ${timestamp}`);
+            console.log(`🔄 Triggered by: ${eventType}`);
+
+            // Se è stato triggerato da PR, commenta sulla PR
+            if (eventType === 'pull_request') {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: `🚀 **Deployment completed!**
+                
+                ✅ Version \`${version}\` deployed successfully to production
+                📅 Deployed at: \`${timestamp}\`
+                🌐 Live URL: https://lecce-digital-game.web.app
+                
+                **What happened:**
+                1. ✅ Release PR merged automatically
+                2. ✅ Production build completed  
+                3. ✅ Firebase hosting deployment successful
+                4. ✅ Application is now live`
+              });
+            }
+
+            // Crea una release note se non esiste (per trigger da tag)
+            if (eventType === 'push') {
+              try {
+                await github.rest.repos.createRelease({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  tag_name: version,
+                  name: `Release ${version}`,
+                  body: `🚀 **Automated Release ${version}**
+                  
+                  📅 Released at: ${timestamp}
+                  🌐 Live URL: https://lecce-digital-game.web.app
+                  
+                  This release was automatically created and deployed.`,
+                  draft: false,
+                  prerelease: version.includes('-')
+                });
+                console.log(`📝 Release notes created for ${version}`);
+              } catch (error) {
+                console.log(`ℹ️ Release ${version} already exists or couldn't be created:`, error.message);
+              }
+            }
+
+      - name: Notify deployment failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const version = '${{ steps.version.outputs.version }}';
+            const eventType = '${{ github.event_name }}';
+
+            console.log(`❌ Deployment failed for version ${version}`);
+
+            // Se è stato triggerato da PR, commenta sulla PR
+            if (eventType === 'pull_request') {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: `❌ **Deployment failed!**
+                
+                Version \`${version}\` deployment to production failed.
+                
+                **Next steps:**
+                1. Check the [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details
+                2. Fix any issues and manually redeploy if needed
+                3. Consider creating a hotfix if critical`
+              });
+            }
