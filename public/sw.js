@@ -16,6 +16,36 @@ const urlsToCache = [
   '/assets/splash_screens/icon.png'
 ];
 
+/**
+ * Controlla se è disponibile una nuova versione dell'applicazione
+ */
+async function checkForAppUpdate() {
+  try {
+    // Fetch del manifest con cache busting per ottenere la versione più recente
+    const response = await fetch('/manifest.json?t=' + Date.now(), {
+      cache: 'no-cache'
+    });
+
+    if (!response.ok) {
+      return false;
+    }
+
+    const manifest = await response.json();
+    const serverVersion = manifest.version;
+
+    // Se il manifest ha una versione diversa, c'è un aggiornamento
+    if (serverVersion && serverVersion !== CACHE_VERSION) {
+      console.log('SW: New version detected:', serverVersion, 'vs current:', CACHE_VERSION);
+      return true;
+    }
+
+    return false;
+  } catch (error) {
+    console.error('SW: Error checking for updates:', error);
+    return false;
+  }
+}
+
 // Install event - cache resources
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -38,17 +68,17 @@ self.addEventListener('install', (event) => {
 // Fetch event - serve from cache when offline
 self.addEventListener('fetch', (event) => {
   const { request } = event;
-  
+
   // Skip non-GET requests
   if (request.method !== 'GET') {
     return;
   }
-  
+
   // Skip cross-origin requests
   if (!request.url.startsWith(self.location.origin)) {
     return;
   }
-  
+
   event.respondWith(
     caches.match(request)
       .then((cachedResponse) => {
@@ -56,7 +86,7 @@ self.addEventListener('fetch', (event) => {
         if (cachedResponse) {
           return cachedResponse;
         }
-        
+
         // Otherwise, fetch from network
         return fetch(request)
           .then((networkResponse) => {
@@ -64,16 +94,16 @@ self.addEventListener('fetch', (event) => {
             if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
               return networkResponse;
             }
-            
+
             // Clone the response as it can only be consumed once
             const responseToCache = networkResponse.clone();
-            
+
             // Add to cache for future use
             caches.open(CACHE_NAME)
               .then((cache) => {
                 cache.put(request, responseToCache);
               });
-            
+
             return networkResponse;
           })
           .catch(() => {
@@ -91,7 +121,7 @@ self.addEventListener('fetch', (event) => {
 // Activate event - clean up old caches and notify clients of updates
 self.addEventListener('activate', (event) => {
   console.log('SW: Activating new service worker');
-  
+
   event.waitUntil(
     caches.keys()
       .then((cacheNames) => {
@@ -102,7 +132,7 @@ self.addEventListener('activate', (event) => {
             return caches.delete(cacheName);
           }
         });
-        
+
         return Promise.all(deletionPromises);
       })
       .then(() => {
@@ -139,7 +169,7 @@ async function doBackgroundSync() {
   try {
     // Handle any queued operations when coming back online
     console.log('Background sync triggered');
-    
+
     // In a real implementation, this would process the sync queue
     // from localStorage and send pending operations to the server
   } catch (error) {
@@ -151,7 +181,7 @@ async function doBackgroundSync() {
 self.addEventListener('push', (event) => {
   if (event.data) {
     const data = event.data.json();
-    
+
     const options = {
       body: data.body,
       icon: '/icon-192x192.png',
@@ -173,7 +203,7 @@ self.addEventListener('push', (event) => {
         }
       ]
     };
-    
+
     event.waitUntil(
       self.registration.showNotification(data.title, options)
     );
@@ -183,7 +213,7 @@ self.addEventListener('push', (event) => {
 // Notification click handler
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  
+
   if (event.action === 'explore') {
     event.waitUntil(
       clients.openWindow('/')
@@ -194,13 +224,13 @@ self.addEventListener('notificationclick', (event) => {
 // Message listener for commands from the main app
 self.addEventListener('message', (event) => {
   console.log('SW: Received message:', event.data);
-  
+
   if (event.data?.type === 'SKIP_WAITING') {
     console.log('SW: Skipping waiting and activating immediately');
     self.skipWaiting();
   } else if (event.data?.type === 'FORCE_UPDATE') {
     console.log('SW: Force updating cache');
-    
+
     // Clear all caches and restart
     event.waitUntil(
       caches.keys()
@@ -222,7 +252,29 @@ self.addEventListener('message', (event) => {
         })
     );
   } else if (event.data?.type === 'CHECK_VERSION') {
-    // Return current version info
+    console.log('SW: Checking for version updates');
+
+    // Verifica se c'è una nuova versione disponibile
+    event.waitUntil(
+      checkForAppUpdate()
+        .then((hasUpdate) => {
+          event.ports[0]?.postMessage({
+            type: 'VERSION_CHECK_RESULT',
+            hasUpdate,
+            currentVersion: CACHE_VERSION
+          });
+        })
+        .catch((error) => {
+          console.error('SW: Version check failed:', error);
+          event.ports[0]?.postMessage({
+            type: 'VERSION_CHECK_RESULT',
+            hasUpdate: false,
+            error: error.message
+          });
+        })
+    );
+  } else if (event.data?.type === 'GET_VERSION_INFO') {
+    // Restituisce informazioni sulla versione corrente
     event.ports[0]?.postMessage({
       type: 'VERSION_INFO',
       version: CACHE_VERSION,
