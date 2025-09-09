@@ -8,6 +8,14 @@ import CompanionSlot from './CompanionSlot';
 import UiDialog from '@/components/UiDialog';
 import gameData from '@/assets/game-data.json';
 import allianceGem from '@assets/images/gem-of-alliance.png';
+import AliceAvatar from '@assets/avatars/female_designer.png';
+import BobAvatar from '@assets/avatars/male_designer.png';
+import CharlieAvatar from '@assets/avatars/male_manager.png';
+import DavidAvatar from '@assets/avatars/male_developer.png';
+import EveAvatar from '@assets/avatars/female_manager.png';
+import FrankAvatar from '@assets/avatars/male_scientist.png';
+import GraceAvatar from '@assets/avatars/female_developer.png';
+import HenryAvatar from '@assets/avatars/male_designer.png';
 
 // Load configuration for guild-builder from game-data.json
 const guildBuilderConfig = Array.isArray((gameData as any).challenges)
@@ -20,56 +28,56 @@ const companions: GuildCompanion[] = [
     name: 'Alice',
     role: 'Social Media Wizard',
     description: 'Esperta nel connettere persone e comunità online',
-    avatar: '@assets/avatars/female_designer.png',
+    avatar: AliceAvatar,
   },
   {
     id: '2',
     name: 'Bob',
     role: 'Designer',
     description: 'Crea esperienze visive memorabili e innovative',
-    avatar: '@assets/avatars/male_designer.png',
+    avatar: BobAvatar,
   },
   {
     id: '3',
     name: 'Charlie',
     role: 'Speaker',
     description: 'Comunica idee complesse con chiarezza e passione',
-    avatar: '@assets/a/Teacher_avatar_pixel_art_c32e4d73.png',
+    avatar: CharlieAvatar,
   },
   {
     id: '4',
     name: 'David',
     role: 'Developer',
     description: 'Costruisce soluzioni tecniche robuste e scalabili',
-    avatar: '@assets/generated_images/Developer_avatar_pixel_art_a2515cc8.png',
+    avatar: DavidAvatar,
   },
   {
     id: '5',
     name: 'Eve',
     role: 'Project Manager',
     description: 'Coordina team e progetti con efficienza strategica',
-    avatar: '@assets/generated_images/Manager_avatar_pixel_art_1555a05c.png',
+    avatar: EveAvatar,
   },
   {
     id: '6',
     name: 'Frank',
     role: 'Tester',
     description: 'Garantisce qualità e affidabilità in ogni dettaglio',
-    avatar: '@assets/generated_images/Scientist_avatar_pixel_art_eac1695c.png',
+    avatar: FrankAvatar,
   },
   {
     id: '7',
     name: 'Grace',
     role: 'Marketing Expert',
     description: 'Trasforma prodotti in storie che coinvolgono',
-    avatar: '@assets/generated_images/Female_teacher_avatar_pixel_2ede18a1.png',
+    avatar: GraceAvatar,
   },
   {
     id: '8',
     name: 'Henry',
     role: 'Content Creator',
     description: 'Produce contenuti che educano e ispirano',
-    avatar: '@assets/generated_images/Student_avatar_pixel_art_285fb9d0.png',
+    avatar: HenryAvatar,
   },
 ];
 
