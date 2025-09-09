@@ -4,6 +4,7 @@ import useNavigateWithTransition from '@/hooks/use-navigate-with-transition';
 import { useGameStore } from '@/hooks/use-game-store';
 import ProfileCreationForm from '@/components/ProfileCreationForm';
 import UiDialog from '@/components/UiDialog';
+import Logo from '@/components/Logo';
 // Import static game data
 import gameData from '@/assets/game-data.json';
 import sealWithoutGems from '@assets/images/seal-without-gems.png';
@@ -66,7 +67,7 @@ const IntroPage: React.FC = () => {
 
   return (
     <div
-      className="intro-screen fixed inset-0 flex flex-col items-center justify-center z-10"
+      className="intro-screen fixed inset-0 flex flex-col items-center justify-center z-10 px-4 md:px-0"
       style={{
         background:
           'linear-gradient(to bottom, var(--ldc-primary-dark), var(--ldc-surface))',
@@ -74,8 +75,8 @@ const IntroPage: React.FC = () => {
       }}
     >
       {/* Sigillo Image */}
-      <div className="text-center mb-8">
-        <div className="w-32 h-32 mx-auto mb-4">
+      <div className="text-center mb-4 md:mb-8">
+        <div className="w-24 h-24 md:w-32 md:h-32 mx-auto mb-4">
           <img
             src={sealWithoutGems}
             alt="Sigillo di Lecce"
@@ -85,16 +86,16 @@ const IntroPage: React.FC = () => {
         </div>
       </div>
       {/* Title */}
-      <div className="text-center mb-8">
+      <div className="text-center mb-4 md:mb-8">
         <h1
-          className="font-retro text-xl md:text-2xl mb-4"
+          className="font-retro text-lg md:text-xl lg:text-2xl mb-2 md:mb-4"
           style={{ color: 'var(--ldc-contrast-yellow)' }}
           data-testid="text-game-title"
         >
           {titleText}
         </h1>
         <h2
-          className="font-retro text-lg"
+          className="font-retro text-base md:text-lg"
           style={{ color: 'var(--ldc-primary-light)' }}
           data-testid="text-game-subtitle"
         >
@@ -103,20 +104,22 @@ const IntroPage: React.FC = () => {
       </div>
 
       {/* Story text with progressive reveal */}
-      <div className="max-w-md mx-auto px-6 text-center">
+      <div className="max-w-sm md:max-w-md mx-auto px-4 md:px-6 text-center">
         <div
           className={`transition-opacity duration-1000 ${
             textRevealed ? 'opacity-100' : 'opacity-0'
           }`}
           data-testid="text-story-intro"
         >
-          <p className="text-sm leading-relaxed mb-8">{storyText}</p>
+          <p className="text-xs md:text-sm leading-relaxed mb-6 md:mb-8">
+            {storyText}
+          </p>
         </div>
 
         {/* CTA Button */}
         {showButton && (
           <button
-            className="nes-btn is-primary text-sm fade-in-retro"
+            className="nes-btn is-primary text-xs md:text-sm fade-in-retro"
             onClick={handleStart}
             data-testid="button-start-legend"
           >
@@ -125,21 +128,10 @@ const IntroPage: React.FC = () => {
         )}
       </div>
 
-      {/* Decorative pixel elements */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-        <div className="flex gap-2">
-          <div
-            className="w-2 h-2 bg-yellow-400 pixel-pop"
-            style={{ animationDelay: '0s' }}
-          ></div>
-          <div
-            className="w-2 h-2 bg-purple-400 pixel-pop"
-            style={{ animationDelay: '0.2s' }}
-          ></div>
-          <div
-            className="w-2 h-2 bg-pink-400 pixel-pop"
-            style={{ animationDelay: '0.4s' }}
-          ></div>
+      {/* Footer with Logo */}
+      <div className="absolute bottom-4 md:bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 md:gap-4">
+        <div className="w-12 h-12 md:w-20 md:h-20">
+          <Logo />
         </div>
       </div>
 
