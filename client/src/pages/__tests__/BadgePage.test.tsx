@@ -1,15 +1,19 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import { vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Router } from 'wouter';
 import BadgePage from '../BadgePage';
-import { getDevFestBadge, submitGameCompletion } from '@/services/completionService';
+import {
+  getDevFestBadge,
+  submitGameCompletion,
+  isDevFestSubmissionSuccessful,
+} from '@/services/completionService';
 
 // Mock dei servizi
-vi.mock('@/services/completionService', () => ({
-  getDevFestBadge: vi.fn(),
-  submitGameCompletion: vi.fn(),
-  isDevFestSubmissionSuccessful: vi.fn(),
+vi.mock('@/services/completionService');
+vi.mock('@/components/Header', () => ({
+  default: () =>
+    React.createElement('header', { 'data-testid': 'header' }, 'Header'),
 }));
 
 // Mock del game store
@@ -26,8 +30,10 @@ vi.mock('@/hooks/use-game-store', () => ({
 const mockBadge = {
   id: 1,
   name: 'Sigillo di Lecce - Master Quest',
-  description: 'Badge ottenuto completando la Quest Digitale di Lecce al DevFest 2025',
-  picture: 'https://api.devfest.gdglecce.it/assets/badges/lecce-quest-master.png',
+  description:
+    'Badge ottenuto completando la Quest Digitale di Lecce al DevFest 2025',
+  picture:
+    'https://api.devfest.gdglecce.it/assets/badges/lecce-quest-master.png',
   owned: '2025-09-03T10:30:00.000Z',
 };
 
@@ -46,7 +52,7 @@ describe('BadgePage', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('🏆 BADGE DEVFEST OTTENUTO!')).toBeInTheDocument();
+      expect(screen.getByText('Badge COMMUNITY ottenuto!')).toBeInTheDocument();
       expect(screen.getByText(mockBadge.name)).toBeInTheDocument();
       expect(screen.getByText(mockBadge.description)).toBeInTheDocument();
       expect(screen.getByAltText(mockBadge.name)).toBeInTheDocument();
@@ -74,7 +80,7 @@ describe('BadgePage', () => {
       </Router>
     );
 
-    const button = screen.getByRole('link', { name: /torna al devfest/i });
+    const button = screen.getByRole('link', { name: /torna all'app devfest/i });
     expect(button).toBeInTheDocument();
     expect(button).toHaveAttribute('href', 'https://devfest.gdglecce.it');
     expect(button).toHaveAttribute('target', '_blank');
@@ -82,7 +88,10 @@ describe('BadgePage', () => {
 
   it('should submit game completion if not already done', async () => {
     (getDevFestBadge as any).mockReturnValue(null);
-    (submitGameCompletion as any).mockResolvedValue({ success: true, badge: mockBadge });
+    (submitGameCompletion as any).mockResolvedValue({
+      success: true,
+      badge: mockBadge,
+    });
 
     render(
       <Router>

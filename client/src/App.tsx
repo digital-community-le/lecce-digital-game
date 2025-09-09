@@ -1,23 +1,23 @@
-import { Switch, Route } from "wouter";
-import { queryClient } from "./lib/queryClient";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import IntroPage from "@/pages/Intro";
-import GameMapPage from "@/pages/GameMap";
-import GameCompletePage from "@/pages/GameComplete";
-import BadgePage from "@/pages/BadgePage";
-import StatisticsPage from "@/pages/Statistics";
-import GameLayout from "@/components/layout/GameLayout";
-import GuildBuilderPage from "@/pages/challenges/GuildBuilder";
-import RetroPuzzlePage from "@/pages/challenges/RetroPuzzle";
-import DebugDungeonPage from "@/pages/challenges/DebugDungeon";
-import SocialArenaPage from "@/pages/challenges/SocialArena";
-import NotFound from "@/pages/not-found";
-import { GameStoreProvider } from "@/hooks/use-game-store";
-import GameCompletionProtectedRoute from "@/components/ProtectedRoute";
-import AuthProtectedRoute from "@/components/AuthProtectedRoute";
-import AuthWrapper from "@/components/AuthWrapper";
+import { Switch, Route } from 'wouter';
+import { queryClient } from './lib/queryClient';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from '@/components/ui/toaster';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import IntroPage from '@/pages/Intro';
+import GameMapPage from '@/pages/GameMap';
+import GameCompletePage from '@/pages/GameComplete';
+import BadgePage from '@/pages/BadgePage';
+import StatisticsPage from '@/pages/Statistics';
+import GameLayout from '@/components/layout/GameLayout';
+import GuildBuilderPage from '@/pages/challenges/GuildBuilder';
+import RetroPuzzlePage from '@/pages/challenges/RetroPuzzle';
+import DebugDungeonPage from '@/pages/challenges/DebugDungeon';
+import SocialArenaPage from '@/pages/challenges/SocialArena';
+import NotFound from '@/pages/not-found';
+import { GameStoreProvider } from '@/hooks/use-game-store';
+import GameCompletionProtectedRoute from '@/components/ProtectedRoute';
+import AuthProtectedRoute from '@/components/AuthProtectedRoute';
+import AuthWrapper from '@/components/AuthWrapper';
 
 function Router() {
   return (
@@ -96,11 +96,13 @@ function Router() {
       <Route path="/badge">
         {() => (
           <AuthProtectedRoute>
-            <BadgePage />
+            <GameLayout>
+              <BadgePage />
+            </GameLayout>
           </AuthProtectedRoute>
         )}
       </Route>
-      
+
       <Route path="/statistics">
         {() => (
           <AuthProtectedRoute>
@@ -108,7 +110,7 @@ function Router() {
           </AuthProtectedRoute>
         )}
       </Route>
-      
+
       {/* Default /game -> show map */}
       <Route path="/game">
         {() => (

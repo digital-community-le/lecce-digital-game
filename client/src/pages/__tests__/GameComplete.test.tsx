@@ -18,7 +18,12 @@ describe('GameComplete', () => {
     gameProgress: {
       userId: 'test-user',
       currentChallengeIndex: 4,
-      completedChallenges: ['networking-forest', 'retro-puzzle', 'debug-dungeon', 'social-arena'],
+      completedChallenges: [
+        'networking-forest',
+        'retro-puzzle',
+        'debug-dungeon',
+        'social-arena',
+      ],
       totalScore: 1000,
       startedAt: '2025-09-08T10:00:00Z',
       lastUpdated: '2025-09-08T12:00:00Z',
@@ -29,13 +34,13 @@ describe('GameComplete', () => {
     currentUser: {
       userId: 'test-user',
       displayName: 'Test Player',
-      avatar: 'avatar1'
+      avatar: 'avatar1',
     },
     currentChallengeId: null,
     theme: 'default',
     auth: { isAuthenticated: true },
     avatarAnimation: null,
-    modals: {}
+    modals: {},
   } as any;
 
   beforeEach(() => {
@@ -72,7 +77,9 @@ describe('GameComplete', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('final-completion-title')).toBeInTheDocument();
-      expect(screen.getByTestId('final-completion-description')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('final-completion-description')
+      ).toBeInTheDocument();
     });
   });
 
@@ -86,7 +93,7 @@ describe('GameComplete', () => {
     await waitFor(() => {
       const button = screen.getByTestId('button-view-badge');
       expect(button).toBeInTheDocument();
-      expect(button).toHaveTextContent('🏆 Vedi il Tuo Badge DevFest');
+      expect(button).toHaveTextContent('Vai al badge DevFest');
     });
   });
 
