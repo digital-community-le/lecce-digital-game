@@ -4,7 +4,7 @@ import { AVATAR_PRESETS } from '@/lib/avatars';
 
 /**
  * Form per la creazione del profilo utente con selezione avatar
- * 
+ *
  * Features:
  * - Validazione nome in tempo reale (2-30 caratteri, solo lettere)
  * - 8 avatar pixel art pre-caricati (4 maschili + 4 femminili)
@@ -17,7 +17,9 @@ interface ProfileCreationFormProps {
   onComplete: () => void;
 }
 
-const ProfileCreationForm: React.FC<ProfileCreationFormProps> = ({ onComplete }) => {
+const ProfileCreationForm: React.FC<ProfileCreationFormProps> = ({
+  onComplete,
+}) => {
   const { saveProfile, showToast } = useGameStore();
   const [displayName, setDisplayName] = useState('');
   const [selectedAvatar, setSelectedAvatar] = useState(AVATAR_PRESETS[0].url);
@@ -31,12 +33,12 @@ const ProfileCreationForm: React.FC<ProfileCreationFormProps> = ({ onComplete })
 
   /**
    * Valida il nome utente inserito secondo le regole di business
-   * 
+   *
    * Regole:
    * - Obbligatorio (non vuoto)
    * - Lunghezza: 2-30 caratteri
    * - Solo lettere (inclusi accenti italiani) e spazi
-   * 
+   *
    * @param name Nome da validare
    * @returns Messaggio di errore o stringa vuota se valido
    */
@@ -44,7 +46,8 @@ const ProfileCreationForm: React.FC<ProfileCreationFormProps> = ({ onComplete })
     if (!name.trim()) return 'Il nome è obbligatorio';
     if (name.trim().length < 2) return 'Il nome deve essere almeno 2 caratteri';
     if (name.trim().length > 30) return 'Il nome non può superare 30 caratteri';
-    if (!/^[a-zA-ZÀ-ÿ\s]+$/.test(name.trim())) return 'Il nome può contenere solo lettere e spazi';
+    if (!/^[a-zA-ZÀ-ÿ\s]+$/.test(name.trim()))
+      return 'Il nome può contenere solo lettere e spazi';
     return '';
   };
 
@@ -58,7 +61,7 @@ const ProfileCreationForm: React.FC<ProfileCreationFormProps> = ({ onComplete })
   const handleSave = async () => {
     const trimmedName = displayName.trim();
     const error = validateName(trimmedName);
-    
+
     if (error) {
       setNameError(error);
       showToast(error, 'error');
@@ -97,15 +100,17 @@ const ProfileCreationForm: React.FC<ProfileCreationFormProps> = ({ onComplete })
 
       {/* Avatar selection */}
       <div className="mb-6">
-        <label className="block font-retro text-sm font-medium mb-3">Scegli il tuo avatar</label>
+        <label className="block font-retro text-sm font-medium mb-3">
+          Scegli il tuo avatar
+        </label>
         <div className="grid grid-cols-4 gap-3" data-testid="avatar-picker">
           {AVATAR_PRESETS.map((avatar) => (
             <button
               type="button"
               key={avatar.id}
               className={`w-16 h-16 border-2 flex items-center justify-center overflow-hidden transition-all duration-200 ${
-                selectedAvatar === avatar.url 
-                  ? 'border-yellow-400 bg-yellow-100 shadow-lg transform scale-105' 
+                selectedAvatar === avatar.url
+                  ? 'border-yellow-400 bg-yellow-100 shadow-lg transform scale-105'
                   : 'border-gray-400 bg-white hover:border-yellow-300 hover:bg-yellow-50 hover:scale-102'
               }`}
               onClick={() => setSelectedAvatar(avatar.url)}
@@ -113,8 +118,8 @@ const ProfileCreationForm: React.FC<ProfileCreationFormProps> = ({ onComplete })
               title={avatar.name}
               disabled={isLoading}
             >
-              <img 
-                src={avatar.url} 
+              <img
+                src={avatar.url}
                 alt={avatar.name}
                 className="w-full h-full object-cover pixelated"
               />
@@ -123,21 +128,24 @@ const ProfileCreationForm: React.FC<ProfileCreationFormProps> = ({ onComplete })
         </div>
         {selectedAvatar && (
           <p className="text-center text-xs text-muted-foreground mt-2">
-            {AVATAR_PRESETS.find(a => a.url === selectedAvatar)?.name}
+            {AVATAR_PRESETS.find((a) => a.url === selectedAvatar)?.name}
           </p>
         )}
       </div>
 
       {/* Name input */}
       <div className="mb-6">
-        <label htmlFor="displayName" className="block font-retro text-sm font-medium mb-2">
+        <label
+          htmlFor="displayName"
+          className="block font-retro text-sm font-medium mb-2"
+        >
           Il tuo nome da guerriero
         </label>
-        <input 
-          type="text" 
-          id="displayName" 
+        <input
+          type="text"
+          id="displayName"
           className={`nes-input w-full ${nameError ? 'is-error' : ''}`}
-          placeholder="Es. Marco il Valoroso" 
+          placeholder="Es. Marco il Valoroso"
           maxLength={30}
           value={displayName}
           onChange={handleNameChange}
@@ -147,7 +155,10 @@ const ProfileCreationForm: React.FC<ProfileCreationFormProps> = ({ onComplete })
           disabled={isLoading}
         />
         {nameError && (
-          <p className="text-red-500 text-xs mt-1 font-retro" data-testid="error-name">
+          <p
+            className="text-red-500 text-xs mt-1 font-retro"
+            data-testid="error-name"
+          >
             {nameError}
           </p>
         )}
@@ -158,18 +169,18 @@ const ProfileCreationForm: React.FC<ProfileCreationFormProps> = ({ onComplete })
 
       {/* Action buttons */}
       <div className="flex gap-3 justify-center">
-        <button 
-          type='submit'
+        <button
+          type="submit"
           className={`nes-btn font-retro px-6 py-2 ${
-            !displayName.trim() || nameError || isLoading 
-              ? 'is-disabled' 
+            !displayName.trim() || nameError || isLoading
+              ? 'is-disabled'
               : 'is-primary'
           }`}
           onClick={handleSave}
           disabled={!displayName.trim() || !!nameError || isLoading}
           data-testid="button-save-profile"
         >
-          {isLoading ? 'Creazione...' : '⚔️ Inizia l\'avventura'}
+          {isLoading ? 'Creazione...' : "Inizia l'avventura"}
         </button>
       </div>
     </div>
