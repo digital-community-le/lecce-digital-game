@@ -35,20 +35,31 @@ const DebugDungeon: React.FC = () => {
         throw new Error('game-data.json non è disponibile nel bundle.');
       }
 
-      const challenge = data.challenges?.find((c: any) => c.id === 'debug-dungeon');
+      const challenge = data.challenges?.find(
+        (c: any) => c.id === 'debug-dungeon'
+      );
 
-      if (!challenge || !Array.isArray(challenge.questions) || challenge.questions.length === 0) {
-        throw new Error('Nessuna domanda trovata per la challenge "debug-dungeon" in game-data.json');
+      if (
+        !challenge ||
+        !Array.isArray(challenge.questions) ||
+        challenge.questions.length === 0
+      ) {
+        throw new Error(
+          'Nessuna domanda trovata per la challenge "debug-dungeon" in game-data.json'
+        );
       }
 
-      const questions: QuizQuestion[] = challenge.questions.map((q: any, idx: number) => ({
-        id: q.id ?? String(idx + 1),
-        question: q.question ?? q.text ?? 'Question',
-        options: q.options ?? [],
-        correctAnswer: typeof q.correctAnswer === 'number' ? q.correctAnswer : 0,
-        explanation: q.explanation ?? '',
-        category: q.category ?? 'General',
-      }));
+      const questions: QuizQuestion[] = challenge.questions.map(
+        (q: any, idx: number) => ({
+          id: q.id ?? String(idx + 1),
+          question: q.question ?? q.text ?? 'Question',
+          options: q.options ?? [],
+          correctAnswer:
+            typeof q.correctAnswer === 'number' ? q.correctAnswer : 0,
+          explanation: q.explanation ?? '',
+          category: q.category ?? 'General',
+        })
+      );
 
       let state = gameStorage.getQuizState(gameState.currentUser.userId);
 
@@ -69,7 +80,9 @@ const DebugDungeon: React.FC = () => {
       setQuizState(state);
       return true;
     } catch (err: any) {
-      setLoadError(err?.message ?? 'Errore durante il caricamento delle domande');
+      setLoadError(
+        err?.message ?? 'Errore durante il caricamento delle domande'
+      );
       return false;
     } finally {
       setIsLoading(false);
@@ -115,28 +128,32 @@ const DebugDungeon: React.FC = () => {
   const handleNextQuestion = () => {
     if (!quizState) return;
 
-    const isLastQuestion = quizState.currentQuestionIndex === quizState.questions.length - 1;
-    
+    const isLastQuestion =
+      quizState.currentQuestionIndex === quizState.questions.length - 1;
+
     if (isLastQuestion) {
       // Complete the quiz
       const finalScore = quizState.score;
       const percentage = (finalScore / QUESTIONS_COUNT) * 100;
       const passed = percentage >= PASS_THRESHOLD;
-      
+
       const completedState: QuizState = {
         ...quizState,
         completed: true,
         finishedAt: new Date().toISOString(),
       };
-      
+
       setQuizState(completedState);
       gameStorage.saveQuizState(gameState.currentUser.userId, completedState);
-      
+
       if (passed) {
         updateChallengeProgress('debug-dungeon', finalScore, true);
       } else {
         updateChallengeProgress('debug-dungeon', finalScore, false);
-        showToast(`Punteggio insufficiente. Serve almeno ${PASS_THRESHOLD}%`, 'warning');
+        showToast(
+          `Punteggio insufficiente. Serve almeno ${PASS_THRESHOLD}%`,
+          'warning'
+        );
       }
     } else {
       // Move to next question
@@ -144,11 +161,11 @@ const DebugDungeon: React.FC = () => {
         ...quizState,
         currentQuestionIndex: quizState.currentQuestionIndex + 1,
       };
-      
+
       setQuizState(nextState);
       gameStorage.saveQuizState(gameState.currentUser.userId, nextState);
     }
-    
+
     setSelectedAnswer(null);
     setShowExplanation(false);
   };
@@ -176,12 +193,12 @@ const DebugDungeon: React.FC = () => {
       return;
     }
 
-  // No questions available locally: try to re-fetch from game-data.json
-  setSelectedAnswer(null);
-  setShowExplanation(false);
-  setLoadError(null);
-  const success = await fetchAndInit();
-  if (success) showToast('Quiz riavviato!', 'info');
+    // No questions available locally: try to re-fetch from game-data.json
+    setSelectedAnswer(null);
+    setShowExplanation(false);
+    setLoadError(null);
+    const success = await fetchAndInit();
+    if (success) showToast('Quiz riavviato!', 'info');
   };
 
   if (isLoading) {
@@ -198,7 +215,9 @@ const DebugDungeon: React.FC = () => {
       <div className="p-4">
         <p className="title bg-card">Debug Dungeon</p>
         <div className="text-center">
-          <p className="text-sm text-red-600 mb-3">{loadError ?? 'Impossibile inizializzare il quiz.'}</p>
+          <p className="text-sm text-red-600 mb-3">
+            {loadError ?? 'Impossibile inizializzare il quiz.'}
+          </p>
           <div className="flex justify-center gap-2">
             <button
               className="nes-btn is-primary"
@@ -217,13 +236,16 @@ const DebugDungeon: React.FC = () => {
   }
 
   const currentQuestion = quizState.questions[quizState.currentQuestionIndex];
-  const progressPercentage = ((quizState.currentQuestionIndex + (showExplanation ? 1 : 0)) / QUESTIONS_COUNT) * 100;
+  const progressPercentage =
+    ((quizState.currentQuestionIndex + (showExplanation ? 1 : 0)) /
+      QUESTIONS_COUNT) *
+    100;
   const currentScore = quizState.score;
 
   if (quizState.completed) {
     const percentage = (quizState.score / QUESTIONS_COUNT) * 100;
     const passed = percentage >= PASS_THRESHOLD;
-    
+
     return (
       <ChallengeContentLayout
         gemTitle="La Gemma del Sapere"
@@ -242,42 +264,47 @@ const DebugDungeon: React.FC = () => {
       >
         <div>
           <div className="p-4">
-          <div className="text-center">
-            <div className={`nes-container p-4 mb-4 ${passed ? 'is-success' : 'is-error'}`}>
-              <div className="text-4xl mb-2">{passed ? '🏆' : '💀'}</div>
-              <h4 className="font-retro text-sm mb-2">
-                {passed ? 'Dungeon Conquistato!' : 'Dungeon Non Superato'}
-              </h4>
-              <p className="text-sm mb-3">
-                {passed 
-                  ? 'Hai dimostrato le tue competenze! La Gemma del Sapere è tua.' 
-                  : `Hai bisogno di più preparazione. Serve almeno ${PASS_THRESHOLD}% per superare il dungeon.`
-                }
-              </p>
-              <div className="nes-container is-light p-3">
-                <div className="text-sm">
-                  <div className="flex justify-between">
-                    <span>Punteggio:</span>
-                    <span className="font-retro">{quizState.score}/{QUESTIONS_COUNT}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Percentuale:</span>
-                    <span className="font-retro">{percentage.toFixed(1)}%</span>
+            <div className="text-center">
+              <div
+                className={`nes-container p-4 mb-4 ${passed ? 'is-success' : 'is-error'}`}
+              >
+                <div className="text-4xl mb-2">{passed ? '🏆' : '💀'}</div>
+                <h4 className="font-retro text-sm mb-2">
+                  {passed ? 'Dungeon Conquistato!' : 'Dungeon Non Superato'}
+                </h4>
+                <p className="text-sm mb-3">
+                  {passed
+                    ? 'Hai dimostrato le tue competenze! La Gemma del Sapere è tua.'
+                    : `Hai bisogno di più preparazione. Serve almeno ${PASS_THRESHOLD}% per superare il dungeon.`}
+                </p>
+                <div className="nes-container is-light p-3">
+                  <div className="text-sm">
+                    <div className="flex justify-between">
+                      <span>Punteggio:</span>
+                      <span className="font-retro">
+                        {quizState.score}/{QUESTIONS_COUNT}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Percentuale:</span>
+                      <span className="font-retro">
+                        {percentage.toFixed(1)}%
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
+
+              <button
+                className="nes-btn is-warning"
+                onClick={handleRestart}
+                data-testid="button-restart-quiz"
+              >
+                Riprova
+              </button>
             </div>
-            
-            <button 
-              className="nes-btn is-warning"
-              onClick={handleRestart}
-              data-testid="button-restart-quiz"
-            >
-              Riprova
-            </button>
           </div>
         </div>
-      </div>
       </ChallengeContentLayout>
     );
   }
@@ -294,11 +321,12 @@ const DebugDungeon: React.FC = () => {
       isCompleted={false}
     >
       <div>
-
         {/* Question */}
         <div className="mb-6">
           <div className="nes-container with-title mb-4">
-            <p className="title">Domanda {quizState.currentQuestionIndex + 1}</p>
+            <p className="title">
+              Domanda {quizState.currentQuestionIndex + 1}
+            </p>
             <p className="text-sm p-3" data-testid="question-text">
               {currentQuestion.question}
             </p>
@@ -307,12 +335,16 @@ const DebugDungeon: React.FC = () => {
           {/* Options */}
           <div className="space-y-2" data-testid="answer-options">
             {currentQuestion.options.map((option, index) => {
-              let buttonClass = 'w-full p-3 border-2 border-black text-left text-sm transition-colors';
-              
+              let buttonClass =
+                'w-full p-3 border-2 border-black text-left text-sm transition-colors';
+
               if (showExplanation) {
                 if (index === currentQuestion.correctAnswer) {
                   buttonClass += ' bg-green-200 text-green-800';
-                } else if (index === selectedAnswer && index !== currentQuestion.correctAnswer) {
+                } else if (
+                  index === selectedAnswer &&
+                  index !== currentQuestion.correctAnswer
+                ) {
                   buttonClass += ' bg-red-200 text-red-800';
                 } else {
                   buttonClass += ' bg-muted cursor-not-allowed';
@@ -324,7 +356,7 @@ const DebugDungeon: React.FC = () => {
                   buttonClass += ' bg-muted hover:bg-primary hover:text-white';
                 }
               }
-              
+
               return (
                 <button
                   key={index}
@@ -334,8 +366,13 @@ const DebugDungeon: React.FC = () => {
                   data-testid={`answer-option-${index}`}
                 >
                   {String.fromCharCode(65 + index)}. {option}
-                  {showExplanation && index === currentQuestion.correctAnswer && ' ✓'}
-                  {showExplanation && index === selectedAnswer && index !== currentQuestion.correctAnswer && ' ✗'}
+                  {showExplanation &&
+                    index === currentQuestion.correctAnswer &&
+                    ' ✓'}
+                  {showExplanation &&
+                    index === selectedAnswer &&
+                    index !== currentQuestion.correctAnswer &&
+                    ' ✗'}
                 </button>
               );
             })}
@@ -354,20 +391,18 @@ const DebugDungeon: React.FC = () => {
         {/* Action button */}
         <div className="text-center">
           {showExplanation && (
-            <button 
+            <button
               className="nes-btn is-primary"
               onClick={handleNextQuestion}
               data-testid="button-next-question"
             >
-              {quizState.currentQuestionIndex === quizState.questions.length - 1 
-                ? 'Completa quiz' 
-                : 'Prossima domanda'
-              }
+              {quizState.currentQuestionIndex === quizState.questions.length - 1
+                ? 'Completa quiz'
+                : 'Prossima domanda'}
             </button>
           )}
         </div>
       </div>
-
     </ChallengeContentLayout>
   );
 };

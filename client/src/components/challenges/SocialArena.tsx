@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
-import { useGameStore } from "@/hooks/use-game-store";
-import { gameStorage } from "@/lib/storage";
-import { putBlob, getBlobUrl } from "@/lib/blobStore";
-import { SocialProof } from "@shared/schema";
-import CameraCapture from "@/components/CameraCapture";
-import OcrModal from "@/components/OcrModal";
-import ChallengeContentLayout from "@/components/layout/ChallengeContentLayout";
-import communityGem from "@assets/images/gem-of-community.png";
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useGameStore } from '@/hooks/use-game-store';
+import { gameStorage } from '@/lib/storage';
+import { putBlob, getBlobUrl } from '@/lib/blobStore';
+import { SocialProof } from '@shared/schema';
+import CameraCapture from '@/components/CameraCapture';
+import OcrModal from '@/components/OcrModal';
+import ChallengeContentLayout from '@/components/layout/ChallengeContentLayout';
+import communityGem from '@assets/images/gem-of-community.png';
 import GameData from '@/assets/game-data.json';
 
 const SocialArena: React.FC = () => {
@@ -30,15 +30,15 @@ const SocialArena: React.FC = () => {
   const [showCamera, setShowCamera] = useState(false);
   const cameraInputRef = useRef<HTMLInputElement | null>(null);
   const [sharePhase, setSharePhase] = useState<
-    "idle" | "captured" | "shared" | "await_screenshot"
-  >("idle");
+    'idle' | 'captured' | 'shared' | 'await_screenshot'
+  >('idle');
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [ocrModalOpen, setOcrModalOpen] = useState(false);
   const [forcedValidated, setForcedValidated] = useState(false);
   const [showShareGuide, setShowShareGuide] = useState(false);
 
   // challenge settings (fallbacks to sensible defaults)
-  const challenge = gameState.challenges.find((c) => c.id === "social-arena");
+  const challenge = gameState.challenges.find((c) => c.id === 'social-arena');
   // Prefer runtime challenge settings (from gameState), then fall back to
   // static game-data.json, then sensible defaults.
   const staticChallenge = (GameData as any)?.challenges?.find(
@@ -48,13 +48,18 @@ const SocialArena: React.FC = () => {
 
   // Derive required tags as an array. Do NOT use any fallback tag. If there are
   // no required tags, the flow ends after sharing (no screenshot upload / OCR).
-  const rawRequiredFromRuntime = (challenge as any)?.settings?.requiredTags ?? (challenge as any)?.settings?.requiredTag;
-  const rawRequiredFromStatic = staticSettings?.requiredTags ?? staticSettings?.requiredTag;
+  const rawRequiredFromRuntime =
+    (challenge as any)?.settings?.requiredTags ??
+    (challenge as any)?.settings?.requiredTag;
+  const rawRequiredFromStatic =
+    staticSettings?.requiredTags ?? staticSettings?.requiredTag;
   const rawRequired = rawRequiredFromRuntime ?? rawRequiredFromStatic;
 
   let requiredTags: string[] = [];
   if (Array.isArray(rawRequired)) {
-    requiredTags = rawRequired.filter((t) => typeof t === 'string' && t.trim().length > 0);
+    requiredTags = rawRequired.filter(
+      (t) => typeof t === 'string' && t.trim().length > 0
+    );
   } else if (typeof rawRequired === 'string' && rawRequired.trim().length > 0) {
     // If static/runtime provided a single string, treat it as single-element list
     requiredTags = [rawRequired.trim()];
@@ -65,7 +70,9 @@ const SocialArena: React.FC = () => {
   const hasRequiredTags = requiredTags.length > 0;
 
   const confidenceThreshold =
-    (challenge as any)?.settings?.confidenceThreshold ?? staticSettings?.confidenceThreshold ?? 70;
+    (challenge as any)?.settings?.confidenceThreshold ??
+    staticSettings?.confidenceThreshold ??
+    70;
 
   useEffect(() => {
     // Load latest proof from storage and update UI/progress
@@ -84,8 +91,8 @@ const SocialArena: React.FC = () => {
     setProof(latest || null);
     if (
       latest &&
-      typeof latest.imageLocalUrl === "string" &&
-      latest.imageLocalUrl.startsWith("blob_")
+      typeof latest.imageLocalUrl === 'string' &&
+      latest.imageLocalUrl.startsWith('blob_')
     ) {
       getBlobUrl(latest.imageLocalUrl)
         .then((u) => {
@@ -96,7 +103,7 @@ const SocialArena: React.FC = () => {
     setIsLoading(false);
 
     const validProof = userProofs.find((p) => p.detected && p.verified);
-    if (validProof) updateChallengeProgress("social-arena", 1, true);
+    if (validProof) updateChallengeProgress('social-arena', 1, true);
   }, [gameState.currentUser.userId]);
 
   const handleTakePicture = () => {
@@ -106,11 +113,11 @@ const SocialArena: React.FC = () => {
 
     // Fallback: create a file input for camera capture dynamically
     try {
-      const input = document.createElement("input");
-      input.type = "file";
-      input.accept = "image/*";
-      input.setAttribute("capture", "environment");
-      input.style.display = "none";
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.setAttribute('capture', 'environment');
+      input.style.display = 'none';
 
       const onChange = (e: Event) => {
         const file = (e.target as HTMLInputElement).files?.[0];
@@ -118,18 +125,18 @@ const SocialArena: React.FC = () => {
           setSelectedFile(file);
         }
         // cleanup
-        input.removeEventListener("change", onChange);
+        input.removeEventListener('change', onChange);
         if (input.parentNode) input.parentNode.removeChild(input);
       };
 
-      input.addEventListener("change", onChange);
+      input.addEventListener('change', onChange);
       document.body.appendChild(input);
       input.click();
     } catch (err) {
-      console.error("Errore nell’aprire la fotocamera/file picker:", err);
+      console.error('Errore nell’aprire la fotocamera/file picker:', err);
       showToast(
         'Impossibile aprire la fotocamera. Usa "Scegli immagine".',
-        "error"
+        'error'
       );
     }
   };
@@ -138,8 +145,8 @@ const SocialArena: React.FC = () => {
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = event.target.files?.[0];
-    if (!file || !file.type.startsWith("image/")) {
-      showToast("Seleziona un'immagine valida", "error");
+    if (!file || !file.type.startsWith('image/')) {
+      showToast("Seleziona un'immagine valida", 'error');
       return;
     }
 
@@ -153,7 +160,7 @@ const SocialArena: React.FC = () => {
     setSelectedFile(file);
     setSelectedPreviewUrl(URL.createObjectURL(file));
     setFailedAttempts(0);
-    setSharePhase("captured");
+    setSharePhase('captured');
 
     if (!gameState.currentUser.userId) return;
     try {
@@ -174,14 +181,14 @@ const SocialArena: React.FC = () => {
         const url = await getBlobUrl(blobId);
         setProofPreviewUrl(url || null);
       } catch {}
-      setSharePhase("captured");
+      setSharePhase('captured');
       showToast(
-        "Immagine salvata. Ora condividi la storia o salta se non vuoi condividerla.",
-        "info"
+        'Immagine salvata. Ora condividi la storia o salta se non vuoi condividerla.',
+        'info'
       );
     } catch (err) {
-      console.error("Errore salvataggio immagine:", err);
-      showToast("Errore nel salvataggio dell'immagine", "error");
+      console.error('Errore salvataggio immagine:', err);
+      showToast("Errore nel salvataggio dell'immagine", 'error');
     }
   };
 
@@ -199,7 +206,7 @@ const SocialArena: React.FC = () => {
     // reset failed attempts when user provides a new image
     setFailedAttempts(0);
     // advance UI to share step immediately
-    setSharePhase("captured");
+    setSharePhase('captured');
     if (!gameState.currentUser.userId) return;
     try {
       const blobId = await putBlob(file);
@@ -219,14 +226,14 @@ const SocialArena: React.FC = () => {
         const url = await getBlobUrl(blobId);
         setProofPreviewUrl(url || null);
       } catch {}
-      setSharePhase("captured");
+      setSharePhase('captured');
       showToast(
-        "Immagine salvata. Ora condividi la storia o salta se non vuoi condividerla.",
-        "info"
+        'Immagine salvata. Ora condividi la storia o salta se non vuoi condividerla.',
+        'info'
       );
     } catch (err) {
-      console.error("Errore salvataggio immagine:", err);
-      showToast("Errore nel salvataggio dell'immagine", "error");
+      console.error('Errore salvataggio immagine:', err);
+      showToast("Errore nel salvataggio dell'immagine", 'error');
     }
   };
 
@@ -263,14 +270,14 @@ const SocialArena: React.FC = () => {
         setProofPreviewUrl(url || null);
       } catch {}
 
-      setSharePhase("await_screenshot");
+      setSharePhase('await_screenshot');
       showToast(
-        "Immagine salvata. Condividi la storia e poi carica lo screenshot per la verifica.",
-        "info"
+        'Immagine salvata. Condividi la storia e poi carica lo screenshot per la verifica.',
+        'info'
       );
     } catch (error) {
-      console.error("Error saving image blob:", error);
-      showToast("Errore nel salvataggio dell'immagine", "error");
+      console.error('Error saving image blob:', error);
+      showToast("Errore nel salvataggio dell'immagine", 'error');
     } finally {
       setIsUploading(false);
     }
@@ -296,7 +303,7 @@ const SocialArena: React.FC = () => {
 
   const handleForceValidate = () => {
     if (!gameState.currentUser.userId) return;
-    updateChallengeProgress("social-arena", 1, true);
+    updateChallengeProgress('social-arena', 1, true);
     setForcedValidated(true);
   };
 
@@ -304,10 +311,10 @@ const SocialArena: React.FC = () => {
     // allow user to skip the challenge; mark as completed but unverified
     if (!gameState.currentUser.userId) return;
     // Skip: mark as completed (but do not mark OCR/verification as done). Progress only reaches 100% when OCR succeeds or manual validation.
-    updateChallengeProgress("social-arena", 1, true);
+    updateChallengeProgress('social-arena', 1, true);
     showToast(
-      "Hai scelto di saltare la condivisione. La challenge è considerata completata senza verifica.",
-      "info"
+      'Hai scelto di saltare la condivisione. La challenge è considerata completata senza verifica.',
+      'info'
     );
   };
 
@@ -319,9 +326,9 @@ const SocialArena: React.FC = () => {
 
   // Define a clear step-based progression
   const totalSteps = hasRequiredTags ? 3 : 2; // If no tags, final OCR step is skipped
-  const step1Done = sharePhase !== "idle";
+  const step1Done = sharePhase !== 'idle';
   const step2Done =
-    sharePhase === "shared" || sharePhase === "await_screenshot";
+    sharePhase === 'shared' || sharePhase === 'await_screenshot';
   // Final step only completes when OCR verified (isCompleted) or manual validation occurred (forcedValidated)
   const step3Done = isCompleted || forcedValidated;
   const currentStepNumber = step3Done ? 3 : step2Done ? 2 : step1Done ? 1 : 0;
@@ -329,12 +336,12 @@ const SocialArena: React.FC = () => {
   // Map progress percent to NES.css progress variants
   const progressClass =
     progressPercent >= 100
-      ? "is-success"
+      ? 'is-success'
       : progressPercent >= 66
-      ? "is-primary"
-      : progressPercent >= 33
-      ? "is-warning"
-      : "is-error";
+        ? 'is-primary'
+        : progressPercent >= 33
+          ? 'is-warning'
+          : 'is-error';
   // no-op: preview URL is stored in proofPreviewUrl
 
   if (isLoading) {
@@ -353,7 +360,7 @@ const SocialArena: React.FC = () => {
       description="Davanti allo Stand, il tuo gesto diventa simbolo: cattura la foto con il gadget e attiva l'epilogo della leggenda."
       tip={
         hasRequiredTags
-          ? `Scatta la foto al gadget nello stand; lascia che la comunità veda la tua impresa. Il sistema rileverà automaticamente uno di questi tag: ${requiredTags.join(", ")}.`
+          ? `Scatta la foto al gadget nello stand; lascia che la comunità veda la tua impresa. Il sistema rileverà automaticamente uno di questi tag: ${requiredTags.join(', ')}.`
           : `Scatta la foto al gadget nello stand; lascia che la comunità veda la tua impresa. Nessuna verifica automatica è prevista per questa challenge.`
       }
       progress={currentStepNumber > 0 ? currentStepNumber : 0}
@@ -384,7 +391,7 @@ const SocialArena: React.FC = () => {
                         className="w-16 h-16 object-cover inline-block"
                       />
                     ) : (
-                      "📸"
+                      '📸'
                     )}
                   </div>
                   <p className="text-sm mb-4">
@@ -426,7 +433,7 @@ const SocialArena: React.FC = () => {
               )}
 
               {/* Step 2: after selectedFile saved (sharePhase === 'captured') -> show only share or skip */}
-              {selectedFile && sharePhase === "captured" && (
+              {selectedFile && sharePhase === 'captured' && (
                 <div className="space-y-4">
                   <div className="text-4xl">
                     {selectedPreviewUrl ? (
@@ -436,7 +443,7 @@ const SocialArena: React.FC = () => {
                         className="w-16 h-16 object-cover inline-block"
                       />
                     ) : (
-                      "📸"
+                      '📸'
                     )}
                   </div>
                   <p className="text-sm">
@@ -450,35 +457,35 @@ const SocialArena: React.FC = () => {
                           try {
                             await navigator.share({
                               files: [selectedFile],
-                              text: "Condivido la mia storia su Instagram",
+                              text: 'Condivido la mia storia su Instagram',
                             });
-                            setSharePhase("shared");
+                            setSharePhase('shared');
                             showToast(
-                              "Condividi la storia su Instagram, poi torna qui e carica lo screenshot.",
-                              "info"
+                              'Condividi la storia su Instagram, poi torna qui e carica lo screenshot.',
+                              'info'
                             );
                           } catch (e) {
-                            setSharePhase("await_screenshot");
+                            setSharePhase('await_screenshot');
                             showToast(
-                              "Perfetto: ora carica lo screenshot della Story.",
-                              "info"
+                              'Perfetto: ora carica lo screenshot della Story.',
+                              'info'
                             );
                           }
                         } else {
-                          setSharePhase("await_screenshot");
+                          setSharePhase('await_screenshot');
                           showToast(
-                            "Condividi manualmente su Instagram, poi carica lo screenshot da questa schermata.",
-                            "info"
+                            'Condividi manualmente su Instagram, poi carica lo screenshot da questa schermata.',
+                            'info'
                           );
                         }
 
                         // If there are no required tags, complete the challenge now
                         if (!hasRequiredTags && gameState.currentUser.userId) {
-                          updateChallengeProgress("social-arena", 1, true);
+                          updateChallengeProgress('social-arena', 1, true);
                           setForcedValidated(true);
                           showToast(
-                            "Condivisione completata. Nessuna verifica automatica richiesta; prova considerata completata.",
-                            "success"
+                            'Condivisione completata. Nessuna verifica automatica richiesta; prova considerata completata.',
+                            'success'
                           );
                         }
                       }}
@@ -496,9 +503,10 @@ const SocialArena: React.FC = () => {
               )}
 
               {/* Step 3: after sharePhase advances to 'shared' or 'await_screenshot' -> allow screenshot upload and OCR */}
-              {hasRequiredTags && selectedFile &&
-                (sharePhase === "shared" ||
-                  sharePhase === "await_screenshot") && (
+              {hasRequiredTags &&
+                selectedFile &&
+                (sharePhase === 'shared' ||
+                  sharePhase === 'await_screenshot') && (
                   <div className="space-y-4">
                     <div className="text-4xl">
                       {screenshotPreviewUrl ? (
@@ -508,7 +516,7 @@ const SocialArena: React.FC = () => {
                           className="w-16 h-16 object-cover inline-block"
                         />
                       ) : (
-                        "📸"
+                        '📸'
                       )}
                     </div>
                     <p className="text-sm">
@@ -582,7 +590,7 @@ const SocialArena: React.FC = () => {
                       setProofPreviewUrl(url || null);
                     } catch {}
                     if (proof.verified) {
-                      updateChallengeProgress("social-arena", 1, true);
+                      updateChallengeProgress('social-arena', 1, true);
                       setForcedValidated(true);
                       setFailedAttempts(0);
                     } else {
@@ -590,7 +598,7 @@ const SocialArena: React.FC = () => {
                     }
                   } catch (err) {
                     console.error(
-                      "Error saving screenshot proof after OCR modal verification",
+                      'Error saving screenshot proof after OCR modal verification',
                       err
                     );
                   } finally {
@@ -604,8 +612,17 @@ const SocialArena: React.FC = () => {
 
             {/* Share guide modal */}
             {showShareGuide && (
-              <div className="fixed inset-0 z-60 flex items-center justify-center" style={{ background: 'rgba(43, 20, 36, 0.85)' }}>
-                <div className="rounded-lg p-4 max-w-md w-full" style={{ background: 'var(--ldc-background)', color: 'var(--ldc-primary-dark)' }}>
+              <div
+                className="fixed inset-0 z-60 flex items-center justify-center"
+                style={{ background: 'rgba(43, 20, 36, 0.85)' }}
+              >
+                <div
+                  className="rounded-lg p-4 max-w-md w-full"
+                  style={{
+                    background: 'var(--ldc-background)',
+                    color: 'var(--ldc-primary-dark)',
+                  }}
+                >
                   <h3 className="font-retro text-sm mb-2">
                     Come condividere su Instagram
                   </h3>
@@ -658,10 +675,10 @@ const SocialArena: React.FC = () => {
               {proof && (
                 <div className="nes-container is-light p-3">
                   <div className="text-xs text-left">
-                    <div>Tag rilevati: {proof.detectedTags.join(", ")}</div>
+                    <div>Tag rilevati: {proof.detectedTags.join(', ')}</div>
                     <div>
-                      Verificato:{" "}
-                      {new Date(proof.createdAt).toLocaleString("it-IT")}
+                      Verificato:{' '}
+                      {new Date(proof.createdAt).toLocaleString('it-IT')}
                     </div>
                   </div>
                 </div>

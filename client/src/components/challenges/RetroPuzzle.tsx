@@ -26,13 +26,16 @@ const RetroPuzzle: React.FC = () => {
 
   // If configuration is missing, surface a clear error message and log it.
   if (!retroConfig || !PAIRS_DATA) {
-    console.error('RetroPuzzle configuration not found in game-data.json (expected challenge id "retro-puzzle").');
+    console.error(
+      'RetroPuzzle configuration not found in game-data.json (expected challenge id "retro-puzzle").'
+    );
     return (
       <div className="p-4">
         <p className="title bg-card">Retro Puzzle — Errore</p>
         <div className="text-center text-red-600 mt-4">
-          Configurazione della challenge "retro-puzzle" non trovata in <code>game-data.json</code>.
-          Controlla che la sezione sia presente e valida.
+          Configurazione della challenge "retro-puzzle" non trovata in{' '}
+          <code>game-data.json</code>. Controlla che la sezione sia presente e
+          valida.
         </div>
       </div>
     );
@@ -44,12 +47,16 @@ const RetroPuzzle: React.FC = () => {
   useEffect(() => {
     if (gameState.currentUser.userId) {
       let state = gameStorage.getPuzzleState(gameState.currentUser.userId);
-      
+
       if (!state) {
         // Initialize new puzzle state
-  const shuffledTerms = [...PAIRS_DATA.map((p: PuzzlePair) => p.term)].sort(() => Math.random() - 0.5);
-  const shuffledCategories = [...PAIRS_DATA.map((p: PuzzlePair) => p.category)].sort(() => Math.random() - 0.5);
-        
+        const shuffledTerms = [
+          ...PAIRS_DATA.map((p: PuzzlePair) => p.term),
+        ].sort(() => Math.random() - 0.5);
+        const shuffledCategories = [
+          ...PAIRS_DATA.map((p: PuzzlePair) => p.category),
+        ].sort(() => Math.random() - 0.5);
+
         state = {
           id: `puzzle_${Date.now()}`,
           pairs: PAIRS_DATA,
@@ -60,10 +67,10 @@ const RetroPuzzle: React.FC = () => {
           attempts: 0,
           startedAt: new Date().toISOString(),
         };
-        
+
         gameStorage.savePuzzleState(gameState.currentUser.userId, state);
       }
-      
+
       setPuzzleState(state);
       setIsLoading(false);
     }
@@ -80,9 +87,11 @@ const RetroPuzzle: React.FC = () => {
   const handleCategoryClick = (category: string) => {
     if (!selectedTerm || !puzzleState) return;
 
-    const correctPair = puzzleState.pairs.find(pair => pair.term === selectedTerm);
+    const correctPair = puzzleState.pairs.find(
+      (pair) => pair.term === selectedTerm
+    );
     const isCorrect = correctPair?.category === category;
-    
+
     const newAttempts = puzzleState.attempts + 1;
     let newMatches = { ...puzzleState.matches };
     let newRemaining = puzzleState.remaining;
@@ -118,16 +127,24 @@ const RetroPuzzle: React.FC = () => {
     if (isCompleted) {
       updateChallengeProgress('retro-puzzle', PAIRS_COUNT, true);
     } else {
-      updateChallengeProgress('retro-puzzle', PAIRS_COUNT - newRemaining, false);
+      updateChallengeProgress(
+        'retro-puzzle',
+        PAIRS_COUNT - newRemaining,
+        false
+      );
     }
   };
 
   const handleRestart = () => {
     if (!gameState.currentUser.userId) return;
 
-  const shuffledTerms = [...PAIRS_DATA.map((p: PuzzlePair) => p.term)].sort(() => Math.random() - 0.5);
-  const shuffledCategories = [...PAIRS_DATA.map((p: PuzzlePair) => p.category)].sort(() => Math.random() - 0.5);
-    
+    const shuffledTerms = [...PAIRS_DATA.map((p: PuzzlePair) => p.term)].sort(
+      () => Math.random() - 0.5
+    );
+    const shuffledCategories = [
+      ...PAIRS_DATA.map((p: PuzzlePair) => p.category),
+    ].sort(() => Math.random() - 0.5);
+
     const newState: PuzzleState = {
       id: `puzzle_${Date.now()}`,
       pairs: PAIRS_DATA,
@@ -138,7 +155,7 @@ const RetroPuzzle: React.FC = () => {
       attempts: 0,
       startedAt: new Date().toISOString(),
     };
-    
+
     setPuzzleState(newState);
     gameStorage.savePuzzleState(gameState.currentUser.userId, newState);
     setSelectedTerm(null);
@@ -154,7 +171,8 @@ const RetroPuzzle: React.FC = () => {
     );
   }
 
-  const progressPercentage = ((PAIRS_COUNT - puzzleState.remaining) / PAIRS_COUNT) * 100;
+  const progressPercentage =
+    ((PAIRS_COUNT - puzzleState.remaining) / PAIRS_COUNT) * 100;
   const isCompleted = puzzleState.remaining === 0;
 
   return (
@@ -181,17 +199,30 @@ const RetroPuzzle: React.FC = () => {
                   {puzzleState.shuffledTerms.map((term) => {
                     const isMatched = puzzleState.matches[term];
                     const isSelected = selectedTerm === term;
-                    
+
                     return (
                       <button
                         key={term}
                         className={`w-full p-3 border-2 text-left text-sm transition-colors`}
                         style={
                           isMatched
-                            ? { background: 'var(--ldc-rpg-green)', color: 'var(--ldc-background)', border: '2px solid var(--ldc-rpg-green)', cursor: 'not-allowed' }
+                            ? {
+                                background: 'var(--ldc-rpg-green)',
+                                color: 'var(--ldc-background)',
+                                border: '2px solid var(--ldc-rpg-green)',
+                                cursor: 'not-allowed',
+                              }
                             : isSelected
-                              ? { background: 'var(--ldc-primary)', color: 'var(--ldc-background)', border: '2px solid var(--ldc-primary-dark)' }
-                              : { background: 'var(--ldc-background)', color: 'var(--ldc-primary-dark)', border: '2px solid var(--ldc-primary-dark)' }
+                              ? {
+                                  background: 'var(--ldc-primary)',
+                                  color: 'var(--ldc-background)',
+                                  border: '2px solid var(--ldc-primary-dark)',
+                                }
+                              : {
+                                  background: 'var(--ldc-background)',
+                                  color: 'var(--ldc-primary-dark)',
+                                  border: '2px solid var(--ldc-primary-dark)',
+                                }
                         }
                         onClick={() => !isMatched && handleTermClick(term)}
                         disabled={!!isMatched}
@@ -209,20 +240,40 @@ const RetroPuzzle: React.FC = () => {
                 <h4 className="font-retro text-xs mb-3">Categorie</h4>
                 <div className="space-y-2" data-testid="categories-column">
                   {puzzleState.shuffledCategories.map((category) => {
-                    const isMatched = Object.values(puzzleState.matches).includes(category);
-                    
+                    const isMatched = Object.values(
+                      puzzleState.matches
+                    ).includes(category);
+
                     return (
                       <button
                         key={category}
                         className={`w-full p-3 border-2 text-left text-sm transition-colors`}
                         style={
                           isMatched
-                            ? { background: 'var(--ldc-rpg-green)', color: 'var(--ldc-background)', border: '2px solid var(--ldc-rpg-green)', cursor: 'not-allowed' }
+                            ? {
+                                background: 'var(--ldc-rpg-green)',
+                                color: 'var(--ldc-background)',
+                                border: '2px solid var(--ldc-rpg-green)',
+                                cursor: 'not-allowed',
+                              }
                             : selectedTerm
-                              ? { background: 'var(--ldc-primary-dark)', color: 'var(--ldc-background)', border: '2px solid var(--ldc-primary)' }
-                              : { background: 'var(--ldc-background)', color: 'var(--ldc-primary-dark)', border: '2px solid var(--ldc-primary-dark)', cursor: 'not-allowed' }
+                              ? {
+                                  background: 'var(--ldc-primary-dark)',
+                                  color: 'var(--ldc-background)',
+                                  border: '2px solid var(--ldc-primary)',
+                                }
+                              : {
+                                  background: 'var(--ldc-background)',
+                                  color: 'var(--ldc-primary-dark)',
+                                  border: '2px solid var(--ldc-primary-dark)',
+                                  cursor: 'not-allowed',
+                                }
                         }
-                        onClick={() => selectedTerm && !isMatched && handleCategoryClick(category)}
+                        onClick={() =>
+                          selectedTerm &&
+                          !isMatched &&
+                          handleCategoryClick(category)
+                        }
                         disabled={!selectedTerm || isMatched}
                         data-testid={`category-${category.toLowerCase().replace(/[^a-z]/g, '-')}`}
                       >
@@ -236,7 +287,7 @@ const RetroPuzzle: React.FC = () => {
 
             {/* Action buttons */}
             <div className="text-center">
-              <button 
+              <button
                 className="nes-btn is-warning"
                 onClick={handleRestart}
                 data-testid="button-restart-puzzle"
@@ -265,7 +316,7 @@ const RetroPuzzle: React.FC = () => {
             </div>
 
             <div className="text-center">
-              <button 
+              <button
                 className="nes-btn is-warning"
                 onClick={handleRestart}
                 data-testid="button-play-again"
