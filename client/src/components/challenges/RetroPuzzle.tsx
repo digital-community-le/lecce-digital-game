@@ -117,7 +117,6 @@ const RetroPuzzle: React.FC = () => {
 
     if (isCompleted) {
       updateChallengeProgress('retro-puzzle', PAIRS_COUNT, true);
-      showToast('Puzzle completato!', 'success');
     } else {
       updateChallengeProgress('retro-puzzle', PAIRS_COUNT - newRemaining, false);
     }

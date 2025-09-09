@@ -298,7 +298,6 @@ const SocialArena: React.FC = () => {
     if (!gameState.currentUser.userId) return;
     updateChallengeProgress("social-arena", 1, true);
     setForcedValidated(true);
-    showToast("Prova convalidata manualmente.", "success");
   };
 
   const handleSkipChallenge = () => {

@@ -101,9 +101,7 @@ const DebugDungeon: React.FC = () => {
     gameStorage.saveQuizState(gameState.currentUser.userId, updatedState);
     setShowExplanation(true);
 
-    if (isCorrect) {
-      showToast('Risposta corretta!', 'success');
-    } else {
+    if (!isCorrect) {
       showToast('Risposta sbagliata', 'error');
     }
   };
@@ -136,7 +134,6 @@ const DebugDungeon: React.FC = () => {
       
       if (passed) {
         updateChallengeProgress('debug-dungeon', finalScore, true);
-        showToast('Quiz completato con successo!', 'success');
       } else {
         updateChallengeProgress('debug-dungeon', finalScore, false);
         showToast(`Punteggio insufficiente. Serve almeno ${PASS_THRESHOLD}%`, 'warning');
