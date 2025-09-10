@@ -307,17 +307,6 @@ const SocialArena: React.FC = () => {
     setForcedValidated(true);
   };
 
-  const handleSkipChallenge = () => {
-    // allow user to skip the challenge; mark as completed but unverified
-    if (!gameState.currentUser.userId) return;
-    // Skip: mark as completed (but do not mark OCR/verification as done). Progress only reaches 100% when OCR succeeds or manual validation.
-    updateChallengeProgress('social-arena', 1, true);
-    showToast(
-      'Hai scelto di saltare la condivisione. La challenge è considerata completata senza verifica.',
-      'info'
-    );
-  };
-
   // single proof view
   const isCompleted = useMemo(
     () => !!proof?.verified,
@@ -491,12 +480,6 @@ const SocialArena: React.FC = () => {
                       }}
                     >
                       Condividi
-                    </button>
-                    <button
-                      className="nes-btn is-warning"
-                      onClick={() => handleSkipChallenge()}
-                    >
-                      Salta condivisione
                     </button>
                   </div>
                 </div>
