@@ -27,14 +27,6 @@ const CompletionModal: React.FC = () => {
   const handleClose = useCallback(() => {
     closeModal('completion');
 
-    // Check if all challenges are completed for final epilogue
-    if (gameState.gameProgress.completedChallenges.length === 4) {
-      setTimeout(() => {
-        openModal('epilogue');
-      }, 500);
-      // Still navigate to map afterwards for consistent flow
-    }
-
     // Only trigger animation if this challenge was just completed (not previously completed)
     if (completionData?.challengeId) {
       const currentIndex = gameState.challenges.findIndex(
