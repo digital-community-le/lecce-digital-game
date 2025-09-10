@@ -27,10 +27,6 @@ const GameCompletionProtectedRoute: React.FC<
     }
   }, []);
 
-  if (gameState.gameProgress.gameCompleted) {
-    return null;
-  }
-
   return <>{children}</>;
 };
 
