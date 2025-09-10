@@ -127,7 +127,7 @@ jobs:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_LECCE_DIGITAL_LEGENDS }}
           channelId: live
-          projectId: lecce-digital-game
+          projectId: lecce-digital-legends
 
       - name: Get version info
         id: version
@@ -169,7 +169,7 @@ jobs:
                   
                   ✅ Version \`${version}\` deployed successfully to production
                   📅 Deployed at: \`${timestamp}\`
-                  🌐 Live URL: https://lecce-digital-game.web.app
+                  🌐 Live URL: https://lecce-digital-legends.web.app
                   
                   **What happened:**
                   1. ✅ Release PR merged ${mergeType}
@@ -201,7 +201,7 @@ jobs:
                   body: `🚀 **Automated Release ${version}**
                   
                   📅 Released at: ${timestamp}
-                  🌐 Live URL: https://lecce-digital-game.web.app
+                  🌐 Live URL: https://lecce-digital-legends.web.app
                   
                   This release was automatically created and deployed.`,
                   draft: false,
