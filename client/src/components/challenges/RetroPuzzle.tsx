@@ -25,6 +25,15 @@ const RetroPuzzle: React.FC = () => {
     term: string;
     category: string;
   } | null>(null);
+  const [hiddenElements, setHiddenElements] = useState<Set<string>>(new Set());
+  const [pendingUpdate, setPendingUpdate] = useState<{
+    matches: Record<string, string>;
+    remaining: number;
+    attempts: number;
+    score: number;
+    isCompleted: boolean;
+    finishedAt?: string;
+  } | null>(null);
 
   const BASE_POINTS = 10;
   const PENALTY = 2;
@@ -103,48 +112,82 @@ const RetroPuzzle: React.FC = () => {
     let newScore = puzzleState.score || 0;
 
     if (isCorrect) {
+      // Avvia l'animazione di blink PRIMA di aggiornare lo stato
+      setBlinkingPair({ term: selectedTerm, category });
+
+      // Prepara i dati per l'aggiornamento dopo il blink
       newMatches[selectedTerm] = category;
       newRemaining--;
       newScore += BASE_POINTS;
-      showToast(`Giusto! +${BASE_POINTS} punti`, 'success');
 
-      // Avvia l'animazione di blink per la coppia corretta
-      setBlinkingPair({ term: selectedTerm, category });
+      const isCompleted = newRemaining === 0;
+      const finishedAt = isCompleted ? new Date().toISOString() : undefined;
+
+      // Salva le modifiche in pendingUpdate invece di applicarle immediatamente
+      setPendingUpdate({
+        matches: newMatches,
+        remaining: newRemaining,
+        attempts: newAttempts,
+        score: newScore,
+        isCompleted,
+        finishedAt,
+      });
+
+      showToast(`Giusto! +${BASE_POINTS} punti`, 'success');
     } else {
+      // Per risposte sbagliate, aggiorna immediatamente (no blink)
       newScore = Math.max(0, newScore - PENALTY);
+
+      const updatedState: PuzzleState = {
+        ...puzzleState,
+        attempts: newAttempts,
+        score: newScore,
+      };
+
+      setPuzzleState(updatedState);
+      gameStorage.savePuzzleState(gameState.currentUser.userId, updatedState);
       showToast(`Sbagliato — riprova (−${PENALTY} punti)`, 'error');
     }
 
-    const isCompleted = newRemaining === 0;
-    const finalScore = isCompleted ? newScore : undefined;
-    const finishedAt = isCompleted ? new Date().toISOString() : undefined;
-
-    const updatedState: PuzzleState = {
-      ...puzzleState,
-      matches: newMatches,
-      remaining: newRemaining,
-      attempts: newAttempts,
-      score: newScore,
-      finishedAt,
-    };
-
-    setPuzzleState(updatedState);
-    gameStorage.savePuzzleState(gameState.currentUser.userId, updatedState);
     setSelectedTerm(null);
-
-    if (isCompleted) {
-      updateChallengeProgress('retro-puzzle', PAIRS_COUNT, true);
-    } else {
-      updateChallengeProgress(
-        'retro-puzzle',
-        PAIRS_COUNT - newRemaining,
-        false
-      );
-    }
   };
 
   const handleBlinkComplete = () => {
-    setBlinkingPair(null);
+    // Quando il blink termina, aggiungi gli elementi alla lista di quelli nascosti
+    if (blinkingPair) {
+      setHiddenElements(
+        (prev) => new Set([...prev, blinkingPair.term, blinkingPair.category])
+      );
+      setBlinkingPair(null);
+    }
+
+    // Applica l'aggiornamento pendente DOPO il blink
+    if (pendingUpdate && puzzleState) {
+      const updatedState: PuzzleState = {
+        ...puzzleState,
+        matches: pendingUpdate.matches,
+        remaining: pendingUpdate.remaining,
+        attempts: pendingUpdate.attempts,
+        score: pendingUpdate.score,
+        finishedAt: pendingUpdate.finishedAt,
+      };
+
+      setPuzzleState(updatedState);
+      gameStorage.savePuzzleState(gameState.currentUser.userId, updatedState);
+
+      // Aggiorna il progresso della challenge
+      if (pendingUpdate.isCompleted) {
+        updateChallengeProgress('retro-puzzle', PAIRS_COUNT, true);
+      } else {
+        updateChallengeProgress(
+          'retro-puzzle',
+          PAIRS_COUNT - pendingUpdate.remaining,
+          false
+        );
+      }
+
+      setPendingUpdate(null);
+    }
   };
 
   const handleRestart = () => {
@@ -172,6 +215,8 @@ const RetroPuzzle: React.FC = () => {
     gameStorage.savePuzzleState(gameState.currentUser.userId, newState);
     setSelectedTerm(null);
     setBlinkingPair(null);
+    setHiddenElements(new Set()); // Reset hidden elements
+    setPendingUpdate(null); // Reset pending update
     showToast('Puzzle riavviato!', 'info');
   };
 
@@ -209,32 +254,42 @@ const RetroPuzzle: React.FC = () => {
               <div>
                 <h4 className="font-retro text-xs mb-3">Termini</h4>
                 <div className="space-y-2" data-testid="terms-column">
-                  {puzzleState.shuffledTerms.map((term) => {
-                    const isMatched = puzzleState.matches[term];
-                    const isSelected = selectedTerm === term;
-                    const shouldBlink = blinkingPair?.term === term;
+                  {puzzleState.shuffledTerms
+                    .filter((term) => {
+                      // Nascondi gli elementi che sono stati esplicitamente nascosti dopo il blink
+                      if (hiddenElements.has(term)) return false;
 
-                    let variant: 'primary' | 'success' | 'disabled' = 'primary';
-                    if (isMatched) {
-                      variant = 'success';
-                    } else if (isSelected) {
-                      variant = 'primary';
-                    }
+                      // Mostra tutti gli altri, inclusi quelli che stanno blinkando
+                      return true;
+                    })
+                    .map((term) => {
+                      const isMatched = puzzleState.matches[term];
+                      const isSelected = selectedTerm === term;
+                      const shouldBlink = blinkingPair?.term === term;
 
-                    return (
-                      <ChallengeButton
-                        key={term}
-                        variant={variant}
-                        shouldBlink={shouldBlink}
-                        onBlinkComplete={handleBlinkComplete}
-                        onClick={() => !isMatched && handleTermClick(term)}
-                        disabled={!!isMatched}
-                        data-testid={`term-${term.toLowerCase().replace(/[^a-z]/g, '-')}`}
-                      >
-                        {term}
-                      </ChallengeButton>
-                    );
-                  })}
+                      let variant: 'default' | 'primary' | 'success' =
+                        'default';
+                      if (shouldBlink) {
+                        // Durante il blink, i pulsanti devono essere verdi
+                        variant = 'success';
+                      } else if (isSelected) {
+                        variant = 'primary';
+                      }
+
+                      return (
+                        <ChallengeButton
+                          key={term}
+                          variant={variant}
+                          shouldBlink={shouldBlink}
+                          onBlinkComplete={handleBlinkComplete}
+                          onClick={() => !isMatched && handleTermClick(term)}
+                          disabled={!!isMatched}
+                          data-testid={`term-${term.toLowerCase().replace(/[^a-z]/g, '-')}`}
+                        >
+                          {term} {isMatched && '✓'}
+                        </ChallengeButton>
+                      );
+                    })}
                 </div>
               </div>
 
@@ -242,38 +297,50 @@ const RetroPuzzle: React.FC = () => {
               <div>
                 <h4 className="font-retro text-xs mb-3">Categorie</h4>
                 <div className="space-y-2" data-testid="categories-column">
-                  {puzzleState.shuffledCategories.map((category) => {
-                    const isMatched = Object.values(
-                      puzzleState.matches
-                    ).includes(category);
-                    const shouldBlink = blinkingPair?.category === category;
+                  {puzzleState.shuffledCategories
+                    .filter((category) => {
+                      // Nascondi gli elementi che sono stati esplicitamente nascosti dopo il blink
+                      if (hiddenElements.has(category)) return false;
 
-                    let variant: 'primary' | 'success' | 'disabled' =
-                      'disabled';
-                    if (isMatched) {
-                      variant = 'success';
-                    } else if (selectedTerm) {
-                      variant = 'primary';
-                    }
+                      // Mostra tutti gli altri, inclusi quelli che stanno blinkando
+                      return true;
+                    })
+                    .map((category) => {
+                      const isMatched = Object.values(
+                        puzzleState.matches
+                      ).includes(category);
+                      const shouldBlink = blinkingPair?.category === category;
 
-                    return (
-                      <ChallengeButton
-                        key={category}
-                        variant={variant}
-                        shouldBlink={shouldBlink}
-                        onBlinkComplete={handleBlinkComplete}
-                        onClick={() =>
-                          selectedTerm &&
-                          !isMatched &&
-                          handleCategoryClick(category)
-                        }
-                        disabled={!selectedTerm || isMatched}
-                        data-testid={`category-${category.toLowerCase().replace(/[^a-z]/g, '-')}`}
-                      >
-                        {category} {isMatched && '✓'}
-                      </ChallengeButton>
-                    );
-                  })}
+                      let variant:
+                        | 'default'
+                        | 'primary'
+                        | 'success'
+                        | 'disabled' = 'disabled';
+                      if (shouldBlink) {
+                        // Durante il blink, i pulsanti devono essere verdi
+                        variant = 'success';
+                      } else if (selectedTerm) {
+                        variant = 'primary';
+                      }
+
+                      return (
+                        <ChallengeButton
+                          key={category}
+                          variant={variant}
+                          shouldBlink={shouldBlink}
+                          onBlinkComplete={handleBlinkComplete}
+                          onClick={() =>
+                            selectedTerm &&
+                            !isMatched &&
+                            handleCategoryClick(category)
+                          }
+                          disabled={!selectedTerm || isMatched}
+                          data-testid={`category-${category.toLowerCase().replace(/[^a-z]/g, '-')}`}
+                        >
+                          {category} {isMatched && '✓'}
+                        </ChallengeButton>
+                      );
+                    })}
                 </div>
               </div>
             </div>

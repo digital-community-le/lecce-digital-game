@@ -4,9 +4,10 @@ import { useState, useEffect, useCallback } from 'react';
  * Hook personalizzato per gestire l'animazione di blink
  * 
  * @param duration - Durata in millisecondi per ogni cambio di stato (default: 200ms)
+ * @param onComplete - Callback chiamata quando l'animazione termina
  * @returns Oggetto con lo stato dell'animazione e funzione per avviarla
  */
-export const useBlinkAnimation = (duration: number = 200) => {
+export const useBlinkAnimation = (duration: number = 200, onComplete?: () => void) => {
   const [flashing, setFlashing] = useState(false);
   const [flashCount, setFlashCount] = useState(0);
 
@@ -27,12 +28,17 @@ export const useBlinkAnimation = (duration: number = 200) => {
           clearInterval(blinkInterval);
           setFlashing(false);
           setFlashCount(0);
+
+          // Chiama il callback di completamento se fornito
+          if (onComplete) {
+            onComplete();
+          }
         }
       }, duration);
 
       return () => clearInterval(blinkInterval);
     }
-  }, [flashing, duration]);
+  }, [flashing, duration, onComplete]);
 
   return {
     flashing,

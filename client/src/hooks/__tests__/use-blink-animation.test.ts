@@ -93,6 +93,38 @@ describe('useBlinkAnimation', () => {
     expect(result.current.isVisible).toBe(true); // flashCount = 2
   });
 
+  it('should call onComplete callback when animation finishes', () => {
+    const onComplete = vi.fn();
+    const { result } = renderHook(() => useBlinkAnimation(200, onComplete));
+
+    act(() => {
+      result.current.startBlink();
+    });
+
+    // Complete the full animation cycle
+    act(() => {
+      vi.advanceTimersByTime(1200); // 6 x 200ms
+    });
+
+    expect(onComplete).toHaveBeenCalledTimes(1);
+    expect(result.current.flashing).toBe(false);
+  });
+
+  it('should not call onComplete if no callback provided', () => {
+    const { result } = renderHook(() => useBlinkAnimation(200));
+
+    act(() => {
+      result.current.startBlink();
+    });
+
+    // Complete the full animation cycle - should not throw
+    act(() => {
+      vi.advanceTimersByTime(1200);
+    });
+
+    expect(result.current.flashing).toBe(false);
+  });
+
   it('should allow custom animation duration', () => {
     const customDuration = 100;
     const { result } = renderHook(() => useBlinkAnimation(customDuration));

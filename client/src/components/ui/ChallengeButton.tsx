@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
  * Tipi di varianti per il ChallengeButton
  */
 export type ButtonVariant =
+  | 'default'
   | 'primary'
   | 'success'
   | 'error'
@@ -49,7 +50,7 @@ export const ChallengeButton = forwardRef<
   (
     {
       children,
-      variant = 'primary',
+      variant = 'default',
       size = 'normal',
       shouldBlink = false,
       blinkDuration,
@@ -60,8 +61,10 @@ export const ChallengeButton = forwardRef<
     },
     ref
   ) => {
-    const { flashing, isVisible, startBlink } =
-      useBlinkAnimation(blinkDuration);
+    const { flashing, isVisible, startBlink } = useBlinkAnimation(
+      blinkDuration,
+      onBlinkComplete
+    );
 
     // Avvia l'animazione quando shouldBlink diventa true
     useEffect(() => {
@@ -70,12 +73,12 @@ export const ChallengeButton = forwardRef<
       }
     }, [shouldBlink, startBlink]);
 
-    // Callback quando l'animazione termina
-    useEffect(() => {
-      if (!flashing && shouldBlink && onBlinkComplete) {
-        onBlinkComplete();
-      }
-    }, [flashing, shouldBlink, onBlinkComplete]);
+    // Rimuoviamo questo useEffect perché ora il callback viene gestito direttamente nell'hook
+    // useEffect(() => {
+    //   if (!flashing && shouldBlink && onBlinkComplete) {
+    //     onBlinkComplete();
+    //   }
+    // }, [flashing, shouldBlink, onBlinkComplete]);
 
     const getVariantClass = () => {
       // Per i pulsanti disabled che dovrebbero mostrare successo, mostriamo success
@@ -83,6 +86,8 @@ export const ChallengeButton = forwardRef<
       if (disabled || variant === 'disabled') return 'is-disabled';
 
       switch (variant) {
+        case 'default':
+          return ''; // Nessuna classe aggiuntiva per stile default (bianco)
         case 'primary':
           return 'is-primary';
         case 'success':

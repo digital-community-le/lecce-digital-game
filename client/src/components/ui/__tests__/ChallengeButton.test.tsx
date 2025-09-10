@@ -13,6 +13,14 @@ describe('ChallengeButton', () => {
 
   it('should apply correct variant classes', () => {
     const { rerender } = render(
+      <ChallengeButton variant="default" onClick={vi.fn()}>
+        Default
+      </ChallengeButton>
+    );
+    expect(screen.getByRole('button')).toHaveClass('nes-btn');
+    expect(screen.getByRole('button')).not.toHaveClass('is-primary');
+
+    rerender(
       <ChallengeButton variant="primary" onClick={vi.fn()}>
         Primary
       </ChallengeButton>
