@@ -4,6 +4,7 @@ import { gameStorage } from '@/lib/storage';
 import { PuzzleState, PuzzlePair } from '@shared/schema';
 import ChallengeCompleted from '@/components/ChallengeCompleted';
 import ChallengeContentLayout from '@/components/layout/ChallengeContentLayout';
+import { ChallengeButton } from '@/components/ui/ChallengeButton';
 import memoryGem from '@assets/images/gem-of-memory.png';
 import gameData from '@/assets/game-data.json';
 
@@ -20,6 +21,10 @@ const RetroPuzzle: React.FC = () => {
   const [puzzleState, setPuzzleState] = useState<PuzzleState | null>(null);
   const [selectedTerm, setSelectedTerm] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [blinkingPair, setBlinkingPair] = useState<{
+    term: string;
+    category: string;
+  } | null>(null);
 
   const BASE_POINTS = 10;
   const PENALTY = 2;
@@ -102,6 +107,9 @@ const RetroPuzzle: React.FC = () => {
       newRemaining--;
       newScore += BASE_POINTS;
       showToast(`Giusto! +${BASE_POINTS} punti`, 'success');
+
+      // Avvia l'animazione di blink per la coppia corretta
+      setBlinkingPair({ term: selectedTerm, category });
     } else {
       newScore = Math.max(0, newScore - PENALTY);
       showToast(`Sbagliato — riprova (−${PENALTY} punti)`, 'error');
@@ -135,6 +143,10 @@ const RetroPuzzle: React.FC = () => {
     }
   };
 
+  const handleBlinkComplete = () => {
+    setBlinkingPair(null);
+  };
+
   const handleRestart = () => {
     if (!gameState.currentUser.userId) return;
 
@@ -159,6 +171,7 @@ const RetroPuzzle: React.FC = () => {
     setPuzzleState(newState);
     gameStorage.savePuzzleState(gameState.currentUser.userId, newState);
     setSelectedTerm(null);
+    setBlinkingPair(null);
     showToast('Puzzle riavviato!', 'info');
   };
 
@@ -199,37 +212,27 @@ const RetroPuzzle: React.FC = () => {
                   {puzzleState.shuffledTerms.map((term) => {
                     const isMatched = puzzleState.matches[term];
                     const isSelected = selectedTerm === term;
+                    const shouldBlink = blinkingPair?.term === term;
+
+                    let variant: 'primary' | 'success' | 'disabled' = 'primary';
+                    if (isMatched) {
+                      variant = 'success';
+                    } else if (isSelected) {
+                      variant = 'primary';
+                    }
 
                     return (
-                      <button
+                      <ChallengeButton
                         key={term}
-                        className={`w-full p-3 border-2 text-left text-sm transition-colors`}
-                        style={
-                          isMatched
-                            ? {
-                                background: 'var(--ldc-rpg-green)',
-                                color: 'var(--ldc-background)',
-                                border: '2px solid var(--ldc-rpg-green)',
-                                cursor: 'not-allowed',
-                              }
-                            : isSelected
-                              ? {
-                                  background: 'var(--ldc-primary)',
-                                  color: 'var(--ldc-background)',
-                                  border: '2px solid var(--ldc-primary-dark)',
-                                }
-                              : {
-                                  background: 'var(--ldc-background)',
-                                  color: 'var(--ldc-primary-dark)',
-                                  border: '2px solid var(--ldc-primary-dark)',
-                                }
-                        }
+                        variant={variant}
+                        shouldBlink={shouldBlink}
+                        onBlinkComplete={handleBlinkComplete}
                         onClick={() => !isMatched && handleTermClick(term)}
                         disabled={!!isMatched}
                         data-testid={`term-${term.toLowerCase().replace(/[^a-z]/g, '-')}`}
                       >
-                        {term} {isMatched && '✓'}
-                      </button>
+                        {term}
+                      </ChallengeButton>
                     );
                   })}
                 </div>
@@ -243,32 +246,22 @@ const RetroPuzzle: React.FC = () => {
                     const isMatched = Object.values(
                       puzzleState.matches
                     ).includes(category);
+                    const shouldBlink = blinkingPair?.category === category;
+
+                    let variant: 'primary' | 'success' | 'disabled' =
+                      'disabled';
+                    if (isMatched) {
+                      variant = 'success';
+                    } else if (selectedTerm) {
+                      variant = 'primary';
+                    }
 
                     return (
-                      <button
+                      <ChallengeButton
                         key={category}
-                        className={`w-full p-3 border-2 text-left text-sm transition-colors`}
-                        style={
-                          isMatched
-                            ? {
-                                background: 'var(--ldc-rpg-green)',
-                                color: 'var(--ldc-background)',
-                                border: '2px solid var(--ldc-rpg-green)',
-                                cursor: 'not-allowed',
-                              }
-                            : selectedTerm
-                              ? {
-                                  background: 'var(--ldc-primary-dark)',
-                                  color: 'var(--ldc-background)',
-                                  border: '2px solid var(--ldc-primary)',
-                                }
-                              : {
-                                  background: 'var(--ldc-background)',
-                                  color: 'var(--ldc-primary-dark)',
-                                  border: '2px solid var(--ldc-primary-dark)',
-                                  cursor: 'not-allowed',
-                                }
-                        }
+                        variant={variant}
+                        shouldBlink={shouldBlink}
+                        onBlinkComplete={handleBlinkComplete}
                         onClick={() =>
                           selectedTerm &&
                           !isMatched &&
@@ -278,7 +271,7 @@ const RetroPuzzle: React.FC = () => {
                         data-testid={`category-${category.toLowerCase().replace(/[^a-z]/g, '-')}`}
                       >
                         {category} {isMatched && '✓'}
-                      </button>
+                      </ChallengeButton>
                     );
                   })}
                 </div>
