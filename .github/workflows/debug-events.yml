@@ -1,0 +1,162 @@
+name: Debug Events Logger
+
+# Trigger on common events to log what triggered the workflow
+on:
+  push:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+  issues:
+    types: [opened, edited, closed]
+  issue_comment:
+    types: [created, edited]
+  pull_request_review_comment:
+    types: [created, edited]
+  release:
+    types: [published, edited]
+  workflow_run:
+    types: [completed]
+  workflow_dispatch: # Manual trigger
+
+permissions:
+  contents: read
+
+jobs:
+  debug-event:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log Event Details
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            console.log('🔍 DEBUG EVENT LOGGER');
+            console.log('='.repeat(50));
+
+            // Log basic event information
+            console.log(`📅 Timestamp: ${new Date().toISOString()}`);
+            console.log(`🎯 Event Name: ${context.eventName}`);
+            console.log(`🏷️  Action: ${context.payload.action || 'N/A'}`);
+            console.log(`👤 Actor: ${context.actor}`);
+            console.log(`📂 Repository: ${context.repo.owner}/${context.repo.repo}`);
+            console.log(`🌿 Branch/Ref: ${context.ref || 'N/A'}`);
+            console.log(`🔗 SHA: ${context.sha || 'N/A'}`);
+            console.log(`🆔 Run ID: ${context.runId}`);
+            console.log(`🔢 Run Number: ${context.runNumber}`);
+
+            console.log('\n📋 EVENT PAYLOAD SUMMARY:');
+            console.log('-'.repeat(30));
+
+            // Log key payload information based on event type
+            const payload = context.payload;
+
+            // Common fields for all events
+            if (payload.repository) {
+              console.log(`📦 Repository: ${payload.repository.full_name}`);
+              console.log(`🔒 Private: ${payload.repository.private}`);
+            }
+
+            if (payload.sender) {
+              console.log(`👤 Sender: ${payload.sender.login} (${payload.sender.type})`);
+            }
+
+            // Event-specific logging
+            switch (context.eventName) {
+              case 'push':
+                console.log(`📤 Pushed to: ${payload.ref}`);
+                console.log(`📊 Commits: ${payload.commits?.length || 0}`);
+                if (payload.commits && payload.commits.length > 0) {
+                  console.log('📝 Recent commits:');
+                  payload.commits.slice(0, 3).forEach(commit => {
+                    console.log(`  - ${commit.id.substring(0, 7)}: ${commit.message.split('\n')[0]}`);
+                  });
+                }
+                break;
+
+              case 'pull_request':
+                if (payload.pull_request) {
+                  const pr = payload.pull_request;
+                  console.log(`🔢 PR #${pr.number}: "${pr.title}"`);
+                  console.log(`📝 State: ${pr.state} (${pr.draft ? 'Draft' : 'Ready'})`);
+                  console.log(`👤 Author: ${pr.user.login}`);
+                  console.log(`📂 Branches: ${pr.head.ref} → ${pr.base.ref}`);
+                  console.log(`🏷️  Labels: ${(pr.labels || []).map(l => l.name).join(', ') || 'None'}`);
+                  console.log(`✅ Mergeable: ${pr.mergeable}`);
+                  console.log(`📊 Commits: ${pr.commits}, Changed files: ${pr.changed_files}`);
+                }
+                break;
+
+              case 'issue_comment':
+              case 'pull_request_review_comment':
+                if (payload.comment) {
+                  console.log(`💬 Comment by: ${payload.comment.user.login}`);
+                  console.log(`📝 Comment preview: ${(payload.comment.body || '').substring(0, 100)}...`);
+                  console.log(`🔗 Comment URL: ${payload.comment.html_url}`);
+                }
+                if (payload.issue) {
+                  console.log(`📋 Issue/PR #${payload.issue.number}: "${payload.issue.title}"`);
+                }
+                break;
+
+              case 'issues':
+                if (payload.issue) {
+                  console.log(`📋 Issue #${payload.issue.number}: "${payload.issue.title}"`);
+                  console.log(`🏷️  Labels: ${(payload.issue.labels || []).map(l => l.name).join(', ') || 'None'}`);
+                  console.log(`📊 State: ${payload.issue.state}`);
+                }
+                break;
+
+              case 'release':
+                if (payload.release) {
+                  console.log(`🚀 Release: ${payload.release.tag_name}`);
+                  console.log(`📝 Title: ${payload.release.name}`);
+                  console.log(`📋 Draft: ${payload.release.draft}, Pre-release: ${payload.release.prerelease}`);
+                  console.log(`🔗 Release URL: ${payload.release.html_url}`);
+                }
+                break;
+
+              case 'workflow_run':
+                console.log(`⚙️  Workflow: ${payload.workflow?.name || 'Unknown'}`);
+                console.log(`🏃 Run: ${payload.workflow_run?.run_number || 'N/A'}`);
+                console.log(`📊 Conclusion: ${payload.workflow_run?.conclusion || 'N/A'}`);
+                break;
+
+              case 'schedule':
+                console.log(`⏰ Scheduled run`);
+                break;
+
+              default:
+                console.log(`📋 Event type: ${context.eventName}`);
+                // Log some generic payload keys
+                const keys = Object.keys(payload).slice(0, 10);
+                console.log(`🔑 Payload keys: ${keys.join(', ')}`);
+            }
+
+            console.log('\n🔍 RAW PAYLOAD SIZE:');
+            console.log('-'.repeat(30));
+            const payloadSize = JSON.stringify(payload).length;
+            console.log(`📏 Payload size: ${payloadSize} characters`);
+            console.log(`📊 Approximate size: ${(payloadSize / 1024).toFixed(2)} KB`);
+
+            console.log('\n✅ DEBUG LOGGING COMPLETE');
+            console.log('='.repeat(50));
+
+      - name: Log Workflow Context
+        run: |
+          echo "🔧 WORKFLOW CONTEXT:"
+          echo "Event: ${{ github.event_name }}"
+          echo "Actor: ${{ github.actor }}"
+          echo "Repository: ${{ github.repository }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "SHA: ${{ github.sha }}"
+          echo "Run ID: ${{ github.run_id }}"
+          echo "Run Number: ${{ github.run_number }}"
+
+      - name: Log Environment Variables
+        run: |
+          echo "🌍 ENVIRONMENT VARIABLES:"
+          echo "CI: $CI"
+          echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
+          echo "GITHUB_EVENT_NAME: $GITHUB_EVENT_NAME"
+          echo "GITHUB_EVENT_PATH: $GITHUB_EVENT_PATH"
+          echo "GITHUB_REPOSITORY: $GITHUB_REPOSITORY"
+          echo "GITHUB_RUN_ID: $GITHUB_RUN_ID"
