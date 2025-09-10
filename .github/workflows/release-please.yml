@@ -24,9 +24,11 @@ jobs:
   # Pre-validation veloce per commit che potrebbero creare release
   pre-validation:
     if: |
-      contains(github.event.head_commit.message, 'feat:') || 
+      contains(github.event.head_commit.message, 'feat:') ||
+      contains(github.event.head_commit.message, 'feat(') || 
       contains(github.event.head_commit.message, 'fix:') || 
-      contains(github.event.head_commit.message, 'BREAKING CHANGE:')
+      contains(github.event.head_commit.message, 'fix(') || 
+      contains(github.event.head_commit.message, 'BREAKING CHANGE')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     outputs:
