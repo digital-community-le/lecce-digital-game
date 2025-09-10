@@ -13,8 +13,6 @@ on:
     types: [created, edited]
   release:
     types: [published, edited]
-  workflow_run:
-    types: [completed]
   workflow_dispatch: # Manual trigger
 
 permissions:
