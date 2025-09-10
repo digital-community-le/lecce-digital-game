@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/digital-community-le/lecce-digital-game/compare/v1.3.0...v1.3.1) (2025-09-10)
+
+
+### Bug Fixes
+
+* auto-merge release PR - poll mergeable and relax release detection ([070ef4e](https://github.com/digital-community-le/lecce-digital-game/commit/070ef4ed2091137381abebf0c0a41426c9b909cd))
+
 ## [1.3.0](https://github.com/digital-community-le/lecce-digital-game/compare/v1.2.0...v1.3.0) (2025-09-10)
 
 
