@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.5](https://github.com/digital-community-le/lecce-digital-game/compare/v1.3.4...v1.3.5) (2025-09-10)
+
+
+### Bug Fixes
+
+* **ci:** update Firebase project ID and live URL in deployment workflow ([9005d01](https://github.com/digital-community-le/lecce-digital-game/commit/9005d01a68d63c5bdbef392fdf5be48d25f617e2))
+
 ## [1.3.4](https://github.com/digital-community-le/lecce-digital-game/compare/v1.3.3...v1.3.4) (2025-09-10)
 
 
