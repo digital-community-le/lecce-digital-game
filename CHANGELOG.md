@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.4.0](https://github.com/digital-community-le/lecce-digital-game/compare/v1.3.7...v1.4.0) (2025-09-10)
+
+
+### Features
+
+* **challenges:** implement unified button styling and blink animation ([a33d48f](https://github.com/digital-community-le/lecce-digital-game/commit/a33d48f1cd610689db52d1267bcb63f865606bd7))
+* **challenges:** implement unified button styling with blink animation for RetroPuzzle ([fab89cb](https://github.com/digital-community-le/lecce-digital-game/commit/fab89cb351b32e4d38dab969ae3063f543959b04))
+
+
+### Bug Fixes
+
+* **ci:** add debug job and fix comment trigger condition in auto-merge workflow ([4de134e](https://github.com/digital-community-le/lecce-digital-game/commit/4de134e4ceae10c37b1964fca12ecf98956ca90e))
+* **ci:** fix shell syntax error in debug step by removing quotes around output interpolation ([5b6c332](https://github.com/digital-community-le/lecce-digital-game/commit/5b6c3326b4dd6dc57e2921340ff6b84a43ef8ae0))
+* **ci:** remove conditional check for issue comment in debug job ([4cdaf69](https://github.com/digital-community-le/lecce-digital-game/commit/4cdaf69791896c28820933b88554663bbde230cf))
+* **ci:** remove workflow path trigger from docs-config-only workflow ([ad907b8](https://github.com/digital-community-le/lecce-digital-game/commit/ad907b8a22e9125059bc1fc9782871c67ae2d913))
+* **ci:** run auto-merge only on PR comments and require autorelease: pending ([4e63461](https://github.com/digital-community-le/lecce-digital-game/commit/4e634611a89cde028d20cb00d3e4c06580cdcbd2))
+* **ci:** update release-please workflow to use v4 outputs and simplify comment logic ([2de8f0c](https://github.com/digital-community-le/lecce-digital-game/commit/2de8f0cdc0b4ba0ac57e7a629577cc0eaad0060f))
+* **ci:** use environment variables in comment step to fix JSON parsing with control characters ([46c0ee0](https://github.com/digital-community-le/lecce-digital-game/commit/46c0ee0e17678d4916f9a52376be902d0faecff7))
+* **ci:** use environment variables in debug step to avoid shell parsing issues with JSON outputs ([a85a9e9](https://github.com/digital-community-le/lecce-digital-game/commit/a85a9e97255ac22bda51b9c715e313d666fe6e94))
+* **completion:** remove epilogue modal from completion flow ([2aebaf7](https://github.com/digital-community-le/lecce-digital-game/commit/2aebaf774a81eddacecf8439b213dc20fb3dc1c3))
+* **completion:** simplify completion flow by removing redundant EpilogueModal ([08ea593](https://github.com/digital-community-le/lecce-digital-game/commit/08ea593c0591a1eaf38188dab1830a85cc80574a))
+* **retro-puzzle:** hide completed pairs instead of just disabling them ([b1f1de9](https://github.com/digital-community-le/lecce-digital-game/commit/b1f1de9ca08d52064ed957743b9820cbe0b2ea6e))
+
 ## [1.3.7](https://github.com/digital-community-le/lecce-digital-game/compare/v1.3.6...v1.3.7) (2025-09-10)
 
 
