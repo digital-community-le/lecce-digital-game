@@ -57,8 +57,9 @@ jobs:
     timeout-minutes: 5
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
-      pr_created: ${{ steps.release.outputs.pr_created }}
-      pr_number: ${{ steps.release.outputs.pr_number }}
+      prs_created: ${{ steps.release.outputs.prs_created }}
+      pr: ${{ steps.release.outputs.pr }}
+      prs: ${{ steps.release.outputs.prs }}
       tag_name: ${{ steps.release.outputs.tag_name }}
       version: ${{ steps.release.outputs.version }}
       html_url: ${{ steps.release.outputs.html_url }}
@@ -74,42 +75,62 @@ jobs:
         run: |
           echo "DEBUG: release action outputs"
           echo "steps.release.outputs.release_created='${{ steps.release.outputs.release_created }}'"
-          echo "steps.release.outputs.pr_created='${{ steps.release.outputs.pr_created }}'"
-          echo "steps.release.outputs.pr_number='${{ steps.release.outputs.pr_number }}'"
+          echo "steps.release.outputs.prs_created='${{ steps.release.outputs.prs_created }}'"
+          echo "steps.release.outputs.pr='${{ steps.release.outputs.pr }}'"
+          echo "steps.release.outputs.prs='${{ steps.release.outputs.prs }}'"
           echo "steps.release.outputs.tag_name='${{ steps.release.outputs.tag_name }}'"
           echo "steps.release.outputs.version='${{ steps.release.outputs.version }}'"
           echo "steps.release.outputs.html_url='${{ steps.release.outputs.html_url }}'"
           echo "needs.pre-validation.outputs.validation_passed='${{ needs.pre-validation.outputs.validation_passed }}'"
 
       - name: Comment on created PR with validation status
-        if: steps.release.outputs.pr_created == 'true'
+        if: needs.pre-validation.outputs.validation_passed == 'true'
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const prNumber = ${{ steps.release.outputs.pr_number }};
-            const validationPassed = ${{ needs.pre-validation.outputs.validation_passed == 'true' }};
+            // Try to get PR number from release-please v4 outputs
+            const prsCreated = `${{ steps.release.outputs.prs_created }}`.trim();
+            const prsOutput = `${{ steps.release.outputs.prs }}`.trim();
+            const prOutput = `${{ steps.release.outputs.pr }}`.trim();
+            let prNumber = '';
 
-            const comment = validationPassed 
-              ? `✅ **Pre-validation passed** - This PR is ready for auto-merge
-                 
-                 📋 **Validation Results:**
-                 - ✅ TypeScript check passed
-                 - ✅ Smart tests passed
-                 - 🤖 Auto-merge will proceed when this PR is ready
-                 
-                 Once merged, deployment will start automatically.`
-              : `⚠️ **Pre-validation failed** - Auto-merge blocked
-                 
-                 📋 **Validation Results:**
-                 - ❌ Pre-validation tests failed
-                 - 🚫 Auto-merge is blocked
-                 
-                 **Action Required:**
-                 1. Check the pre-validation job logs
-                 2. Fix any failing tests  
-                 3. Push fixes to trigger re-validation
-                 4. Manual review and merge when ready`;
+            // Extract PR number from structured outputs
+            if (prsCreated === 'true' && prsOutput) {
+              try {
+                const prs = JSON.parse(prsOutput);
+                if (Array.isArray(prs) && prs.length > 0) {
+                  prNumber = prs[0].number;
+                  console.log(`Found PR #${prNumber} from prs output (${prs.length} PRs total)`);
+                }
+              } catch (e) {
+                console.log('Failed to parse steps.release.outputs.prs:', e.message);
+              }
+            } else if (prOutput) {
+              try {
+                const pr = JSON.parse(prOutput);
+                if (pr && pr.number) {
+                  prNumber = pr.number;
+                  console.log(`Found PR #${prNumber} from pr output`);
+                }
+              } catch (e) {
+                console.log('Failed to parse steps.release.outputs.pr:', e.message);
+              }
+            }
+
+            if (!prNumber) {
+              console.log('No PR number found in release-please outputs; skipping comment.');
+              return;
+            }
+
+            const comment = `✅ **Pre-validation passed** - This PR is ready for auto-merge
+             
+             📋 **Validation Results:**
+             - ✅ TypeScript check passed
+             - ✅ Smart tests passed
+             - 🤖 Auto-merge will proceed when this PR is ready
+             
+             Once merged, deployment will start automatically.`;
 
             await github.rest.issues.createComment({
               owner: context.repo.owner,
