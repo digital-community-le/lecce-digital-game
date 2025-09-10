@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.3.0](https://github.com/digital-community-le/lecce-digital-game/compare/v1.2.0...v1.3.0) (2025-09-10)
+
+
+### Features
+
+* **ci:** aggiunge strumenti completi per troubleshooting auto-merge ([412b375](https://github.com/digital-community-le/lecce-digital-game/commit/412b3753bbf9b16b5b7e359a253a27ab08d0d492))
+
+
+### Bug Fixes
+
+* **deploy:** risolve errore Firebase service account mancante ([eb94a13](https://github.com/digital-community-le/lecce-digital-game/commit/eb94a13da735b28b6d62a8fc11ef777a86d68b08))
+* **deploy:** update Firebase service account secret for deployment ([54a7dd9](https://github.com/digital-community-le/lecce-digital-game/commit/54a7dd91cbaa3813bf89e3ca2f086f163a84298d))
+
 ## [1.2.0](https://github.com/digital-community-le/lecce-digital-game/compare/v1.1.1...v1.2.0) (2025-09-10)
 
 
