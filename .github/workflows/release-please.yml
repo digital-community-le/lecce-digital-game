@@ -72,16 +72,25 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Debug release outputs
+        env:
+          RELEASE_CREATED: ${{ steps.release.outputs.release_created }}
+          PRS_CREATED: ${{ steps.release.outputs.prs_created }}
+          PR_OUTPUT: ${{ steps.release.outputs.pr }}
+          PRS_OUTPUT: ${{ steps.release.outputs.prs }}
+          TAG_NAME: ${{ steps.release.outputs.tag_name }}
+          VERSION: ${{ steps.release.outputs.version }}
+          HTML_URL: ${{ steps.release.outputs.html_url }}
+          VALIDATION_PASSED: ${{ needs.pre-validation.outputs.validation_passed }}
         run: |
           echo "DEBUG: release action outputs"
-          echo "steps.release.outputs.release_created=${{ steps.release.outputs.release_created }}"
-          echo "steps.release.outputs.prs_created=${{ steps.release.outputs.prs_created }}"
-          echo "steps.release.outputs.pr=${{ steps.release.outputs.pr }}"
-          echo "steps.release.outputs.prs=${{ steps.release.outputs.prs }}"
-          echo "steps.release.outputs.tag_name=${{ steps.release.outputs.tag_name }}"
-          echo "steps.release.outputs.version=${{ steps.release.outputs.version }}"
-          echo "steps.release.outputs.html_url=${{ steps.release.outputs.html_url }}"
-          echo "needs.pre-validation.outputs.validation_passed=${{ needs.pre-validation.outputs.validation_passed }}"
+          echo "steps.release.outputs.release_created=$RELEASE_CREATED"
+          echo "steps.release.outputs.prs_created=$PRS_CREATED"
+          echo "steps.release.outputs.pr=$PR_OUTPUT"
+          echo "steps.release.outputs.prs=$PRS_OUTPUT"
+          echo "steps.release.outputs.tag_name=$TAG_NAME"
+          echo "steps.release.outputs.version=$VERSION"
+          echo "steps.release.outputs.html_url=$HTML_URL"
+          echo "needs.pre-validation.outputs.validation_passed=$VALIDATION_PASSED"
 
       - name: Comment on created PR with validation status
         if: needs.pre-validation.outputs.validation_passed == 'true'
