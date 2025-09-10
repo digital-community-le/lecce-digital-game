@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.2](https://github.com/digital-community-le/lecce-digital-game/compare/v1.3.1...v1.3.2) (2025-09-10)
+
+
+### Bug Fixes
+
+* **ci:** update deploy-on-release.yml ([ddbea68](https://github.com/digital-community-le/lecce-digital-game/commit/ddbea68512e9aa9651a90d45fdc22a4d00b27b4e))
+
 ## [1.3.1](https://github.com/digital-community-le/lecce-digital-game/compare/v1.3.0...v1.3.1) (2025-09-10)
 
 
