@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.6.0](https://github.com/digital-community-le/lecce-digital-game/compare/v1.5.0...v1.6.0) (2025-09-10)
+
+
+### Features
+
+* **ci:** add debug events logger workflow ([65f0a49](https://github.com/digital-community-le/lecce-digital-game/commit/65f0a49a8a6f47747f8b1dd172ef3f8d18c4bf64))
+
+
+### Bug Fixes
+
+* **badge:** add consistent error activation message ([8f4d9ff](https://github.com/digital-community-le/lecce-digital-game/commit/8f4d9ff6654971a4cbc422f0654fd1e82e4b58f4))
+* **completion:** ensure CompletionModal is shown before redirect to game-complete ([e074a86](https://github.com/digital-community-le/lecce-digital-game/commit/e074a86053df8e337b600648ac1ea8ec1870dd99))
+* **map:** ensure GameMap useEffect triggers on navigation between challenges ([44d5042](https://github.com/digital-community-le/lecce-digital-game/commit/44d504294109f2185c0d58a3f496c97bedc21e40))
+* **workflow:** remove workflow_run trigger from debug events logger ([09c5ef7](https://github.com/digital-community-le/lecce-digital-game/commit/09c5ef74a065fd31e7ef3a046bdd58cf0752bcfa))
+
 ## [1.5.0](https://github.com/digital-community-le/lecce-digital-game/compare/v1.4.0...v1.5.0) (2025-09-10)
 
 
