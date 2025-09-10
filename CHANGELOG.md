@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.3](https://github.com/digital-community-le/lecce-digital-game/compare/v1.3.2...v1.3.3) (2025-09-10)
+
+
+### Bug Fixes
+
+* **ci:** allow checks write permission for Firebase Hosting deploy action ([11d8eb7](https://github.com/digital-community-le/lecce-digital-game/commit/11d8eb740ea42f5afd1216d02f80449df0e5d4d8))
+
 ## [1.3.2](https://github.com/digital-community-le/lecce-digital-game/compare/v1.3.1...v1.3.2) (2025-09-10)
 
 
