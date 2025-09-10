@@ -10,22 +10,23 @@ interface GameCompletionProtectedRouteProps {
 /**
  * GameCompletionProtectedRoute - Redirects completed games to completion page
  * This is separate from auth protection and handles only game completion state
+ *
+ * Only redirects on initial render if game is already completed.
+ * Does NOT redirect when game becomes completed during gameplay.
  */
-const GameCompletionProtectedRoute: React.FC<GameCompletionProtectedRouteProps> = ({ 
-  children, 
-  redirectPath = '/game-complete' 
-}) => {
+const GameCompletionProtectedRoute: React.FC<
+  GameCompletionProtectedRouteProps
+> = ({ children, redirectPath = '/game-complete' }) => {
   const { gameState } = useGameStore();
   const [, setLocation] = useLocation();
 
+  // Check only on initial render - if game is already completed, redirect
   useEffect(() => {
-    // If game is completed, redirect to completion page
     if (gameState.gameProgress.gameCompleted) {
       setLocation(redirectPath);
     }
-  }, [gameState.gameProgress.gameCompleted, setLocation, redirectPath]);
+  }, []);
 
-  // Don't render if game is completed (will redirect)
   if (gameState.gameProgress.gameCompleted) {
     return null;
   }

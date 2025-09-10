@@ -7,31 +7,32 @@ const GameMapPage: React.FC = () => {
   const [, setLocation] = useLocation();
   const { gameState, toasts, removeToast } = useGameStore();
 
-    
+  useEffect(() => {
+    // Check if all challenges are completed - redirect to final page
+    if (gameState.currentUser.userId && gameState.gameProgress.gameCompleted) {
+      setLocation('/game-complete');
+      return;
+    }
+  }, []);
 
   // Redirect to intro if no user profile
-  // Redirect to game-complete if game is completed (all challenges done)
   useEffect(() => {
     if (!gameState.currentUser.userId) {
       setLocation('/');
       return;
     }
-    
-    // Check if all challenges are completed - redirect to final page
-    if (gameState.gameProgress.completedChallenges.length === 4) {
-      setLocation('/game-complete');
-      return;
-    }
-  }, [gameState.currentUser.userId, gameState.gameProgress.completedChallenges.length, setLocation]);
+  }, [
+    gameState.currentUser.userId,
+    gameState.gameProgress.completedChallenges.length,
+    setLocation,
+  ]);
 
   // Prevent rendering if redirecting
-  if (!gameState.currentUser.userId || gameState.gameProgress.completedChallenges.length === 4) {
+  if (!gameState.currentUser.userId || gameState.gameProgress.gameCompleted) {
     return null; // Will redirect
   }
 
-  return (      
-    <CanvasMap />
-  );
+  return <CanvasMap />;
 };
 
 export default GameMapPage;
