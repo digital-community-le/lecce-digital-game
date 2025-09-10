@@ -65,6 +65,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            // Fetch PR number & data depending on trigger
             let prNumber, prData;
 
             if (context.eventName === 'pull_request') {
@@ -72,7 +73,6 @@ jobs:
               prData = context.payload.pull_request;
             } else if (context.eventName === 'issue_comment') {
               prNumber = context.payload.issue.number;
-              // Fetch PR data
               const { data } = await github.rest.pulls.get({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -81,14 +81,25 @@ jobs:
               prData = data;
             }
 
-            // Verifica che sia una PR di release
-            const isReleasePR = prData.title.startsWith('chore') && 
-                               prData.title.includes('release') &&
-                               prData.user.login === 'github-actions[bot]';
+            // Defensive: ensure we have PR data
+            if (!prData || !prNumber) {
+              console.log('❌ Could not determine PR data, exiting');
+              return { prNumber: prNumber || null, ready: false, reason: 'no_pr_data' };
+            }
+
+            // Rilevazione PR di release: usa le stesse condizioni permissive del job-level if
+            const labels = (prData.labels || []).map(l => l.name);
+            const isReleasePR = prData.user && prData.user.login === 'github-actions[bot]' && (
+              prData.title.startsWith('chore') ||
+              prData.title.startsWith('release') ||
+              prData.title.includes('release') ||
+              (prData.head && prData.head.ref && prData.head.ref.startsWith('release-please--')) ||
+              labels.includes('autorelease: pending')
+            );
 
             if (!isReleasePR) {
-              console.log('❌ Not a release PR, skipping');
-              return;
+              console.log('❌ Not a release PR, skipping auto-merge behavior');
+              return { prNumber, ready: false, reason: 'not_release_pr' };
             }
 
             console.log(`✅ Processing release PR #${prNumber}: ${prData.title}`);
@@ -101,23 +112,39 @@ jobs:
             });
 
             const validationPassed = comments.some(comment => 
-              comment.body.includes('✅ **Pre-validation passed**')
+              comment.body && comment.body.includes('✅ **Pre-validation passed**')
             );
 
             const validationFailed = comments.some(comment => 
-              comment.body.includes('⚠️ **Pre-validation failed**')
+              comment.body && comment.body.includes('⚠️ **Pre-validation failed**')
             );
 
-            console.log(`PR #${prNumber} mergeable: ${prData.mergeable}`);
+            // Ensure mergeable is resolved (GitHub may return null initially). Poll a few times.
+            let mergeable = prData.mergeable;
+            const maxAttempts = 6;
+            let attempt = 0;
+            while ((mergeable === null || mergeable === undefined) && attempt < maxAttempts) {
+              attempt++;
+              console.log(`🔁 mergeable is ${mergeable} - re-fetching PR data (attempt ${attempt}/${maxAttempts})`);
+              await new Promise(res => setTimeout(res, 3000));
+              const { data: refreshed } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber
+              });
+              mergeable = refreshed.mergeable;
+            }
+
+            console.log(`PR #${prNumber} mergeable: ${mergeable}`);
             console.log(`Validation passed: ${validationPassed}`);
             console.log(`Validation failed: ${validationFailed}`);
 
-            const ready = prData.mergeable && validationPassed && !validationFailed;
+            const ready = Boolean(mergeable) && validationPassed && !validationFailed;
 
             return {
               prNumber,
               ready,
-              mergeable: prData.mergeable,
+              mergeable: mergeable,
               validationPassed,
               validationFailed,
               title: prData.title
