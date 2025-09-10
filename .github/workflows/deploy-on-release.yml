@@ -105,16 +105,16 @@ jobs:
 
       - name: Check Firebase Secrets
         env:
-          FIREBASE_SECRET: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_LECCE_DIGITAL_GAME }}
+          FIREBASE_SECRET: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_LECCE_DIGITAL_LEGENDS }}
         run: |
           if [ -z "$FIREBASE_SECRET" ]; then
-            echo "❌ FIREBASE_SERVICE_ACCOUNT_LECCE_DIGITAL_GAME secret not configured"
+            echo "❌ FIREBASE_SERVICE_ACCOUNT_LECCE_DIGITAL_LEGENDS secret not configured"
             echo ""
             echo "🔧 To fix this:"
             echo "1. Go to Firebase Console: https://console.firebase.google.com/project/lecce-digital-game/settings/serviceaccounts/adminsdk"
             echo "2. Generate new private key and download JSON"
             echo "3. Add secret to GitHub: https://github.com/digital-community-le/lecce-digital-game/settings/secrets/actions"
-            echo "4. Secret name: FIREBASE_SERVICE_ACCOUNT_LECCE_DIGITAL_GAME"
+            echo "4. Secret name: FIREBASE_SERVICE_ACCOUNT_LECCE_DIGITAL_LEGENDS"
             echo "5. Secret value: [entire JSON file content]"
             exit 1
           else
@@ -125,7 +125,7 @@ jobs:
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_LECCE_DIGITAL_GAME }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_LECCE_DIGITAL_LEGENDS }}
           channelId: live
           projectId: lecce-digital-game
 
