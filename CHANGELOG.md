@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.0](https://github.com/digital-community-le/lecce-digital-game/compare/v1.4.0...v1.5.0) (2025-09-10)
+
+
+### Features
+
+* **badge:** improve error handling with detailed messages and retry functionality ([acc0c6f](https://github.com/digital-community-le/lecce-digital-game/commit/acc0c6fa3db5583bf4d7ad248186c66c7adce075))
+
 ## [1.4.0](https://github.com/digital-community-le/lecce-digital-game/compare/v1.3.7...v1.4.0) (2025-09-10)
 
 
