@@ -15,6 +15,24 @@ permissions:
   checks: write
 
 jobs:
+  # Job di debug per capire perché l'auto-merge non si triggera
+  debug-auto-merge:
+    if: github.event_name == 'issue_comment' && github.event.issue.pull_request
+    runs-on: ubuntu-latest
+    steps:
+      - name: Debug comment trigger
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            console.log('🔍 DEBUG: Auto-merge comment trigger analysis');
+            console.log(`Event: ${context.eventName}`);
+            console.log(`Comment author: ${context.payload.comment.user.login}`);
+            console.log(`Comment body preview: ${(context.payload.comment.body || '').substring(0, 100)}...`);
+            console.log(`Is PR: ${!!context.payload.issue.pull_request}`);
+            console.log(`Contains "Pre-validation passed": ${(context.payload.comment.body || '').includes('Pre-validation passed')}`);
+            console.log(`Is from github-actions[bot]: ${context.payload.comment.user.login === 'github-actions[bot]'}`);
+
   auto-merge-release-pr:
     # Trigger per PR di release-please (rileva vari formati)
     if: |
@@ -24,7 +42,7 @@ jobs:
       ) ||
       (github.event_name == 'issue_comment' &&
        github.event.issue.pull_request &&
-       contains(github.event.comment.body, '✅ **Pre-validation passed**') &&
+       contains(github.event.comment.body, 'Pre-validation passed') &&
        github.event.comment.user.login == 'github-actions[bot]')
     runs-on: ubuntu-latest
     steps:
