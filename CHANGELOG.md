@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.7](https://github.com/digital-community-le/lecce-digital-game/compare/v1.3.6...v1.3.7) (2025-09-10)
+
+
+### Bug Fixes
+
+* **html:** update PWA meta tags for improved mobile compatibility ([85eb325](https://github.com/digital-community-le/lecce-digital-game/commit/85eb325cf363f5561a6fbaf45758c56360446153))
+* **workflow:** simplify auto-merge conditions for pull requests ([c3fea31](https://github.com/digital-community-le/lecce-digital-game/commit/c3fea31d1c5110fd022fb8938232fe21bfb06f95))
+
 ## [1.3.6](https://github.com/digital-community-le/lecce-digital-game/compare/v1.3.5...v1.3.6) (2025-09-10)
 
 
