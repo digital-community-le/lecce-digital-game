@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.2.0](https://github.com/digital-community-le/lecce-digital-game/compare/v1.1.1...v1.2.0) (2025-09-10)
+
+
+### Features
+
+* **ci:** aggiunge strumenti completi per gestione permessi GitHub Actions ([86edc1d](https://github.com/digital-community-le/lecce-digital-game/commit/86edc1dc26555f126826441cf118b92be42efa73))
+* **scripts:** aggiunge check-workflows per monitoraggio stato CI/CD ([408caeb](https://github.com/digital-community-le/lecce-digital-game/commit/408caeba3d174de949257f58dd27685eced979cf))
+
+
+### Bug Fixes
+
+* **ci:** migliora rilevamento PR release-please per auto-merge ([857028a](https://github.com/digital-community-le/lecce-digital-game/commit/857028a1bb0c24670cdc8bf75ceaaec4c88a8c91))
+* **ci:** risolve definitivamente errore 403 'Resource not accessible by integration' ([9ee1d55](https://github.com/digital-community-le/lecce-digital-game/commit/9ee1d5526f778e523d994ba5b95ddd44d9f1df77))
+* **ci:** risolve errore 'Resource not accessible by integration' nel deployment ([c1f2373](https://github.com/digital-community-le/lecce-digital-game/commit/c1f2373800221fee97e8c7c9c3df4077a4b29775))
+* **scripts:** corregge check-permissions.js per ES modules ([c8fc856](https://github.com/digital-community-le/lecce-digital-game/commit/c8fc856da62079a6074fa6013e7584e9e2740774))
+
 ## [1.1.1](https://github.com/digital-community-le/lecce-digital-game/compare/v1.1.0...v1.1.1) (2025-09-09)
 
 
