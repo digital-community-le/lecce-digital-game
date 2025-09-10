@@ -7,7 +7,6 @@ import IntroPage from '@/pages/Intro';
 import GameMapPage from '@/pages/GameMap';
 import GameCompletePage from '@/pages/GameComplete';
 import BadgePage from '@/pages/BadgePage';
-import StatisticsPage from '@/pages/Statistics';
 import GameLayout from '@/components/layout/GameLayout';
 import GuildBuilderPage from '@/pages/challenges/GuildBuilder';
 import RetroPuzzlePage from '@/pages/challenges/RetroPuzzle';
@@ -99,14 +98,6 @@ function Router() {
             <GameLayout>
               <BadgePage />
             </GameLayout>
-          </AuthProtectedRoute>
-        )}
-      </Route>
-
-      <Route path="/statistics">
-        {() => (
-          <AuthProtectedRoute>
-            <StatisticsPage />
           </AuthProtectedRoute>
         )}
       </Route>
