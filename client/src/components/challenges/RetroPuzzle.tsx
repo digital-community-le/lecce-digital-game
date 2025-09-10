@@ -132,8 +132,6 @@ const RetroPuzzle: React.FC = () => {
         isCompleted,
         finishedAt,
       });
-
-      showToast(`Giusto! +${BASE_POINTS} punti`, 'success');
     } else {
       // Per risposte sbagliate, aggiorna immediatamente (no blink)
       newScore = Math.max(0, newScore - PENALTY);
@@ -188,36 +186,6 @@ const RetroPuzzle: React.FC = () => {
 
       setPendingUpdate(null);
     }
-  };
-
-  const handleRestart = () => {
-    if (!gameState.currentUser.userId) return;
-
-    const shuffledTerms = [...PAIRS_DATA.map((p: PuzzlePair) => p.term)].sort(
-      () => Math.random() - 0.5
-    );
-    const shuffledCategories = [
-      ...PAIRS_DATA.map((p: PuzzlePair) => p.category),
-    ].sort(() => Math.random() - 0.5);
-
-    const newState: PuzzleState = {
-      id: `puzzle_${Date.now()}`,
-      pairs: PAIRS_DATA,
-      shuffledTerms,
-      shuffledCategories,
-      matches: {},
-      remaining: PAIRS_COUNT,
-      attempts: 0,
-      startedAt: new Date().toISOString(),
-    };
-
-    setPuzzleState(newState);
-    gameStorage.savePuzzleState(gameState.currentUser.userId, newState);
-    setSelectedTerm(null);
-    setBlinkingPair(null);
-    setHiddenElements(new Set()); // Reset hidden elements
-    setPendingUpdate(null); // Reset pending update
-    showToast('Puzzle riavviato!', 'info');
   };
 
   if (isLoading || !puzzleState) {
@@ -344,17 +312,6 @@ const RetroPuzzle: React.FC = () => {
                 </div>
               </div>
             </div>
-
-            {/* Action buttons */}
-            <div className="text-center">
-              <button
-                className="nes-btn is-warning"
-                onClick={handleRestart}
-                data-testid="button-restart-puzzle"
-              >
-                Ricomincia
-              </button>
-            </div>
           </>
         ) : (
           <ChallengeCompleted
@@ -373,16 +330,6 @@ const RetroPuzzle: React.FC = () => {
                   <span>{puzzleState.attempts}</span>
                 </div>
               </div>
-            </div>
-
-            <div className="text-center">
-              <button
-                className="nes-btn is-warning"
-                onClick={handleRestart}
-                data-testid="button-play-again"
-              >
-                Gioca di nuovo
-              </button>
             </div>
           </ChallengeCompleted>
         )}

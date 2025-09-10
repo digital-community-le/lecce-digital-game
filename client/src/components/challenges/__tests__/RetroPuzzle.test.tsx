@@ -135,16 +135,4 @@ describe('RetroPuzzle with ChallengeButton', () => {
       { timeout: 2000 }
     );
   });
-
-  it('should show restart button with warning variant', async () => {
-    render(<RetroPuzzle />);
-
-    await waitFor(() => {
-      expect(screen.getByText('Ricomincia')).toBeInTheDocument();
-    });
-
-    const restartButton = screen.getByTestId('button-restart-puzzle');
-    expect(restartButton).toHaveClass('nes-btn');
-    expect(restartButton).toHaveClass('is-warning');
-  });
 });
