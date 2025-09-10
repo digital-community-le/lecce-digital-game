@@ -7,6 +7,7 @@ import {
   getDevFestBadge,
   submitGameCompletion,
   isDevFestSubmissionSuccessful,
+  getDevFestSubmissionStatus,
 } from '@/services/completionService';
 
 // Mock dei servizi
@@ -40,6 +41,8 @@ const mockBadge = {
 describe('BadgePage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Setup default mocks
+    (getDevFestSubmissionStatus as any).mockReturnValue(null);
   });
 
   it('should display the badge when available', async () => {
@@ -91,6 +94,95 @@ describe('BadgePage', () => {
     await waitFor(() => {
       expect(submitGameCompletion).toHaveBeenCalled();
       expect(screen.getByText(mockBadge.name)).toBeInTheDocument();
+    });
+  });
+
+  it('should display detailed error information when badge submission failed', async () => {
+    (getDevFestBadge as any).mockReturnValue(null);
+    (isDevFestSubmissionSuccessful as any).mockReturnValue(false);
+    (submitGameCompletion as any).mockResolvedValue({
+      success: false,
+      error: 'Network timeout',
+    });
+    (getDevFestSubmissionStatus as any).mockReturnValue({
+      success: false,
+      submittedAt: '2025-09-10T10:00:00.000Z',
+      error: 'Network timeout',
+    });
+
+    render(
+      <Router>
+        <BadgePage />
+      </Router>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Problema di connessione')).toBeInTheDocument();
+      expect(screen.getByText(/Network timeout/)).toBeInTheDocument();
+      expect(screen.getByText('Riprova')).toBeInTheDocument();
+    });
+
+    // Should not show DevFest return button when there's an error
+    expect(screen.queryByText(/Torna all'app DevFest/)).not.toBeInTheDocument();
+  });
+
+  it('should handle retry functionality', async () => {
+    // Initially fails
+    (getDevFestBadge as any).mockReturnValue(null);
+    (isDevFestSubmissionSuccessful as any).mockReturnValue(false);
+    (getDevFestSubmissionStatus as any).mockReturnValue({
+      success: false,
+      submittedAt: '2025-09-10T10:00:00.000Z',
+      error: 'API temporarily unavailable',
+    });
+
+    const { rerender } = render(
+      <Router>
+        <BadgePage />
+      </Router>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Riprova')).toBeInTheDocument();
+    });
+
+    // Mock successful retry
+    (submitGameCompletion as any).mockResolvedValueOnce({
+      success: true,
+      badge: mockBadge,
+    });
+
+    // Click retry button
+    const retryButton = screen.getByText('Riprova');
+    await act(async () => {
+      retryButton.click();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(mockBadge.name)).toBeInTheDocument();
+      expect(screen.queryByText('Riprova')).not.toBeInTheDocument();
+    });
+  });
+
+  it('should show different error messages based on error type', async () => {
+    (getDevFestBadge as any).mockReturnValue(null);
+    (isDevFestSubmissionSuccessful as any).mockReturnValue(false);
+    (getDevFestSubmissionStatus as any).mockReturnValue(null);
+
+    // Test network error
+    (submitGameCompletion as any).mockResolvedValue({
+      success: false,
+      error: 'fetch failed',
+    });
+
+    render(
+      <Router>
+        <BadgePage />
+      </Router>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText(/Problema di connessione/)).toBeInTheDocument();
     });
   });
 });
