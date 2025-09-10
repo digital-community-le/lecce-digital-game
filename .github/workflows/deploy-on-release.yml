@@ -249,4 +249,3 @@ jobs:
             } else {
               console.log(`ℹ️ Deployment failed for ${eventType} trigger - no PR to comment on`);
             }
-            }
