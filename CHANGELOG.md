@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.4](https://github.com/digital-community-le/lecce-digital-game/compare/v1.3.3...v1.3.4) (2025-09-10)
+
+
+### Bug Fixes
+
+* **ci:** update Node.js version to 20.0.0 or higher in deploy workflow ([fe5c9a4](https://github.com/digital-community-le/lecce-digital-game/commit/fe5c9a41c4a6238bf35db9f5eec354fbd21a6208))
+
 ## [1.3.3](https://github.com/digital-community-le/lecce-digital-game/compare/v1.3.2...v1.3.3) (2025-09-10)
 
 
