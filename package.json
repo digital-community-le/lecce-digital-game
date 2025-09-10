@@ -36,6 +36,7 @@
     "check:prerequisites": "node scripts/check-prerequisites.js",
     "check:permissions": "node scripts/check-permissions.js",
     "check:workflows": "node scripts/check-workflows.js",
+    "trigger:auto-merge": "node scripts/trigger-auto-merge.js",
     "commit-help": "node scripts/commit-help.js",
     "prepare": "husky",
     "lint-staged": "lint-staged"
