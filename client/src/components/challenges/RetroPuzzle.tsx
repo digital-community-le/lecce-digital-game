@@ -227,11 +227,13 @@ const RetroPuzzle: React.FC = () => {
                       // Nascondi gli elementi che sono stati esplicitamente nascosti dopo il blink
                       if (hiddenElements.has(term)) return false;
 
+                      // Nascondi gli elementi già abbinati (persistenti tra ricaricamenti)
+                      if (puzzleState.matches[term]) return false;
+
                       // Mostra tutti gli altri, inclusi quelli che stanno blinkando
                       return true;
                     })
                     .map((term) => {
-                      const isMatched = puzzleState.matches[term];
                       const isSelected = selectedTerm === term;
                       const shouldBlink = blinkingPair?.term === term;
 
@@ -250,11 +252,10 @@ const RetroPuzzle: React.FC = () => {
                           variant={variant}
                           shouldBlink={shouldBlink}
                           onBlinkComplete={handleBlinkComplete}
-                          onClick={() => !isMatched && handleTermClick(term)}
-                          disabled={!!isMatched}
+                          onClick={() => handleTermClick(term)}
                           data-testid={`term-${term.toLowerCase().replace(/[^a-z]/g, '-')}`}
                         >
-                          {term} {isMatched && '✓'}
+                          {term}
                         </ChallengeButton>
                       );
                     })}
@@ -270,13 +271,14 @@ const RetroPuzzle: React.FC = () => {
                       // Nascondi gli elementi che sono stati esplicitamente nascosti dopo il blink
                       if (hiddenElements.has(category)) return false;
 
+                      // Nascondi le categorie già abbinate (persistenti tra ricaricamenti)
+                      if (Object.values(puzzleState.matches).includes(category))
+                        return false;
+
                       // Mostra tutti gli altri, inclusi quelli che stanno blinkando
                       return true;
                     })
                     .map((category) => {
-                      const isMatched = Object.values(
-                        puzzleState.matches
-                      ).includes(category);
                       const shouldBlink = blinkingPair?.category === category;
 
                       let variant:
@@ -298,14 +300,12 @@ const RetroPuzzle: React.FC = () => {
                           shouldBlink={shouldBlink}
                           onBlinkComplete={handleBlinkComplete}
                           onClick={() =>
-                            selectedTerm &&
-                            !isMatched &&
-                            handleCategoryClick(category)
+                            selectedTerm && handleCategoryClick(category)
                           }
-                          disabled={!selectedTerm || isMatched}
+                          disabled={!selectedTerm}
                           data-testid={`category-${category.toLowerCase().replace(/[^a-z]/g, '-')}`}
                         >
-                          {category} {isMatched && '✓'}
+                          {category}
                         </ChallengeButton>
                       );
                     })}
