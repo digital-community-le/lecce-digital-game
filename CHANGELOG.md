@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.6](https://github.com/digital-community-le/lecce-digital-game/compare/v1.3.5...v1.3.6) (2025-09-10)
+
+
+### Bug Fixes
+
+* **html:** remove replit scripts ([4dfe22f](https://github.com/digital-community-le/lecce-digital-game/commit/4dfe22fdc8b6d918a02ec3910403a4ed67a89a6f))
+
 ## [1.3.5](https://github.com/digital-community-le/lecce-digital-game/compare/v1.3.4...v1.3.5) (2025-09-10)
 
 
