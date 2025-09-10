@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.0](https://github.com/digital-community-le/lecce-digital-game/compare/v1.6.0...v1.7.0) (2025-09-10)
+
+
+### Features
+
+* **social-arena:** remove skip sharing button ([9a0baa5](https://github.com/digital-community-le/lecce-digital-game/commit/9a0baa58aaa0111c7e3f974baa5eefe8c2a51a48))
+
 ## [1.6.0](https://github.com/digital-community-le/lecce-digital-game/compare/v1.5.0...v1.6.0) (2025-09-10)
 
 
