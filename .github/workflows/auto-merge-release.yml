@@ -1,12 +1,9 @@
 name: Auto-merge Release PR
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
-    branches:
-      - main
   issue_comment:
-    types: [created]
+    # Trigger only when comments are created or edited on issues/PRs
+    types: [created, edited]
 
 permissions:
   contents: write
@@ -17,6 +14,7 @@ permissions:
 jobs:
   # Job di debug per capire perché l'auto-merge non si triggera
   debug-auto-merge:
+    if: github.event.issue && github.event.issue.pull_request
     runs-on: ubuntu-latest
     steps:
       - name: Debug comment trigger
@@ -24,25 +22,41 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            console.log('🔍 DEBUG: Auto-merge comment trigger analysis');
+            console.log('🔍 DEBUG: Auto-merge comment trigger analysis (PR comment only)');
             console.log(`Event: ${context.eventName}`);
-            console.log(`Comment author: ${context.payload.comment.user.login}`);
-            console.log(`Comment body preview: ${(context.payload.comment.body || '').substring(0, 100)}...`);
+            console.log(`Comment author: ${context.payload.comment?.user?.login}`);
+            console.log(`Comment body preview: ${(context.payload.comment?.body || '').substring(0, 200)}...`);
+
+            // Resolve PR number from the issue payload
+            const prNumber = context.payload.issue && context.payload.issue.number;
             console.log(`Is PR: ${!!context.payload.issue.pull_request}`);
-            console.log(`Contains "Pre-validation passed": ${(context.payload.comment.body || '').includes('Pre-validation passed')}`);
-            console.log(`Is from github-actions[bot]: ${context.payload.comment.user.login === 'github-actions[bot]'}`);
+
+            if (!prNumber) {
+              console.log('❌ No PR number found on the issue payload.');
+              return;
+            }
+
+            // Fetch PR details for more insight
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+
+            console.log(`PR #${pr.number}: "${pr.title}" created by ${pr.user.login}`);
+            console.log(`Head ref: ${pr.head.ref}, Base ref: ${pr.base.ref}, Draft: ${pr.draft}`);
+            console.log(`Mergeable: ${pr.mergeable}`);
+            const labels = (pr.labels || []).map(l => l.name);
+            console.log(`Labels: ${labels.join(', ')}`);
+            console.log(`Contains "Pre-validation passed": ${(context.payload.comment?.body || '').includes('Pre-validation passed')}`);
 
   auto-merge-release-pr:
     # Trigger per PR di release-please (rileva vari formati)
-    if: |
-      (github.event_name == 'pull_request' &&
-       github.event.pull_request.user.login == 'github-actions[bot]' &&
-       contains(github.event.pull_request.labels.*.name, 'autorelease: pending')
-      ) ||
-      (github.event_name == 'issue_comment' &&
-       github.event.issue.pull_request &&
-       contains(github.event.comment.body, 'Pre-validation passed') &&
-       github.event.comment.user.login == 'github-actions[bot]')
+    if: >
+      github.event_name == 'issue_comment' &&
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, 'Pre-validation passed') &&
+      contains(github.event.issue.labels.*.name, 'autorelease: pending')
     runs-on: ubuntu-latest
     steps:
       - name: Debug PR Information
@@ -80,10 +94,7 @@ jobs:
             // Fetch PR number & data depending on trigger
             let prNumber, prData;
 
-            if (context.eventName === 'pull_request') {
-              prNumber = context.payload.pull_request.number;
-              prData = context.payload.pull_request;
-            } else if (context.eventName === 'issue_comment') {
+            if (context.eventName === 'issue_comment') {
               prNumber = context.payload.issue.number;
               const { data } = await github.rest.pulls.get({
                 owner: context.repo.owner,
