@@ -86,6 +86,41 @@ jobs:
       - name: Build project
         run: npm run build
 
+      - name: Verify Firebase Configuration
+        run: |
+          echo "🔍 Verifying Firebase configuration..."
+          if [ ! -f "firebase.json" ]; then
+            echo "❌ firebase.json not found"
+            exit 1
+          fi
+
+          if [ ! -d "dist/public" ]; then
+            echo "❌ Build output directory dist/public not found"
+            exit 1
+          fi
+
+          echo "✅ Firebase configuration OK"
+          echo "📁 Build output files:"
+          ls -la dist/public/ | head -10
+
+      - name: Check Firebase Secrets
+        env:
+          FIREBASE_SECRET: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_LECCE_DIGITAL_GAME }}
+        run: |
+          if [ -z "$FIREBASE_SECRET" ]; then
+            echo "❌ FIREBASE_SERVICE_ACCOUNT_LECCE_DIGITAL_GAME secret not configured"
+            echo ""
+            echo "🔧 To fix this:"
+            echo "1. Go to Firebase Console: https://console.firebase.google.com/project/lecce-digital-game/settings/serviceaccounts/adminsdk"
+            echo "2. Generate new private key and download JSON"
+            echo "3. Add secret to GitHub: https://github.com/digital-community-le/lecce-digital-game/settings/secrets/actions"
+            echo "4. Secret name: FIREBASE_SERVICE_ACCOUNT_LECCE_DIGITAL_GAME"
+            echo "5. Secret value: [entire JSON file content]"
+            exit 1
+          else
+            echo "✅ Firebase service account secret is configured"
+          fi
+
       - name: Deploy to Firebase
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
