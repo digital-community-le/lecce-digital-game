@@ -117,6 +117,9 @@ describe('BadgePage', () => {
     );
 
     await waitFor(() => {
+      expect(
+        screen.getByText("Errore nell'attivazione del badge")
+      ).toBeInTheDocument();
       expect(screen.getByText('Problema di connessione')).toBeInTheDocument();
       expect(screen.getByText(/Network timeout/)).toBeInTheDocument();
       expect(screen.getByText('Riprova')).toBeInTheDocument();
@@ -182,6 +185,9 @@ describe('BadgePage', () => {
     );
 
     await waitFor(() => {
+      expect(
+        screen.getByText("Errore nell'attivazione del badge")
+      ).toBeInTheDocument();
       expect(screen.getByText(/Problema di connessione/)).toBeInTheDocument();
     });
   });

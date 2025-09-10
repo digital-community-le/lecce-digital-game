@@ -23,9 +23,11 @@ La pagina ora utilizza `getDevFestSubmissionStatus()` per ottenere informazioni 
 
 ### ✅ UI Migliorata
 
+- **Messaggio principale consistente**: Sempre "Errore nell'attivazione del badge" per chiarezza
 - **Dettagli tecnici espandibili**: Sezione collassabile con informazioni tecniche per il debugging
 - **Rimozione condizionale dell'invito DevFest**: L'invito a tornare all'app DevFest viene mostrato solo quando il badge è ottenuto con successo
 - **Messaggi di errore più user-friendly**: Titoli chiari e messaggi descrittivi
+- **Gerarchia informativa**: Messaggio principale + categoria errore + dettagli specifici
 
 ### ✅ Stati di Caricamento
 
@@ -110,12 +112,14 @@ npm run test:coverage src/pages/__tests__/BadgePage.test.tsx
 
 ### Dopo (Miglioramenti)
 
+- ✅ Messaggio principale consistente: "Errore nell'attivazione del badge"
 - ✅ Messaggi di errore contestuali e user-friendly
 - ✅ Pulsante di retry con feedback visivo
 - ✅ Invito DevFest solo per successi
 - ✅ Dettagli tecnici espandibili per debugging
 - ✅ Timestamp dell'ultimo tentativo
 - ✅ Stati di loading chiari
+- ✅ Gerarchia informativa chiara (principale → categoria → dettagli)
 
 ## Compatibilità
 
@@ -134,7 +138,8 @@ npm run test:coverage src/pages/__tests__/BadgePage.test.tsx
 ### Errore di Rete
 
 ```
-Titolo: "Problema di connessione"
+Titolo principale: "Errore nell'attivazione del badge"
+Categoria: "Problema di connessione"
 Messaggio: "Verifica la tua connessione internet e riprova."
 Dettagli: "fetch failed"
 ```
@@ -142,7 +147,8 @@ Dettagli: "fetch failed"
 ### Errore di Autenticazione
 
 ```
-Titolo: "Problema di autenticazione"
+Titolo principale: "Errore nell'attivazione del badge"
+Categoria: "Problema di autenticazione"
 Messaggio: "La sessione potrebbe essere scaduta. Riavvia l'app DevFest."
 Dettagli: "unauthorized"
 ```
@@ -150,9 +156,24 @@ Dettagli: "unauthorized"
 ### Errore del Server
 
 ```
+Titolo principale: "Errore nell'attivazione del badge"
+Categoria: "Servizio temporaneamente non disponibile"
+Messaggio: "I server DevFest stanno avendo problemi. Riprova tra qualche minuto."
+Dettagli: "server error 500"
+```
+
+Dettagli: "unauthorized"
+
+```
+
+### Errore del Server
+
+```
+
 Titolo: "Servizio temporaneamente non disponibile"
 Messaggio: "I server DevFest stanno avendo problemi. Riprova tra qualche minuto."
 Dettagli: "server error 500"
+
 ```
 
 ## Note per Sviluppatori
@@ -161,3 +182,4 @@ Dettagli: "server error 500"
 - Il meccanismo di retry utilizza la stessa logica di `submitGameCompletion()`
 - I test sono progettati per essere facilmente estendibili per nuovi scenari
 - L'UI utilizza le classi NES.css esistenti per mantenere la coerenza visiva
+```

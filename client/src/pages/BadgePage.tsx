@@ -207,7 +207,19 @@ const BadgePage: React.FC = () => {
                     className="font-retro text-lg mb-2"
                     style={{ color: 'var(--ldc-on-background)' }}
                   >
-                    {getErrorMessage(error).title}
+                    Errore nell'attivazione del badge
+                  </p>
+                  <p
+                    className="text-sm mb-2"
+                    style={{ color: 'var(--ldc-on-background)' }}
+                  >
+                    Non è stato possibile attivare il tuo badge DevFest.
+                  </p>
+                  <p
+                    className="font-retro text-base mb-2"
+                    style={{ color: 'var(--ldc-on-background)' }}
+                  >
+                    <strong>{getErrorMessage(error).title}</strong>
                   </p>
                   <p
                     className="text-sm mb-4"
@@ -254,13 +266,14 @@ const BadgePage: React.FC = () => {
                   className="font-retro text-lg"
                   style={{ color: 'var(--ldc-on-background)' }}
                 >
-                  Badge non disponibile
+                  Errore nell'attivazione del badge
                 </p>
                 <p
                   className="text-sm mt-2"
                   style={{ color: 'var(--ldc-on-background)' }}
                 >
-                  Si è verificato un errore nel recupero del badge.
+                  Non è stato possibile attivare il tuo badge DevFest. Si è
+                  verificato un errore nel recupero del badge.
                 </p>
               </>
             )}
