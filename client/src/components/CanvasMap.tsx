@@ -1,8 +1,8 @@
-import React, { useRef, useEffect, useState } from "react";
-import { useLocation } from "wouter";
+import React, { useRef, useEffect, useState } from 'react';
+import { useLocation } from 'wouter';
 import useNavigateWithTransition from '@/hooks/use-navigate-with-transition';
-import { useGameStore } from "@/hooks/use-game-store";
-import { MapNode } from "@/types/game";
+import { useGameStore } from '@/hooks/use-game-store';
+import { MapNode } from '@/types/game';
 import {
   renderMap,
   determineSafePositionForChallenge,
@@ -11,11 +11,11 @@ import {
   calculateClickableAreas,
   isPointInClickableArea,
   ChallengeClickableArea,
-} from "@/lib/mapRenderer";
+} from '@/lib/mapRenderer';
 
 // Import atlas semplificato e configurazione tiles
-import atlasUrl from "@assets/image_1756807944133.png";
-import tilesConfig from "../data/tiles.json";
+import atlasUrl from '@assets/image_1756807944133.png';
+import tilesConfig from '../data/tiles.json';
 
 /**
  * NodeRect type definition
@@ -34,7 +34,7 @@ import tilesConfig from "../data/tiles.json";
  */
 
 /** Tipi di terreno supportati dalla mappa */
-type TerrainType = "grass" | "forest" | "mountain" | "lake" | "road";
+type TerrainType = 'grass' | 'forest' | 'mountain' | 'lake' | 'road';
 
 /** Singolo tile di terreno con posizione e tipo */
 interface MapTile {
@@ -67,47 +67,72 @@ const CanvasMap: React.FC = () => {
 
   // Preload map icons when component mounts
   useEffect(() => {
-    preloadMapIcons(gameState.challenges).catch(err => {
+    preloadMapIcons(gameState.challenges).catch((err) => {
       console.warn('[CanvasMap] Some map icons failed to preload:', err);
     });
-    
+
     // Listen for icon load events to trigger re-render
     const handleIconLoaded = (event: CustomEvent) => {
       // Force re-render by calling drawMap again
       if (canvasRef.current) {
         const canvas = canvasRef.current;
-        renderMap(canvas, gameState.challenges, MAP_WIDTH, MAP_HEIGHT, 48, nodeRectsState);
+        renderMap(
+          canvas,
+          gameState.challenges,
+          MAP_WIDTH,
+          MAP_HEIGHT,
+          48,
+          nodeRectsState
+        );
       }
     };
-    
-    window.addEventListener('map-icon-loaded', handleIconLoaded as EventListener);
-    
+
+    window.addEventListener(
+      'map-icon-loaded',
+      handleIconLoaded as EventListener
+    );
+
     return () => {
-      window.removeEventListener('map-icon-loaded', handleIconLoaded as EventListener);
+      window.removeEventListener(
+        'map-icon-loaded',
+        handleIconLoaded as EventListener
+      );
     };
   }, [gameState.challenges, nodeRectsState]);
-  
+
   // Check for pending avatar animation when map loads
   useEffect(() => {
     const pendingAnimation = sessionStorage.getItem('pendingAvatarAnimation');
     if (pendingAnimation) {
       try {
         const animationData = JSON.parse(pendingAnimation);
-        if (animationData.shouldAnimate && animationData.fromChallengeId && animationData.toChallengeId) {
+        if (
+          animationData.shouldAnimate &&
+          animationData.fromChallengeId &&
+          animationData.toChallengeId
+        ) {
           // Clear the stored data first
           sessionStorage.removeItem('pendingAvatarAnimation');
-          
+
           // Calculate delay: 1 second from modal close + time for map to render
-          const elapsedSinceModalClose = Date.now() - (animationData.closedAt || Date.now());
+          const elapsedSinceModalClose =
+            Date.now() - (animationData.closedAt || Date.now());
           const targetDelay = animationData.delayMs || 1000; // Default 1 second
-          const remainingDelay = Math.max(targetDelay - elapsedSinceModalClose, 0);
+          const remainingDelay = Math.max(
+            targetDelay - elapsedSinceModalClose,
+            0
+          );
           const mapRenderDelay = 500; // Additional delay for map rendering
-          
+
           const totalDelay = remainingDelay + mapRenderDelay;
-          
+
           // Start the animation after the calculated delay
           setTimeout(() => {
-            startAvatarAnimation(animationData.fromChallengeId, animationData.toChallengeId, 3000);
+            startAvatarAnimation(
+              animationData.fromChallengeId,
+              animationData.toChallengeId,
+              3000
+            );
           }, totalDelay);
         }
       } catch (e) {
@@ -147,7 +172,7 @@ const CanvasMap: React.FC = () => {
       MAP_WIDTH,
       MAP_HEIGHT,
       48,
-      nodeRectsState,
+      nodeRectsState
     );
   };
 
@@ -170,21 +195,21 @@ const CanvasMap: React.FC = () => {
       setTimeout(drawMap, 100); // Debounce resize
     };
 
-    window.addEventListener("resize", handleResize);
+    window.addEventListener('resize', handleResize);
 
     // Redraw when a map icon image finishes loading in the renderer
     const onIconLoaded = (ev?: Event) => {
       try {
-        console.debug("[CanvasMap] map-icon-loaded", (ev as any)?.detail);
+        console.debug('[CanvasMap] map-icon-loaded', (ev as any)?.detail);
       } catch (e) {}
       drawMap();
     };
-    window.addEventListener("map-icon-loaded", onIconLoaded as EventListener);
+    window.addEventListener('map-icon-loaded', onIconLoaded as EventListener);
     return () => {
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener('resize', handleResize);
       window.removeEventListener(
-        "map-icon-loaded",
-        onIconLoaded as EventListener,
+        'map-icon-loaded',
+        onIconLoaded as EventListener
       );
     };
   }, [gameState.challenges, nodeRectsState]); // Redraw when challenges or rects change
@@ -204,25 +229,25 @@ const CanvasMap: React.FC = () => {
         canvasWidth,
         canvasHeight,
         MAP_WIDTH,
-        MAP_HEIGHT,
+        MAP_HEIGHT
       );
       newPositions[node.id] = { left: safe.leftPercent, top: safe.topPercent };
 
       // compute pixel rect for canvas-based rendering
       const left =
-        (parseFloat(safe.leftPercent.replace("%", "")) / 100) * canvasWidth;
+        (parseFloat(safe.leftPercent.replace('%', '')) / 100) * canvasWidth;
       const top =
-        (parseFloat(safe.topPercent.replace("%", "")) / 100) * canvasHeight;
+        (parseFloat(safe.topPercent.replace('%', '')) / 100) * canvasHeight;
       const w = 64; // default visual size for node boxes on canvas
       const h = 64;
       // Simple color mapping to match previous classes
       const colorMap: Record<string, string> = {
-        "guild-builder": "#16a34a",
-        "retro-puzzle": "#f59e0b",
-        "debug-dungeon": "#7c3aed",
-        "social-arena": "#f97316",
+        'guild-builder': '#16a34a',
+        'retro-puzzle': '#f59e0b',
+        'debug-dungeon': '#7c3aed',
+        'social-arena': '#f97316',
       };
-      const bg = colorMap[node.id] || "#9ca3af";
+      const bg = colorMap[node.id] || '#9ca3af';
       nodeRects[node.id] = {
         cx: left,
         cy: top,
@@ -246,12 +271,12 @@ const CanvasMap: React.FC = () => {
       const rect = canvas.getBoundingClientRect();
       const x = ev.clientX - rect.left;
       const y = ev.clientY - rect.top;
-      
+
       // Check click against both node and badge areas for each challenge
       for (const node of gameState.challenges) {
         const challengeArea = newClickableAreas[node.id];
         if (!challengeArea) continue;
-        
+
         if (isPointInClickableArea(x, y, challengeArea)) {
           handleChallengeClick(node);
           return;
@@ -259,16 +284,16 @@ const CanvasMap: React.FC = () => {
       }
     };
 
-    canvas.addEventListener("click", handleCanvasClick);
-    return () => canvas.removeEventListener("click", handleCanvasClick);
+    canvas.addEventListener('click', handleCanvasClick);
+    return () => canvas.removeEventListener('click', handleCanvasClick);
   }, [gameState.challenges]);
 
   const getNodeClassName = (node: MapNode): string => {
-    const baseClass = "map-node";
+    const baseClass = 'map-node';
     switch (node.status) {
-      case "completed":
+      case 'completed':
         return `${baseClass} completed`;
-      case "locked":
+      case 'locked':
         return `${baseClass} locked`;
       default:
         return baseClass;
@@ -277,94 +302,114 @@ const CanvasMap: React.FC = () => {
 
   const getNodeButtonClass = (node: MapNode): string => {
     switch (node.id) {
-      case "guild-builder":
-        return "nes-container with-title bg-green-600 text-white";
-      case "retro-puzzle":
-        return "nes-container with-title bg-yellow-500 text-black";
-      case "debug-dungeon":
-        return "nes-container with-title bg-purple-600 text-white";
-      case "social-arena":
-        return "nes-container with-title bg-orange-600 text-white";
+      case 'guild-builder':
+        return 'nes-container with-title bg-green-600 text-white';
+      case 'retro-puzzle':
+        return 'nes-container with-title bg-yellow-500 text-black';
+      case 'debug-dungeon':
+        return 'nes-container with-title bg-purple-600 text-white';
+      case 'social-arena':
+        return 'nes-container with-title bg-orange-600 text-white';
       default:
-        return "nes-container with-title bg-gray-600 text-white";
+        return 'nes-container with-title bg-gray-600 text-white';
     }
   };
 
   const getCurrentAvatarPosition = () => {
     // If animation is in progress, interpolate between start and end positions
     if (gameState.avatarAnimation.isAnimating) {
-      const { fromChallengeId, toChallengeId, progress } = gameState.avatarAnimation;
-      
+      const { fromChallengeId, toChallengeId, progress } =
+        gameState.avatarAnimation;
+
       if (fromChallengeId && toChallengeId) {
-        const fromChallenge = gameState.challenges.find(c => c.id === fromChallengeId);
-        const toChallenge = gameState.challenges.find(c => c.id === toChallengeId);
-        
+        const fromChallenge = gameState.challenges.find(
+          (c) => c.id === fromChallengeId
+        );
+        const toChallenge = gameState.challenges.find(
+          (c) => c.id === toChallengeId
+        );
+
         if (fromChallenge && toChallenge) {
-          const fromPos = safePositions[fromChallengeId] || fromChallenge.position;
+          const fromPos =
+            safePositions[fromChallengeId] || fromChallenge.position;
           const toPos = safePositions[toChallengeId] || toChallenge.position;
-          
-          const fromTop = parseFloat(fromPos.top.replace("%", ""));
-          const fromLeft = parseFloat(fromPos.left.replace("%", ""));
-          const toTop = parseFloat(toPos.top.replace("%", ""));
-          const toLeft = parseFloat(toPos.left.replace("%", ""));
-          
+
+          const fromTop = parseFloat(fromPos.top.replace('%', ''));
+          const fromLeft = parseFloat(fromPos.left.replace('%', ''));
+          const toTop = parseFloat(toPos.top.replace('%', ''));
+          const toLeft = parseFloat(toPos.left.replace('%', ''));
+
           // Smooth easing (ease-in-out)
-          const easeInOut = (t: number) => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+          const easeInOut = (t: number) =>
+            t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
           const easedProgress = easeInOut(progress);
-          
+
           const currentTop = fromTop + (toTop - fromTop) * easedProgress;
           const currentLeft = fromLeft + (toLeft - fromLeft) * easedProgress;
-          
+
           return { top: `${currentTop}%`, left: `${currentLeft}%` };
         }
       }
     }
-    
+
     // When not animating, position avatar on the last available (unlocked) challenge
     // This ensures the avatar is always on the challenge the player should tackle next
-    const availableChallenges = gameState.challenges.filter(c => c.status === "available");
-    const lastAvailableChallenge = availableChallenges[availableChallenges.length - 1];
-    
+    const availableChallenges = gameState.challenges.filter(
+      (c) => c.status === 'available'
+    );
+    const lastAvailableChallenge =
+      availableChallenges[availableChallenges.length - 1];
+
     if (lastAvailableChallenge) {
-      const position = safePositions[lastAvailableChallenge.id] || lastAvailableChallenge.position;
-      const top = parseFloat(position.top.replace("%", ""));
-      const left = parseFloat(position.left.replace("%", ""));
-      return { top: `${top}%`, left: `${left}%` };
-    }
-    
-    // Fallback: if no available challenges, position on the last completed challenge
-    const lastCompletedChallengeId = gameState.gameProgress.completedChallenges[gameState.gameProgress.completedChallenges.length - 1];
-    
-    if (lastCompletedChallengeId) {
-      const lastCompletedChallenge = gameState.challenges.find(c => c.id === lastCompletedChallengeId);
-      if (lastCompletedChallenge) {
-        const position = safePositions[lastCompletedChallengeId] || lastCompletedChallenge.position;
-        const top = parseFloat(position.top.replace("%", ""));
-        const left = parseFloat(position.left.replace("%", ""));
-        return { top: `${top}%`, left: `${left}%` };
-      }
-    }
-    
-    // If no challenges completed yet, position on first challenge (start position)
-    const firstChallenge = gameState.challenges[0];
-    if (firstChallenge) {
-      const position = safePositions[firstChallenge.id] || firstChallenge.position;
-      const top = parseFloat(position.top.replace("%", ""));
-      const left = parseFloat(position.left.replace("%", ""));
+      const position =
+        safePositions[lastAvailableChallenge.id] ||
+        lastAvailableChallenge.position;
+      const top = parseFloat(position.top.replace('%', ''));
+      const left = parseFloat(position.left.replace('%', ''));
       return { top: `${top}%`, left: `${left}%` };
     }
 
-    return { top: "32%", left: "17%" }; // Fallback position
+    // Fallback: if no available challenges, position on the last completed challenge
+    const lastCompletedChallengeId =
+      gameState.gameProgress.completedChallenges[
+        gameState.gameProgress.completedChallenges.length - 1
+      ];
+
+    if (lastCompletedChallengeId) {
+      const lastCompletedChallenge = gameState.challenges.find(
+        (c) => c.id === lastCompletedChallengeId
+      );
+      if (lastCompletedChallenge) {
+        const position =
+          safePositions[lastCompletedChallengeId] ||
+          lastCompletedChallenge.position;
+        const top = parseFloat(position.top.replace('%', ''));
+        const left = parseFloat(position.left.replace('%', ''));
+        return { top: `${top}%`, left: `${left}%` };
+      }
+    }
+
+    // If no challenges completed yet, position on first challenge (start position)
+    const firstChallenge = gameState.challenges[0];
+    if (firstChallenge) {
+      const position =
+        safePositions[firstChallenge.id] || firstChallenge.position;
+      const top = parseFloat(position.top.replace('%', ''));
+      const left = parseFloat(position.left.replace('%', ''));
+      return { top: `${top}%`, left: `${left}%` };
+    }
+
+    return { top: '32%', left: '17%' }; // Fallback position
   };
 
   const handleChallengeClick = (node: MapNode) => {
     const challengeIndex = gameState.challenges.findIndex(
-      (c) => c.id === node.id,
+      (c) => c.id === node.id
     );
 
     // Enforce sequential progression
-    if (node.status === "locked") {
-      showToast("Questa challenge non è ancora disponibile", "warning");
+    if (node.status === 'locked') {
+      showToast('Questa challenge non è ancora disponibile', 'warning');
       return;
     }
 
@@ -375,13 +420,13 @@ const CanvasMap: React.FC = () => {
 
     if (challengeIndex === 0 || previousChallengesCompleted) {
       // user-initiated navigation with transition
-  navigateWithTransition(`/game/challenge/${node.id}`);
+      navigateWithTransition(`/game/challenge/${node.id}`);
     } else {
       const remainingChallenges =
         challengeIndex - gameState.gameProgress.completedChallenges.length;
       showToast(
         `Devi completare ${remainingChallenges} sfida/e prima di questa`,
-        "warning",
+        'warning'
       );
     }
   };
@@ -395,9 +440,9 @@ const CanvasMap: React.FC = () => {
         ref={canvasRef}
         className="absolute inset-0 pixelated"
         style={{
-          imageRendering: "pixelated",
-          width: "100vw",
-          height: "calc(100vh - 48px)",
+          imageRendering: 'pixelated',
+          width: '100vw',
+          height: 'calc(100vh - 48px)',
         }}
         data-testid="terrain-canvas"
       />
@@ -406,9 +451,27 @@ const CanvasMap: React.FC = () => {
 
       {/* Player Avatar */}
       <div
-        className="player-avatar"
+        className="player-avatar cursor-pointer"
         style={{ top: avatarPosition.top, left: avatarPosition.left }}
         data-testid="player-avatar"
+        onClick={() => {
+          // Trova il nodo attivo (disponibile) o fallback su completato/primo
+          const availableChallenges = gameState.challenges.filter(
+            (c) => c.status === 'available'
+          );
+          let nodeToStart = availableChallenges[availableChallenges.length - 1];
+          if (!nodeToStart) {
+            const lastCompletedId =
+              gameState.gameProgress.completedChallenges[
+                gameState.gameProgress.completedChallenges.length - 1
+              ];
+            nodeToStart =
+              gameState.challenges.find((c) => c.id === lastCompletedId) ||
+              gameState.challenges[0];
+          }
+          if (!nodeToStart) nodeToStart = gameState.challenges[0];
+          if (nodeToStart) handleChallengeClick(nodeToStart);
+        }}
       >
         <div className="w-full h-full bg-white border-2 border-black rounded-full flex items-center justify-center overflow-hidden">
           <img
