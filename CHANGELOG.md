@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.8.0](https://github.com/digital-community-le/lecce-digital-game/compare/v1.7.0...v1.8.0) (2025-09-11)
+
+
+### Features
+
+* **proxy:** add PHP proxy for API calls with CORS support and configuration ([49fb466](https://github.com/digital-community-le/lecce-digital-game/commit/49fb466280bcad1d55e313a94802f710f0baab8c))
+* **SocialArena:** add dialog for image save confirmation and required tags hint ([bdc2a1b](https://github.com/digital-community-le/lecce-digital-game/commit/bdc2a1b7a69a758576fe3a6d021f003f108cb982))
+* **UiDialog:** enhance dialog properties with dismissible and button alignment options ([5e63fcf](https://github.com/digital-community-le/lecce-digital-game/commit/5e63fcfc7574445c34ced564cd598df202da9438))
+
 ## [1.7.0](https://github.com/digital-community-le/lecce-digital-game/compare/v1.6.0...v1.7.0) (2025-09-10)
 
 
