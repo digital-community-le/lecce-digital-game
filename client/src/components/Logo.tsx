@@ -1,8 +1,12 @@
 import logoUrl from '@/assets/images/logo.svg';
 
-const Logo = () => {
+type LogoProps = {
+  className?: string;
+};
+
+const Logo = ({ className }: LogoProps) => {
   return (
-    <div className="-mt-0.5">
+    <div className={`-mt-0.5 ${className || ''}`} data-testid="logo">
       <img src={logoUrl} alt="Logo Digital Community Lecce" />
     </div>
   );

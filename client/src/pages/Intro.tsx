@@ -74,6 +74,11 @@ const IntroPage: React.FC = () => {
         color: 'var(--ldc-on-surface)',
       }}
     >
+      <div className="absolute top-4 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 md:gap-4">
+        <div className="w-30 h-30">
+          <Logo className={'[&>img]:w-full'} />
+        </div>
+      </div>
       {/* Sigillo Image */}
       <div className="text-center mb-4 md:mb-8">
         <div className="w-24 h-24 md:w-32 md:h-32 mx-auto mb-4">
@@ -129,11 +134,11 @@ const IntroPage: React.FC = () => {
       </div>
 
       {/* Footer with Logo */}
-      <div className="absolute bottom-4 md:bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 md:gap-4">
-        <div className="w-12 h-12 md:w-20 md:h-20">
+      {/* <div className="absolute bottom-4 md:bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 md:gap-4">
+        <div className="w-30 h-30">
           <Logo />
         </div>
-      </div>
+      </div> */}
 
       {/* Profile creation dialog */}
       {showProfileForm && (
