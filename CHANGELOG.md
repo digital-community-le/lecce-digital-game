@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.1](https://github.com/digital-community-le/lecce-digital-game/compare/v1.8.0...v1.8.1) (2025-09-11)
+
+
+### Bug Fixes
+
+* **api:** update badge endpoint URL for DevFest Lecce ([df93088](https://github.com/digital-community-le/lecce-digital-game/commit/df93088ad5f63fcef66afdfa2eab27e04767faf5))
+
 ## [1.8.0](https://github.com/digital-community-le/lecce-digital-game/compare/v1.7.0...v1.8.0) (2025-09-11)
 
 
