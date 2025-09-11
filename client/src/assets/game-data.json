@@ -316,7 +316,8 @@
       },
       "settings": {
         "requiredTags": [
-          "@lecce_digital_community"
+          "@lecce_digital_community",
+          "@gdg_lecce"
         ],
         "confidenceThreshold": 40,
         "verificationMode": "ocr-client",

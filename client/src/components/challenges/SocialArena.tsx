@@ -6,6 +6,7 @@ import { SocialProof } from '@shared/schema';
 import CameraCapture from '@/components/CameraCapture';
 import OcrModal from '@/components/OcrModal';
 import ChallengeContentLayout from '@/components/layout/ChallengeContentLayout';
+import UiDialog from '@/components/UiDialog';
 import communityGem from '@assets/images/gem-of-community.png';
 import GameData from '@/assets/game-data.json';
 
@@ -36,6 +37,12 @@ const SocialArena: React.FC = () => {
   const [ocrModalOpen, setOcrModalOpen] = useState(false);
   const [forcedValidated, setForcedValidated] = useState(false);
   const [showShareGuide, setShowShareGuide] = useState(false);
+  const [dialogMessage, setDialogMessage] = useState<string | null>(null);
+  const [dialogTitle, setDialogTitle] = useState<string | undefined>(undefined);
+  const [capturedWithCamera, setCapturedWithCamera] = useState(false);
+  const [dialogType, setDialogType] = useState<'info' | 'save-photo' | null>(
+    null
+  );
 
   // challenge settings (fallbacks to sensible defaults)
   const challenge = gameState.challenges.find((c) => c.id === 'social-arena');
@@ -68,6 +75,11 @@ const SocialArena: React.FC = () => {
   }
 
   const hasRequiredTags = requiredTags.length > 0;
+
+  // Helper to render required tags in dialogs when present
+  const requiredTagsHint = hasRequiredTags
+    ? `\nTag richiesti: ${requiredTags.join(', ')}`
+    : '';
 
   const confidenceThreshold =
     (challenge as any)?.settings?.confidenceThreshold ??
@@ -158,6 +170,7 @@ const SocialArena: React.FC = () => {
     }
 
     setSelectedFile(file);
+    setCapturedWithCamera(false);
     setSelectedPreviewUrl(URL.createObjectURL(file));
     setFailedAttempts(0);
     setSharePhase('captured');
@@ -182,10 +195,11 @@ const SocialArena: React.FC = () => {
         setProofPreviewUrl(url || null);
       } catch {}
       setSharePhase('captured');
-      showToast(
-        'Immagine salvata. Ora condividi la storia o salta se non vuoi condividerla.',
-        'info'
+      setDialogTitle('Immagine salvata');
+      setDialogMessage(
+        `Immagine salvata. Condividi la tua Story su Instagram, poi carica lo screenshot qui per completare la verifica.${requiredTagsHint}`
       );
+      setDialogType('info');
     } catch (err) {
       console.error('Errore salvataggio immagine:', err);
       showToast("Errore nel salvataggio dell'immagine", 'error');
@@ -202,6 +216,7 @@ const SocialArena: React.FC = () => {
       setSelectedPreviewUrl(null);
     }
     setSelectedFile(file);
+    setCapturedWithCamera(true);
     setSelectedPreviewUrl(URL.createObjectURL(file));
     // reset failed attempts when user provides a new image
     setFailedAttempts(0);
@@ -227,10 +242,11 @@ const SocialArena: React.FC = () => {
         setProofPreviewUrl(url || null);
       } catch {}
       setSharePhase('captured');
-      showToast(
-        'Immagine salvata. Ora condividi la storia o salta se non vuoi condividerla.',
-        'info'
+      setDialogTitle('Immagine salvata');
+      setDialogMessage(
+        `Ora condividi la tua Story su Instagram con i tag richiesti.${requiredTagsHint}`
       );
+      setDialogType('info');
     } catch (err) {
       console.error('Errore salvataggio immagine:', err);
       showToast("Errore nel salvataggio dell'immagine", 'error');
@@ -271,15 +287,35 @@ const SocialArena: React.FC = () => {
       } catch {}
 
       setSharePhase('await_screenshot');
-      showToast(
-        'Immagine salvata. Condividi la storia e poi carica lo screenshot per la verifica.',
-        'info'
+      setDialogTitle('Immagine salvata');
+      setDialogMessage(
+        `Immagine salvata. Condividi la Story su Instagram, poi carica lo screenshot per la verifica.${requiredTagsHint}`
       );
+      setDialogType('info');
     } catch (error) {
       console.error('Error saving image blob:', error);
       showToast("Errore nel salvataggio dell'immagine", 'error');
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  // Save photo to device if captured by camera (mobile friendly)
+  const savePhotoToDevice = async (fileUrl: string | null) => {
+    if (!fileUrl) return;
+    try {
+      const link = document.createElement('a');
+      link.href = fileUrl;
+      link.download = 'photo.png';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setDialogMessage('Foto salvata nella galleria del dispositivo.');
+      setDialogType('info');
+    } catch (err) {
+      console.error('Errore nel salvataggio locale della foto', err);
+      setDialogMessage('Impossibile salvare la foto sul dispositivo.');
+      setDialogType('info');
     }
   };
 
@@ -343,159 +379,93 @@ const SocialArena: React.FC = () => {
   }
 
   return (
-    <ChallengeContentLayout
-      gemTitle="Sigillo di Lecce"
-      gemIcon={communityGem}
-      description="Davanti allo Stand, il tuo gesto diventa simbolo: cattura la foto con il gadget e attiva l'epilogo della leggenda."
-      tip={
-        hasRequiredTags
-          ? `Scatta la foto al gadget nello stand; lascia che la comunità veda la tua impresa. Il sistema rileverà automaticamente uno di questi tag: ${requiredTags.join(', ')}.`
-          : `Scatta la foto al gadget nello stand; lascia che la comunità veda la tua impresa. Nessuna verifica automatica è prevista per questa challenge.`
-      }
-      progress={currentStepNumber > 0 ? currentStepNumber : 0}
-      total={totalSteps}
-      progressLabel="Progressione"
-      isCompleted={progressPercent >= 100}
-    >
-      <div>
-        {showCamera && (
-          <CameraCapture
-            onCapture={handleCameraCapture}
-            onCancel={handleCameraCancel}
-          />
-        )}
+    <>
+      <ChallengeContentLayout
+        gemTitle="Sigillo di Lecce"
+        gemIcon={communityGem}
+        description="Davanti allo Stand, il tuo gesto diventa simbolo: cattura la foto con il gadget e attiva l'epilogo della leggenda."
+        tip={
+          hasRequiredTags
+            ? `Scatta la foto al gadget nello stand; lascia che la comunità veda la tua impresa. Il sistema rileverà automaticamente uno di questi tag: ${requiredTags.join(', ')}.`
+            : `Scatta la foto al gadget nello stand; lascia che la comunità veda la tua impresa. Nessuna verifica automatica è prevista per questa challenge.`
+        }
+        progress={currentStepNumber > 0 ? currentStepNumber : 0}
+        total={totalSteps}
+        progressLabel="Progressione"
+        isCompleted={progressPercent >= 100}
+      >
+        <div>
+          {showCamera && (
+            <CameraCapture
+              onCapture={handleCameraCapture}
+              onCancel={handleCameraCancel}
+            />
+          )}
 
-        {!isCompleted ? (
-          <>
-            {/* Upload area */}
-            <div className="border-4 border-dashed border-muted-foreground p-8 text-center mb-6">
-              {/* Step 1: no selectedFile yet -> show capture/upload only */}
-              {!selectedFile && (
-                <div className="space-y-4">
-                  <div className="text-4xl">
-                    {selectedPreviewUrl ? (
-                      <img
-                        src={selectedPreviewUrl}
-                        alt="Preview"
-                        className="w-16 h-16 object-cover inline-block"
-                      />
-                    ) : (
-                      '📸'
-                    )}
-                  </div>
-                  <p className="text-sm mb-4">
-                    Carica la foto con il gadget della community
-                  </p>
-                  <div className="flex gap-2 justify-center flex-wrap">
-                    <button
-                      className="nes-btn is-primary"
-                      onClick={handleTakePicture}
-                      data-testid="button-take-picture"
-                    >
-                      Scatta foto
-                    </button>
-                    <input
-                      ref={cameraInputRef}
-                      type="file"
-                      accept="image/*"
-                      capture="environment"
-                      className="hidden"
-                      onChange={(e) =>
-                        handleFileSelect(
-                          e as React.ChangeEvent<HTMLInputElement>
-                        )
-                      }
-                      data-testid="input-camera-hidden"
-                    />
-                    <label className="nes-btn is-normal cursor-pointer">
-                      Scegli immagine
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleFileSelect}
-                        className="hidden"
-                        data-testid="input-select-image"
-                      />
-                    </label>
-                  </div>
-                </div>
-              )}
-
-              {/* Step 2: after selectedFile saved (sharePhase === 'captured') -> show only share or skip */}
-              {selectedFile && sharePhase === 'captured' && (
-                <div className="space-y-4">
-                  <div className="text-4xl">
-                    {selectedPreviewUrl ? (
-                      <img
-                        src={selectedPreviewUrl}
-                        alt="Preview"
-                        className="w-16 h-16 object-cover inline-block"
-                      />
-                    ) : (
-                      '📸'
-                    )}
-                  </div>
-                  <p className="text-sm">
-                    Immagine selezionata: {selectedFile.name}
-                  </p>
-                  <div className="flex gap-2 justify-center flex-wrap">
-                    <button
-                      className="nes-btn is-normal"
-                      onClick={async () => {
-                        if (navigator.share && selectedFile) {
-                          try {
-                            await navigator.share({
-                              files: [selectedFile],
-                              text: 'Condivido la mia storia su Instagram',
-                            });
-                            setSharePhase('shared');
-                            showToast(
-                              'Condividi la storia su Instagram, poi torna qui e carica lo screenshot.',
-                              'info'
-                            );
-                          } catch (e) {
-                            setSharePhase('await_screenshot');
-                            showToast(
-                              'Perfetto: ora carica lo screenshot della Story.',
-                              'info'
-                            );
-                          }
-                        } else {
-                          setSharePhase('await_screenshot');
-                          showToast(
-                            'Condividi manualmente su Instagram, poi carica lo screenshot da questa schermata.',
-                            'info'
-                          );
-                        }
-
-                        // If there are no required tags, complete the challenge now
-                        if (!hasRequiredTags && gameState.currentUser.userId) {
-                          updateChallengeProgress('social-arena', 1, true);
-                          setForcedValidated(true);
-                          showToast(
-                            'Condivisione completata. Nessuna verifica automatica richiesta; prova considerata completata.',
-                            'success'
-                          );
-                        }
-                      }}
-                    >
-                      Condividi
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Step 3: after sharePhase advances to 'shared' or 'await_screenshot' -> allow screenshot upload and OCR */}
-              {hasRequiredTags &&
-                selectedFile &&
-                (sharePhase === 'shared' ||
-                  sharePhase === 'await_screenshot') && (
+          {!isCompleted ? (
+            <>
+              {/* Upload area */}
+              <div className="border-4 border-dashed border-muted-foreground p-8 text-center mb-6">
+                {/* Step 1: no selectedFile yet -> show capture/upload only */}
+                {!selectedFile && (
                   <div className="space-y-4">
                     <div className="text-4xl">
-                      {screenshotPreviewUrl ? (
+                      {selectedPreviewUrl ? (
                         <img
-                          src={screenshotPreviewUrl}
-                          alt="Screenshot preview"
+                          src={selectedPreviewUrl}
+                          alt="Preview"
+                          className="w-16 h-16 object-cover inline-block"
+                        />
+                      ) : (
+                        '📸'
+                      )}
+                    </div>
+                    <p className="text-sm mb-4">
+                      Carica la foto con il gadget della community
+                    </p>
+                    <div className="flex gap-2 justify-center flex-wrap">
+                      <button
+                        className="nes-btn is-primary"
+                        onClick={handleTakePicture}
+                        data-testid="button-take-picture"
+                      >
+                        Scatta foto
+                      </button>
+                      <input
+                        ref={cameraInputRef}
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        className="hidden"
+                        onChange={(e) =>
+                          handleFileSelect(
+                            e as React.ChangeEvent<HTMLInputElement>
+                          )
+                        }
+                        data-testid="input-camera-hidden"
+                      />
+                      <label className="nes-btn is-normal cursor-pointer">
+                        Scegli immagine
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleFileSelect}
+                          className="hidden"
+                          data-testid="input-select-image"
+                        />
+                      </label>
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 2: after selectedFile saved (sharePhase === 'captured') -> show only share or skip */}
+                {selectedFile && sharePhase === 'captured' && (
+                  <div className="flex flex-col gap-4">
+                    <div className="text-4xl">
+                      {selectedPreviewUrl ? (
+                        <img
+                          src={selectedPreviewUrl}
+                          alt="Preview"
                           className="w-16 h-16 object-cover inline-block"
                         />
                       ) : (
@@ -503,174 +473,353 @@ const SocialArena: React.FC = () => {
                       )}
                     </div>
                     <p className="text-sm">
-                      Hai condiviso la foto? Carica lo screenshot della Story
-                      per la verifica.
+                      Immagine selezionata: {selectedFile.name}
                     </p>
-                    <input
-                      id="input-screenshot-upload"
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleScreenshotSelect}
-                      data-testid="input-screenshot-upload"
-                    />
-                    <label
-                      htmlFor="input-screenshot-upload"
-                      className="nes-btn is-normal cursor-pointer"
-                    >
-                      Carica screenshot della Story
-                    </label>
-                    <div>
+                    {hasRequiredTags && (
+                      <>
+                        <p className="text-sm">
+                          Ora condividi la Story su Instagram (o Facebook) con i
+                          seguenti tag:
+                        </p>
+
+                        <div className="mb-4 flex flex-col gap-2">
+                          {requiredTags.map((tag) => (
+                            <span
+                              key={tag}
+                              className="nes-badge p-2 block relative w-auto inline-block m-1"
+                            >
+                              <span className="is-primary relative block font-bold">
+                                {tag}
+                              </span>
+                            </span>
+                          ))}
+                        </div>
+                      </>
+                    )}
+
+                    <div className="flex gap-2 justify-center flex-wrap">
                       <button
                         className="nes-btn is-normal"
-                        onClick={() => setSelectedFile(null)}
+                        onClick={async () => {
+                          if (navigator.share && selectedFile) {
+                            try {
+                              await navigator.share({
+                                files: [selectedFile],
+                                text: 'Condivido la mia storia su Instagram',
+                              });
+                              setSharePhase('await_screenshot');
+                            } catch (e) {
+                              console.warn(
+                                'Condivisione fallita o annullata',
+                                e
+                              );
+                              setSharePhase('await_screenshot');
+                              // If the photo was captured with the camera, offer to save it locally
+                              if (capturedWithCamera) {
+                                setDialogTitle('Condivisione fallita');
+                                setDialogMessage(
+                                  `La condivisione è fallita o è stata annullata. Vuoi salvare la foto nella galleria del dispositivo prima di uscire?${requiredTagsHint}`
+                                );
+                                setDialogType('save-photo');
+                              } else {
+                                setDialogTitle('Condividi manualmente');
+                                setDialogMessage(
+                                  `Condividi manualmente su Instagram (o Facebook), poi carica lo screenshot da questa schermata.${requiredTagsHint}`
+                                );
+                                setDialogType('info');
+                              }
+                            }
+                          } else {
+                            setSharePhase('await_screenshot');
+                            setDialogTitle('Condividi manualmente');
+                            setDialogMessage(
+                              `Condividi manualmente su Instagram (o Facebook), poi carica lo screenshot da questa schermata.${requiredTagsHint}`
+                            );
+                          }
+
+                          // If there are no required tags, complete the challenge now
+                          if (
+                            !hasRequiredTags &&
+                            gameState.currentUser.userId
+                          ) {
+                            updateChallengeProgress('social-arena', 1, true);
+                            setForcedValidated(true);
+                            setDialogTitle('Condivisione completata');
+                            setDialogMessage(
+                              `Condivisione completata. Nessuna verifica automatica richiesta; prova considerata completata.${requiredTagsHint}`
+                            );
+                          }
+                        }}
                       >
-                        Annulla
+                        Condividi
                       </button>
                     </div>
                   </div>
                 )}
-            </div>
 
-            {/* OCR UI moved into modal (modal shows progress, result and actions) */}
+                {/* Step 3: after sharePhase advances to 'shared' or 'await_screenshot' -> allow screenshot upload and OCR */}
+                {hasRequiredTags &&
+                  selectedFile &&
+                  (sharePhase === 'shared' ||
+                    sharePhase === 'await_screenshot') && (
+                    <div className="space-y-4">
+                      <div className="text-4xl">
+                        {screenshotPreviewUrl ? (
+                          <img
+                            src={screenshotPreviewUrl}
+                            alt="Screenshot preview"
+                            className="w-16 h-16 object-cover inline-block"
+                          />
+                        ) : (
+                          '📸'
+                        )}
+                      </div>
+                      <p className="text-sm">
+                        Hai condiviso la foto? Carica lo screenshot della Story
+                        per la verifica.
+                      </p>
+                      <input
+                        id="input-screenshot-upload"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleScreenshotSelect}
+                        data-testid="input-screenshot-upload"
+                      />
+                      <label
+                        htmlFor="input-screenshot-upload"
+                        className="nes-btn is-normal cursor-pointer"
+                      >
+                        Carica screenshot della Story
+                      </label>
+                      <div>
+                        <button
+                          className="nes-btn is-normal"
+                          onClick={() => setSelectedFile(null)}
+                        >
+                          Rimuovi immagine
+                        </button>
+                        <button
+                          type="button"
+                          className="text-sm sm:text-xs mt-2 sm:mt-0 sm:ml-3 block w-full sm:inline-block px-3 py-2 rounded bg-transparent text-muted-foreground border-none underline text-center touch-manipulation"
+                          aria-label="Non ho social - annulla condivisione"
+                          onClick={() => {
+                            // User indicates they don't have social — mark challenge completed for authenticated users
+                            setSelectedFile(null);
+                            setSharePhase('idle');
 
-            {/* OCR Modal component */}
-            {ocrModalOpen && screenshotFile && (
-              <OcrModal
-                file={screenshotFile}
-                requiredTags={requiredTags}
-                confidenceThreshold={confidenceThreshold}
-                failedAttempts={failedAttempts}
-                onAttempt={() => {
-                  setFailedAttempts((n) => n + 1);
-                }}
-                onVerified={async (result, forced) => {
-                  // persist proof and update progress if verified or forced
-                  if (!gameState.currentUser.userId) return;
-                  try {
-                    const blobId = await putBlob(screenshotFile);
-                    const proof: SocialProof = {
-                      opId: `proof_${Date.now()}`,
-                      userId: gameState.currentUser.userId,
-                      imageLocalUrl: blobId,
-                      detectedTags: result?.detectedTags || [],
-                      detected: !!result?.detected,
-                      // If user manually forces verification, treat as verified
-                      verified:
-                        forced ||
-                        (!!result?.detected &&
-                          result.confidence >= confidenceThreshold),
-                      attempts: 1,
-                      createdAt: new Date().toISOString(),
-                    };
-                    gameStorage.addSocialProof(
-                      gameState.currentUser.userId,
-                      proof
-                    );
-                    setProof(proof);
-                    try {
-                      const url = await getBlobUrl(blobId);
-                      setProofPreviewUrl(url || null);
-                    } catch {}
-                    if (proof.verified) {
-                      updateChallengeProgress('social-arena', 1, true);
-                      setForcedValidated(true);
-                      setFailedAttempts(0);
-                    } else {
-                      setFailedAttempts((n) => n + 1);
-                    }
-                  } catch (err) {
-                    console.error(
-                      'Error saving screenshot proof after OCR modal verification',
-                      err
-                    );
-                  } finally {
-                    setOcrModalOpen(false);
-                  }
-                }}
-              />
-            )}
+                            if (gameState.currentUser?.userId) {
+                              // Persist completion and update UI state
+                              updateChallengeProgress('social-arena', 1, true);
+                              setForcedValidated(true);
+                              setDialogTitle('Partecipazione registrata');
+                              setDialogMessage(
+                                'Hai indicato di non avere social: la partecipazione è stata comunque registrata come completata.'
+                              );
+                            } else {
+                              // Fallback message when no user is logged in
+                              setDialogTitle('Non ho social');
+                              setDialogMessage(
+                                'Se non hai social puoi comunque partecipare in futuro. Torna qui quando avrai uno screenshot della Story per completare la verifica.'
+                              );
+                            }
+                          }}
+                        >
+                          Non ho social
+                        </button>
+                      </div>
+                    </div>
+                  )}
+              </div>
 
-            {/* Post-OCR action area removed per request */}
+              {/* OCR UI moved into modal (modal shows progress, result and actions) */}
 
-            {/* Share guide modal */}
-            {showShareGuide && (
-              <div
-                className="fixed inset-0 z-60 flex items-center justify-center"
-                style={{ background: 'rgba(43, 20, 36, 0.85)' }}
-              >
-                <div
-                  className="rounded-lg p-4 max-w-md w-full"
-                  style={{
-                    background: 'var(--ldc-background)',
-                    color: 'var(--ldc-primary-dark)',
+              {/* OCR Modal component */}
+              {ocrModalOpen && screenshotFile && (
+                <OcrModal
+                  file={screenshotFile}
+                  requiredTags={requiredTags}
+                  confidenceThreshold={confidenceThreshold}
+                  failedAttempts={failedAttempts}
+                  onAttempt={() => {
+                    setFailedAttempts((n) => n + 1);
                   }}
-                >
-                  <h3 className="font-retro text-sm mb-2">
-                    Come condividere su Instagram
-                  </h3>
-                  <ol className="text-xs mb-3">
-                    <li>Apri Instagram e crea una nuova Storia.</li>
-                    <li>Carica la foto che hai appena scattato.</li>
-                    <li>
-                      Pubblica la Storia e fai uno screenshot della Storia
-                      pubblicata.
-                    </li>
-                    <li>
-                      Torni qui e usa "Carica screenshot" per caricare lo
-                      screenshot della Storia.
-                    </li>
-                  </ol>
-                  <div className="flex justify-end gap-2">
-                    <button
-                      className="nes-btn is-normal"
-                      onClick={() => setShowShareGuide(false)}
-                    >
-                      Chiudi
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
+                  onVerified={async (result, forced) => {
+                    // persist proof and update progress if verified or forced
+                    if (!gameState.currentUser.userId) return;
+                    try {
+                      const blobId = await putBlob(screenshotFile);
+                      const proof: SocialProof = {
+                        opId: `proof_${Date.now()}`,
+                        userId: gameState.currentUser.userId,
+                        imageLocalUrl: blobId,
+                        detectedTags: result?.detectedTags || [],
+                        detected: !!result?.detected,
+                        // If user manually forces verification, treat as verified
+                        verified:
+                          forced ||
+                          (!!result?.detected &&
+                            result.confidence >= confidenceThreshold),
+                        attempts: 1,
+                        createdAt: new Date().toISOString(),
+                      };
+                      gameStorage.addSocialProof(
+                        gameState.currentUser.userId,
+                        proof
+                      );
+                      setProof(proof);
+                      try {
+                        const url = await getBlobUrl(blobId);
+                        setProofPreviewUrl(url || null);
+                      } catch {}
+                      if (proof.verified) {
+                        updateChallengeProgress('social-arena', 1, true);
+                        setForcedValidated(true);
+                        setFailedAttempts(0);
+                      } else {
+                        setFailedAttempts((n) => n + 1);
+                      }
+                    } catch (err) {
+                      console.error(
+                        'Error saving screenshot proof after OCR modal verification',
+                        err
+                      );
+                    } finally {
+                      setOcrModalOpen(false);
+                    }
+                  }}
+                />
+              )}
 
-            {/* Latest proof result removed per request */}
-          </>
-        ) : (
-          /* Completion message */
-          <div className="text-center">
-            <div className="nes-container is-success p-4 mb-4">
-              <div className="flex items-center justify-center gap-4 mb-2">
-                <div className="text-5xl">🏆</div>
-                {proof && (
-                  <img
-                    src={proofPreviewUrl || (proof.imageLocalUrl as string)}
-                    alt="Prova verificata"
-                    className="w-16 h-16 object-cover border-2"
-                    style={{ borderColor: 'var(--ldc-primary-dark)' }}
-                  />
-                )}
-              </div>
-              <h4 className="font-retro text-sm mb-2">Arena Conquistata!</h4>
-              <p className="text-sm mb-3">
-                La tua prova è stata verificata! La leggenda del Sigillo è ora
-                completa.
-              </p>
-              {proof && (
-                <div className="nes-container is-light p-3">
-                  <div className="text-xs text-left">
-                    <div>Tag rilevati: {proof.detectedTags.join(', ')}</div>
-                    <div>
-                      Verificato:{' '}
-                      {new Date(proof.createdAt).toLocaleString('it-IT')}
+              {/* Post-OCR action area removed per request */}
+
+              {/* Share guide modal */}
+              {showShareGuide && (
+                <div
+                  className="fixed inset-0 z-60 flex items-center justify-center"
+                  style={{ background: 'rgba(43, 20, 36, 0.85)' }}
+                >
+                  <div
+                    className="rounded-lg p-4 max-w-md w-full"
+                    style={{
+                      background: 'var(--ldc-background)',
+                      color: 'var(--ldc-primary-dark)',
+                    }}
+                  >
+                    <h3 className="font-retro text-sm mb-2">
+                      Come condividere su Instagram
+                    </h3>
+                    <ol className="text-xs mb-3">
+                      <li>Apri Instagram e crea una nuova Storia.</li>
+                      <li>Carica la foto che hai appena scattato.</li>
+                      <li>
+                        Pubblica la Storia e fai uno screenshot della Storia
+                        pubblicata.
+                      </li>
+                      <li>
+                        Torni qui e usa "Carica screenshot" per caricare lo
+                        screenshot della Storia.
+                      </li>
+                    </ol>
+                    <div className="flex justify-end gap-2">
+                      <button
+                        className="nes-btn is-normal"
+                        onClick={() => setShowShareGuide(false)}
+                      >
+                        Chiudi
+                      </button>
                     </div>
                   </div>
                 </div>
               )}
+
+              {/* Latest proof result removed per request */}
+            </>
+          ) : (
+            /* Completion message */
+            <div className="text-center">
+              <div className="nes-container is-success p-4 mb-4">
+                <div className="flex items-center justify-center gap-4 mb-2">
+                  <div className="text-5xl">🏆</div>
+                  {proof && (
+                    <img
+                      src={proofPreviewUrl || (proof.imageLocalUrl as string)}
+                      alt="Prova verificata"
+                      className="w-16 h-16 object-cover border-2"
+                      style={{ borderColor: 'var(--ldc-primary-dark)' }}
+                    />
+                  )}
+                </div>
+                <h4 className="font-retro text-sm mb-2">Arena Conquistata!</h4>
+                <p className="text-sm mb-3">
+                  La tua prova è stata verificata! La leggenda del Sigillo è ora
+                  completa.
+                </p>
+                {proof && (
+                  <div className="nes-container is-light p-3">
+                    <div className="text-xs text-left">
+                      <div>Tag rilevati: {proof.detectedTags.join(', ')}</div>
+                      <div>
+                        Verificato:{' '}
+                        {new Date(proof.createdAt).toLocaleString('it-IT')}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        )}
-      </div>
-    </ChallengeContentLayout>
+          )}
+        </div>
+      </ChallengeContentLayout>
+      {/* Global informational dialog (replaces some toasts) */}
+      {dialogMessage && (
+        <UiDialog
+          open={true}
+          onClose={() => setDialogMessage(null)}
+          title={dialogTitle}
+          dismissible={false}
+          buttonAlignment="right"
+        >
+          <p className="text-sm">{dialogMessage}</p>
+          <menu className="dialog-menu mt-3">
+            {dialogType === 'save-photo' ? (
+              <>
+                <button
+                  className="nes-btn"
+                  onClick={() => {
+                    // Use the selected preview URL if available
+                    savePhotoToDevice(selectedPreviewUrl || proofPreviewUrl);
+                    setDialogMessage(null);
+                    setDialogType(null);
+                  }}
+                >
+                  Salva foto
+                </button>
+                <button
+                  className="nes-btn"
+                  onClick={() => {
+                    setDialogMessage(null);
+                    setDialogType(null);
+                  }}
+                >
+                  Chiudi
+                </button>
+              </>
+            ) : (
+              <button
+                className="nes-btn"
+                onClick={() => {
+                  setDialogMessage(null);
+                  setDialogType(null);
+                }}
+              >
+                Chiudi
+              </button>
+            )}
+          </menu>
+        </UiDialog>
+      )}
+    </>
   );
 };
 
