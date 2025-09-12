@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.2](https://github.com/digital-community-le/lecce-digital-game/compare/v1.9.1...v1.9.2) (2025-09-12)
+
+
+### Bug Fixes
+
+* **devfest:** gestione corretta array badge da localStorage ([2e0b806](https://github.com/digital-community-le/lecce-digital-game/commit/2e0b8062c26857a11431abd5da6aa8ccdc89016a))
+
 ## [1.9.1](https://github.com/digital-community-le/lecce-digital-game/compare/v1.9.0...v1.9.1) (2025-09-12)
 
 
