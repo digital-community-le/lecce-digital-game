@@ -1,6 +1,7 @@
 import React from 'react';
 import { useGameStore } from '@/hooks/use-game-store';
 import UiDialog from './UiDialog';
+import { APP_VERSION, BUILD_TIME, GIT_COMMIT } from '@/version';
 import allianceGem from '@assets/images/gem-of-alliance.png';
 import memoryGem from '@assets/images/gem-of-memory.png';
 import wisdomGem from '@assets/images/gem-of-wisdom.png';
@@ -23,26 +24,35 @@ const StatisticsModal: React.FC = () => {
 
   const badgeMap: Record<string, string> = {
     'guild-builder': "Gemma dell'Alleanza",
-    'retro-puzzle': "Gemma della Conoscenza",
-    'debug-dungeon': "Gemma del Sapere",
-    'social-arena': "Sigillo di Lecce",
+    'retro-puzzle': 'Gemma della Conoscenza',
+    'debug-dungeon': 'Gemma del Sapere',
+    'social-arena': 'Sigillo di Lecce',
   };
 
-  const isCollected = (id: string) => gameState.gameProgress.completedChallenges.includes(id);
+  const isCollected = (id: string) =>
+    gameState.gameProgress.completedChallenges.includes(id);
 
   if (!isOpen) return null;
 
   return (
-    <UiDialog open={isOpen} onClose={() => closeModal('statistics')} title="Statistiche" className="">
+    <UiDialog
+      open={isOpen}
+      onClose={() => closeModal('statistics')}
+      title="Statistiche"
+      className=""
+    >
       <div data-testid="modal-statistics">
         <div className="mt-0 mb-4">
           <div className="space-y-2">
-            {gameState.challenges.map(ch => {
+            {gameState.challenges.map((ch) => {
               const src = gemMap[ch.id] || '';
               const collected = isCollected(ch.id);
               const badgeName = badgeMap[ch.id] || ch.title;
               return (
-                <div key={ch.id} className="flex items-center gap-3 p-2 rounded">
+                <div
+                  key={ch.id}
+                  className="flex items-center gap-3 p-2 rounded"
+                >
                   <img
                     src={src}
                     alt={badgeName}
@@ -50,14 +60,15 @@ const StatisticsModal: React.FC = () => {
                   />
                   <div className="text-left">
                     <div className="font-medium text-sm">{badgeName}</div>
-                    <div className="text-xs text-muted-foreground">{ch.title}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {ch.title}
+                    </div>
                   </div>
                 </div>
               );
             })}
           </div>
         </div>
-
 
         <div className="nes-container is-light p-3 mb-4">
           <div className="text-sm">
@@ -74,7 +85,7 @@ const StatisticsModal: React.FC = () => {
           </div>
         </div>
 
-        <menu className='flex justify-center'>
+        <menu className="flex justify-center mb-4">
           <button
             className="nes-btn is-primary"
             onClick={() => closeModal('statistics')}
@@ -83,6 +94,22 @@ const StatisticsModal: React.FC = () => {
             Chiudi
           </button>
         </menu>
+
+        {/* Version Footer */}
+        <div className="border-t border-muted pt-3">
+          <div className="text-center text-xs text-muted-foreground space-y-1">
+            <div className="font-retro">
+              Lecce Digital Legends v{APP_VERSION}
+            </div>
+            <div>
+              Build: {new Date(BUILD_TIME).toLocaleDateString('it-IT')} •
+              {GIT_COMMIT ? ` ${GIT_COMMIT.substring(0, 7)}` : ''}
+            </div>
+            <div className="text-[10px] opacity-75">
+              © 2025 Lecce Digital Community
+            </div>
+          </div>
+        </div>
       </div>
     </UiDialog>
   );
