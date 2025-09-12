@@ -1,0 +1,58 @@
+# DevFest Lecce - Configurazione Apache per proxy API
+# @author Mattia Mancarella
+# @date 2025-09-11
+
+RewriteEngine On
+
+# ===== CORS Headers =====
+# Applica CORS solo alle richieste /devfest/*
+<IfModule mod_headers.c>
+    # Imposta CORS per richieste /devfest/*
+    SetEnvIf Request_URI "^/devfest/" IS_DEVFEST_API
+    
+    # Headers CORS specifici per l'origin della tua app
+    Header always set Access-Control-Allow-Origin "https://lecce-digital-legends.web.app" env=IS_DEVFEST_API
+    Header always set Access-Control-Allow-Methods "GET,POST,PUT,PATCH,DELETE,OPTIONS" env=IS_DEVFEST_API
+    Header always set Access-Control-Allow-Headers "Content-Type,Authorization,Accept,X-Requested-With" env=IS_DEVFEST_API
+    Header always set Access-Control-Allow-Credentials "true" env=IS_DEVFEST_API
+    
+    # Prevent caching of CORS preflight
+    Header always set Access-Control-Max-Age "86400" env=IS_DEVFEST_API
+</IfModule>
+
+# ===== Preflight OPTIONS =====
+# Gestisci preflight OPTIONS per /devfest/* PRIMA dei rewrite
+RewriteCond %{REQUEST_METHOD} =OPTIONS
+RewriteCond %{REQUEST_URI} ^/devfest/ [NC]
+RewriteRule ^(.*)$ - [R=204,L]
+
+# ===== API Routing =====
+# Rewrite /devfest/* verso il proxy PHP
+# Esempio: /devfest/badges/@scan/ → /php-proxy/proxy.php?path=/badges/@scan/
+RewriteCond %{REQUEST_URI} ^/devfest/(.*)$
+RewriteRule ^devfest/(.*)$ /php-proxy/proxy.php?path=/%1 [L,QSA]
+
+# ===== Sicurezza generale =====
+# Nascondi informazioni server
+ServerTokens Prod
+Header always unset X-Powered-By
+
+# Prevent access to sensitive files
+<FilesMatch "\.(env|log|config)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# ===== Caching =====
+# Cache per risorse statiche
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType application/json "access plus 1 minute"
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/jpg "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/svg+xml "access plus 1 month"
+</IfModule>

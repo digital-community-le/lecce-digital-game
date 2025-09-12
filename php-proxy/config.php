@@ -10,14 +10,14 @@
 return [
   // Host consentiti (whitelist per sicurezza SSRF)
   'allowed_hosts' => [
-    'https://api.devfest.gdglecce.it',
+    'api.devfest.gdglecce.it', // Solo hostname, senza schema
     'jsonplaceholder.typicode.com', // esempio per test
     // Aggiungi qui gli host delle tue API
   ],
 
   // Configurazione CORS
   'cors' => [
-    'allow_origin' => 'https://lecce-digital-legends.web.app/', // Frontend dev server
+    'allow_origin' => 'https://lecce-digital-legends.web.app', // Rimosso trailing slash
     'allow_methods' => 'GET,POST,PUT,PATCH,DELETE,OPTIONS',
     'allow_headers' => 'Content-Type,Authorization,Accept,X-Requested-With',
     'allow_credentials' => 'true',
@@ -32,6 +32,6 @@ return [
   // Default target API
   'default_target' => [
     'scheme' => 'https',
-    'host' => 'https://api.devfest.gdglecce.it',
+    'host' => 'api.devfest.gdglecce.it', // Solo hostname
   ],
 ];
