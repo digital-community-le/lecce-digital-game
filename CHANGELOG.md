@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.10.0](https://github.com/digital-community-le/lecce-digital-game/compare/v1.9.2...v1.10.0) (2025-09-12)
+
+
+### Features
+
+* **ocr:** migliora debug e rilevamento tag nella Social Arena ([f244a38](https://github.com/digital-community-le/lecce-digital-game/commit/f244a38e97f8ce888116b1833dbd7c4598b86d47))
+
 ## [1.9.2](https://github.com/digital-community-le/lecce-digital-game/compare/v1.9.1...v1.9.2) (2025-09-12)
 
 
