@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from 'react';
 
 type Props = {
   onCapture: (file: File) => void;
@@ -9,15 +9,16 @@ const CameraCapture: React.FC<Props> = ({ onCapture, onCancel }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const stickerRef = useRef<HTMLDivElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
   // Heuristic to label camera facing based on device label
   const getFacingLabel = (label?: string | null) => {
-    if (!label) return "Sconosciuta";
+    if (!label) return 'Sconosciuta';
     const l = label.toLowerCase();
-    if (/front|frontale|facing/i.test(l)) return "Frontale";
-    if (/back|rear|posteriore|trasera/i.test(l)) return "Posteriore";
-    return "Sconosciuta";
+    if (/front|frontale|facing/i.test(l)) return 'Frontale';
+    if (/back|rear|posteriore|trasera/i.test(l)) return 'Posteriore';
+    return 'Sconosciuta';
   };
   const [error, setError] = useState<string | null>(null);
   const [capturing, setCapturing] = useState(false);
@@ -41,7 +42,7 @@ const CameraCapture: React.FC<Props> = ({ onCapture, onCancel }) => {
   useEffect(() => {
     const shouldHide = capturing || !!previewUrl;
     const prev = document.body.style.overflow;
-    if (shouldHide) document.body.style.overflow = "hidden";
+    if (shouldHide) document.body.style.overflow = 'hidden';
     return () => {
       document.body.style.overflow = prev;
     };
@@ -138,16 +139,16 @@ const CameraCapture: React.FC<Props> = ({ onCapture, onCancel }) => {
       setStickerScale((s) => Math.max(0.3, Math.min(3, s + delta)));
     };
 
-    document.addEventListener("touchmove", onTouchMove, { passive: false });
-    document.addEventListener("touchstart", onTouchStart, { passive: false });
-    document.addEventListener("touchend", onTouchEnd, { passive: false });
-    document.addEventListener("wheel", onWheel, { passive: false });
+    document.addEventListener('touchmove', onTouchMove, { passive: false });
+    document.addEventListener('touchstart', onTouchStart, { passive: false });
+    document.addEventListener('touchend', onTouchEnd, { passive: false });
+    document.addEventListener('wheel', onWheel, { passive: false });
 
     return () => {
-      document.removeEventListener("touchmove", onTouchMove);
-      document.removeEventListener("touchstart", onTouchStart);
-      document.removeEventListener("touchend", onTouchEnd);
-      document.removeEventListener("wheel", onWheel);
+      document.removeEventListener('touchmove', onTouchMove);
+      document.removeEventListener('touchstart', onTouchStart);
+      document.removeEventListener('touchend', onTouchEnd);
+      document.removeEventListener('wheel', onWheel);
     };
   }, [selectedSticker, stickerPos, stickerScale]);
 
@@ -158,21 +159,25 @@ const CameraCapture: React.FC<Props> = ({ onCapture, onCancel }) => {
       try {
         const devices = await navigator.mediaDevices.enumerateDevices();
         if (!mounted) return;
-        const vids = devices.filter((d) => d.kind === "videoinput");
+        const vids = devices.filter((d) => d.kind === 'videoinput');
         setVideoDevices(vids);
         // keep previously selected if available, otherwise pick first
-        if (!selectedDeviceId && vids.length > 0) setSelectedDeviceId(vids[0].deviceId);
+        if (!selectedDeviceId && vids.length > 0)
+          setSelectedDeviceId(vids[0].deviceId);
       } catch (e) {
-        console.warn("enumerateDevices error", e);
+        console.warn('enumerateDevices error', e);
       }
     };
     updateDevices();
     // also update when devicechange event fires
     const onDeviceChange = () => updateDevices();
-    navigator.mediaDevices.addEventListener?.("devicechange", onDeviceChange);
+    navigator.mediaDevices.addEventListener?.('devicechange', onDeviceChange);
     return () => {
       mounted = false;
-      navigator.mediaDevices.removeEventListener?.("devicechange", onDeviceChange as any);
+      navigator.mediaDevices.removeEventListener?.(
+        'devicechange',
+        onDeviceChange as any
+      );
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -189,7 +194,7 @@ const CameraCapture: React.FC<Props> = ({ onCapture, onCancel }) => {
       try {
         const constraints: MediaStreamConstraints = deviceId
           ? { video: { deviceId: { exact: deviceId } } }
-          : { video: { facingMode: "environment" } };
+          : { video: { facingMode: 'environment' } };
         const s = await navigator.mediaDevices.getUserMedia(constraints);
         if (!mounted) {
           s.getTracks().forEach((t) => t.stop());
@@ -202,8 +207,8 @@ const CameraCapture: React.FC<Props> = ({ onCapture, onCancel }) => {
           setHasStream(true);
         }
       } catch (err) {
-        console.error("Camera error", err);
-        setError("Impossibile accedere alla fotocamera");
+        console.error('Camera error', err);
+        setError('Impossibile accedere alla fotocamera');
         setHasStream(false);
       }
     };
@@ -216,6 +221,10 @@ const CameraCapture: React.FC<Props> = ({ onCapture, onCancel }) => {
         streamRef.current.getTracks().forEach((t) => t.stop());
         streamRef.current = null;
       }
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
       setHasStream(false);
     };
   }, [selectedDeviceId]);
@@ -225,14 +234,14 @@ const CameraCapture: React.FC<Props> = ({ onCapture, onCancel }) => {
     setCapturing(true);
     try {
       const video = videoRef.current;
-      const canvas = document.createElement("canvas");
+      const canvas = document.createElement('canvas');
       canvas.width = video.videoWidth || 1280;
       canvas.height = video.videoHeight || 720;
-      const ctx = canvas.getContext("2d");
+      const ctx = canvas.getContext('2d');
       if (ctx) ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-  // Do not draw sticker onto the source canvas here; we'll draw it onto the
-  // final (cropped) canvas so its position matches the preview after crop.
+      // Do not draw sticker onto the source canvas here; we'll draw it onto the
+      // final (cropped) canvas so its position matches the preview after crop.
 
       // Crop the captured image to match the device screen aspect ratio
       const screenRatio = window.innerWidth / window.innerHeight || 1;
@@ -261,10 +270,10 @@ const CameraCapture: React.FC<Props> = ({ onCapture, onCancel }) => {
         }
       }
 
-      const finalCanvas = document.createElement("canvas");
+      const finalCanvas = document.createElement('canvas');
       finalCanvas.width = sWidth;
       finalCanvas.height = sHeight;
-      const fctx = finalCanvas.getContext("2d");
+      const fctx = finalCanvas.getContext('2d');
       if (fctx) {
         // draw the cropped area from the original canvas into final canvas
         fctx.drawImage(canvas, sx, sy, sWidth, sHeight, 0, 0, sWidth, sHeight);
@@ -285,20 +294,20 @@ const CameraCapture: React.FC<Props> = ({ onCapture, onCancel }) => {
             const baseFont = Math.floor(Math.min(sWidth, sHeight) * 0.12);
             const fontSize = Math.max(12, Math.round(baseFont * stickerScale));
             fctx.font = `${fontSize}px serif`;
-            fctx.textAlign = "center";
-            fctx.textBaseline = "middle";
-            fctx.fillStyle = "rgba(0,0,0,0.45)";
+            fctx.textAlign = 'center';
+            fctx.textBaseline = 'middle';
+            fctx.fillStyle = 'rgba(0,0,0,0.45)';
             fctx.fillText(selectedSticker, fx + 2, fy + 2);
-            fctx.fillStyle = "#fff";
+            fctx.fillStyle = '#fff';
             fctx.fillText(selectedSticker, fx, fy);
           } catch (e) {
-            console.warn("Sticker draw error on final canvas", e);
+            console.warn('Sticker draw error on final canvas', e);
           }
         }
       }
 
       const blob: Blob | null = await new Promise((resolve) =>
-        finalCanvas.toBlob(resolve as any, "image/jpeg", 0.9)
+        finalCanvas.toBlob(resolve as any, 'image/jpeg', 0.9)
       );
       if (blob) {
         const file = new File([blob], `capture_${Date.now()}.jpg`, {
@@ -308,12 +317,12 @@ const CameraCapture: React.FC<Props> = ({ onCapture, onCancel }) => {
         const url = URL.createObjectURL(blob);
         setPreviewFile(file);
         setPreviewUrl(url);
-        // animate in
-        setTimeout(() => setPreviewAnimating(true), 30);
+        // animate in with cleanup tracking
+        timeoutRef.current = setTimeout(() => setPreviewAnimating(true), 30);
       }
     } catch (err) {
-      console.error("Capture error", err);
-      setError("Errore nella cattura");
+      console.error('Capture error', err);
+      setError('Errore nella cattura');
     } finally {
       setCapturing(false);
     }
@@ -453,6 +462,11 @@ const CameraCapture: React.FC<Props> = ({ onCapture, onCancel }) => {
     if (!previewFile) return;
     // stop camera and pass file to parent
     stopStream();
+    // clean up any pending timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
     onCapture(previewFile);
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
@@ -465,15 +479,18 @@ const CameraCapture: React.FC<Props> = ({ onCapture, onCancel }) => {
   const handleRetryPreview = () => {
     // remove preview and resume camera
     if (previewUrl) URL.revokeObjectURL(previewUrl);
-  // also remove any sticker selection when retrying
-  removeSticker();
-  setPreviewFile(null);
-  setPreviewUrl(null);
+    // clean up any pending timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    // also remove any sticker selection when retrying
+    removeSticker();
+    setPreviewFile(null);
+    setPreviewUrl(null);
     setPreviewAnimating(false);
     if (streamRef.current) setHasStream(true);
-  };
-
-  return (
+  };  return (
     <div className="fixed inset-0 z-50 bg-black">
       {/* camera selection control */}
       {videoDevices.length > 1 && (
@@ -481,7 +498,7 @@ const CameraCapture: React.FC<Props> = ({ onCapture, onCancel }) => {
           <label className="text-xs block mb-1 text-white">Fotocamera</label>
           <select
             className="nes-select bg-white text-xs"
-            value={selectedDeviceId || ""}
+            value={selectedDeviceId || ''}
             onChange={(e) => handleDeviceChange(e.target.value)}
             aria-label="Seleziona fotocamera"
           >
@@ -513,7 +530,7 @@ const CameraCapture: React.FC<Props> = ({ onCapture, onCancel }) => {
           role="img"
           aria-hidden
           style={{
-            right: "auto",
+            right: 'auto',
             left: videoRef.current
               ? `${
                   videoRef.current.getBoundingClientRect().left +
@@ -526,11 +543,11 @@ const CameraCapture: React.FC<Props> = ({ onCapture, onCancel }) => {
                   stickerPos.y * videoRef.current.getBoundingClientRect().height
                 }px`
               : `${stickerPos.y * 100}vh`,
-            transform: "translate(-50%,-50%)",
+            transform: 'translate(-50%,-50%)',
             fontSize: `clamp(36px, ${Math.round(6 * stickerScale)}vw, 96px)`,
-            cursor: "grab",
-            userSelect: "none",
-            touchAction: "none",
+            cursor: 'grab',
+            userSelect: 'none',
+            touchAction: 'none',
           }}
           onPointerDown={handleStickerPointerDown}
           onPointerMove={handleStickerPointerMove}
@@ -564,7 +581,10 @@ const CameraCapture: React.FC<Props> = ({ onCapture, onCancel }) => {
         <div className="mx-auto w-full max-w-md pointer-events-auto bg-black bg-opacity-40 backdrop-blur-sm rounded-xl p-3 flex items-center justify-evenly">
           <button
             className="nes-btn is-error"
-            onClick={() => { removeSticker(); onCancel && onCancel(); }}
+            onClick={() => {
+              removeSticker();
+              onCancel && onCancel();
+            }}
             aria-label="Annulla"
             data-testid="button-camera-cancel"
           >
@@ -579,7 +599,7 @@ const CameraCapture: React.FC<Props> = ({ onCapture, onCancel }) => {
               aria-label="Scatta foto"
               data-testid="button-camera-capture"
             >
-              {capturing ? "Scattando..." : "Scatta"}
+              {capturing ? 'Scattando...' : 'Scatta'}
             </button>
           </div>
         </div>
@@ -594,9 +614,9 @@ const CameraCapture: React.FC<Props> = ({ onCapture, onCancel }) => {
             alt="Anteprima"
             className="absolute inset-0 w-full h-full object-cover"
             style={{
-              transform: previewAnimating ? "scale(1)" : "scale(0.98)",
+              transform: previewAnimating ? 'scale(1)' : 'scale(0.98)',
               opacity: previewAnimating ? 1 : 0,
-              transition: "transform 220ms ease-out, opacity 220ms ease-out",
+              transition: 'transform 220ms ease-out, opacity 220ms ease-out',
             }}
           />
 
@@ -607,7 +627,7 @@ const CameraCapture: React.FC<Props> = ({ onCapture, onCancel }) => {
               role="img"
               aria-hidden
               style={{
-                right: "auto",
+                right: 'auto',
                 left: videoRef.current
                   ? `${
                       videoRef.current.getBoundingClientRect().left +
@@ -622,13 +642,13 @@ const CameraCapture: React.FC<Props> = ({ onCapture, onCancel }) => {
                         videoRef.current.getBoundingClientRect().height
                     }px`
                   : `${stickerPos.y * 100}vh`,
-                transform: "translate(-50%,-50%)",
+                transform: 'translate(-50%,-50%)',
                 fontSize: `clamp(48px, ${Math.round(
                   8 * stickerScale
                 )}vw, 128px)`,
-                cursor: "grab",
-                userSelect: "none",
-                touchAction: "none",
+                cursor: 'grab',
+                userSelect: 'none',
+                touchAction: 'none',
               }}
               onPointerDown={handleStickerPointerDown}
               onPointerMove={handleStickerPointerMove}
@@ -649,8 +669,8 @@ const CameraCapture: React.FC<Props> = ({ onCapture, onCancel }) => {
               <div
                 className={`text-white rounded-full px-3 py-1 text-sm ${
                   stickerPos.y <= DELETE_ZONE_RATIO
-                    ? "bg-red-600 bg-opacity-95"
-                    : "bg-red-600 bg-opacity-80"
+                    ? 'bg-red-600 bg-opacity-95'
+                    : 'bg-red-600 bg-opacity-80'
                 }`}
               >
                 Trascina qui per rimuovere
@@ -658,8 +678,9 @@ const CameraCapture: React.FC<Props> = ({ onCapture, onCancel }) => {
             </div>
           )}
 
-          {/* Preview sticker toolbar - allow changing/removing sticker during confirmation */}
-          {/* Top-right overlay: toggle preview toolbar visibility */}
+          {/* Preview sticker toolbar - HIDDEN per request: non permettere modifica emoji nella schermata di conferma */}
+          {/* Top-right overlay: toggle preview toolbar visibility - RIMOSSO */}
+          {/* 
           <div className="absolute right-4 top-4 z-60">
             <button
               className="nes-btn is-small"
@@ -669,7 +690,10 @@ const CameraCapture: React.FC<Props> = ({ onCapture, onCancel }) => {
               🎨
             </button>
           </div>
+          */}
 
+          {/* Toolbar degli stickers - RIMOSSA per nascondere il tool di sovrapposizione emoji */}
+          {/*
           <div
             className={`absolute left-0 right-0 bottom-24 flex justify-center pointer-events-auto ${
               previewToolbarVisible ? "" : "hidden"
@@ -694,6 +718,7 @@ const CameraCapture: React.FC<Props> = ({ onCapture, onCancel }) => {
               ))}
             </div>
           </div>
+          */}
 
           {/* Bottom controls overlay */}
           <div className="absolute left-0 right-0 bottom-0 p-4 pointer-events-none">
