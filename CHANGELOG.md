@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.1](https://github.com/digital-community-le/lecce-digital-game/compare/v1.9.0...v1.9.1) (2025-09-12)
+
+
+### Bug Fixes
+
+* **badge:** correct DevFestBadgeResponse.owned type from string to boolean ([8bde7af](https://github.com/digital-community-le/lecce-digital-game/commit/8bde7aff0bbd421bc4d3b38b672358637ad12410))
+
 ## [1.9.0](https://github.com/digital-community-le/lecce-digital-game/compare/v1.8.2...v1.9.0) (2025-09-12)
 
 
