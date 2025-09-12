@@ -31,11 +31,11 @@
         "type": "compose_team",
         "requirement": {
           "id": "req-social-boost",
-          "text": "Migliora la visibilità sui social con una squadra bilanciata",
+          "text": "Migliora la visibilità sui social con una squadra che copra strategia + creatività + produzione",
           "roles": [
             "Social Media Wizard",
-            "Designer",
-            "Speaker"
+            "Marketing Expert",
+            "Content Creator"
           ]
         }
       },
@@ -86,43 +86,43 @@
       "pairs": [
         {
           "id": "1",
-          "term": "React",
-          "category": "Frontend Library"
+          "term": "Angular",
+          "category": "Frontend"
         },
         {
           "id": "2",
-          "term": "Node.js",
-          "category": "Backend Runtime"
+          "term": "Firebase",
+          "category": "Backend"
         },
         {
           "id": "3",
-          "term": "MongoDB",
-          "category": "Database"
+          "term": "BigQuery",
+          "category": "Data Warehouse"
         },
         {
           "id": "4",
-          "term": "TypeScript",
-          "category": "Programming Language"
+          "term": "Kubernetes",
+          "category": "Orchestration"
         },
         {
           "id": "5",
-          "term": "Docker",
-          "category": "Containerization"
+          "term": "TensorFlow",
+          "category": "Machine Learning"
         },
         {
           "id": "6",
-          "term": "Git",
-          "category": "Version Control"
+          "term": "Figma",
+          "category": "Design"
         },
         {
           "id": "7",
-          "term": "AWS",
-          "category": "Cloud Platform"
+          "term": "SEO",
+          "category": "Digital Marketing"
         },
         {
           "id": "8",
-          "term": "GraphQL",
-          "category": "Query Language"
+          "term": "Call to Action (CTA)",
+          "category": "Copywriting"
         }
       ],
       "rewards": {
@@ -160,55 +160,55 @@
       "questions": [
         {
           "id": "1",
-          "question": "Quale hook di React viene utilizzato per gestire lo stato locale?",
+          "question": "Cosa indica un errore 404 in un sito web",
           "options": [
-            "useEffect",
-            "useState",
-            "useContext",
-            "useReducer"
+            "Accesso negato",
+            "Pagina non trovata",
+            "Errore interno del server",
+            "Richiesta non valida"
           ],
           "correctAnswer": 1,
-          "explanation": "useState è l'hook principale per gestire lo stato locale in React.",
-          "category": "React"
+          "explanation": "Un errore 404 indica che la pagina richiesta non è stata trovata sul server.",
+          "category": "Development"
         },
         {
           "id": "2",
-          "question": "Qual è la porta predefinita per un server HTTP?",
+          "question": "Qual è il principio di UX che descrive la coerenza di colori, font e spaziatura?",
           "options": [
-            "80",
-            "443",
-            "8080",
-            "3000"
+            "Allineamento",
+            "Contrasto",
+            "Prossimità",
+            "Consistenza"
           ],
-          "correctAnswer": 0,
-          "explanation": "La porta 80 è la porta standard per il protocollo HTTP.",
-          "category": "Networking"
+          "correctAnswer": 3,
+          "explanation": "La consistenza assicura che gli elementi visivi siano uniformi in tutto il design.",
+          "category": "Design"
         },
         {
           "id": "3",
-          "question": "Cosa significa SQL?",
+          "question": "Quale di questi strumenti è usato principalmente per il design collaborativo?",
           "options": [
-            "Structured Query Language",
-            "Simple Query Language",
-            "Standard Query Language",
-            "System Query Language"
+            "Figma",
+            "Sketch",
+            "Adobe XD",
+            "InVision"
           ],
           "correctAnswer": 0,
-          "explanation": "SQL sta per Structured Query Language.",
-          "category": "Database"
+          "explanation": "Figma è uno strumento di design collaborativo basato su cloud.",
+          "category": "Design"
         },
         {
           "id": "4",
-          "question": "Quale metodo HTTP viene utilizzato per creare una nuova risorsa?",
+          "question": "In una campagna di marketing digitale, cosa rappresenta la “conversione”?",
           "options": [
-            "GET",
-            "POST",
-            "PUT",
-            "DELETE"
+            "Un visitatore che compie un'azione desiderata",
+            "Un aumento del traffico sul sito web",
+            "Un sito che cambia layout",
+            "Un file trasformato in PDF"
           ],
-          "correctAnswer": 1,
-          "explanation": "POST viene utilizzato per creare nuove risorse sul server.",
-          "category": "HTTP"
+          "correctAnswer": 0,
+          "explanation": "La conversione rappresenta un visitatore che compie un'azione desiderata.",
+          "category": "Marketing"
         },
         {
           "id": "5",
@@ -225,29 +225,29 @@
         },
         {
           "id": "6",
-          "question": "Quale simbolo viene utilizzato per i commenti in JavaScript?",
+          "question": "Quale strumento viene comunemente usato per gestire attività in un team agile?",
           "options": [
-            "#",
-            "//",
-            "/*",
-            "<!--"
+            "Photoshop",
+            "Slack",
+            "Jira",
+            "Asana"
           ],
-          "correctAnswer": 1,
-          "explanation": "// viene utilizzato per i commenti su singola riga in JavaScript.",
-          "category": "JavaScript"
+          "correctAnswer": 2,
+          "explanation": "Jira è uno strumento popolare per la gestione di progetti e attività in team agili.",
+          "category": "Project Management"
         },
         {
           "id": "7",
-          "question": "Cosa significa CSS?",
+          "question": "Quale servizio cloud è offerto da Google?",
           "options": [
-            "Computer Style Sheets",
-            "Cascading Style Sheets",
-            "Creative Style Sheets",
-            "Colorful Style Sheets"
+            "Azure",
+            "Google Cloud",
+            "AWS",
+            "Oracle Cloud"
           ],
           "correctAnswer": 1,
-          "explanation": "CSS sta per Cascading Style Sheets.",
-          "category": "CSS"
+          "explanation": "Google Cloud è la piattaforma di servizi cloud di Google.",
+          "category": "Cloud"
         },
         {
           "id": "8",
@@ -264,29 +264,29 @@
         },
         {
           "id": "9",
-          "question": "Qual è il significato di API?",
+          "question": "Quale pratica aiuta a proteggere un account online?",
           "options": [
-            "Application Programming Interface",
-            "Automated Programming Interface",
-            "Advanced Programming Interface",
-            "Application Process Interface"
+            "Autenticazione a due fattori",
+            "Password complesse",
+            "Domande di sicurezza",
+            "Tutte le precedenti"
           ],
-          "correctAnswer": 0,
-          "explanation": "API sta per Application Programming Interface.",
-          "category": "General"
+          "correctAnswer": 3,
+          "explanation": "Tutte queste pratiche aiutano a proteggere un account online.",
+          "category": "Security"
         },
         {
           "id": "10",
-          "question": "Quale attributo HTML viene utilizzato per specificare un identificatore unico?",
+          "question": "Quale tecnica di copywriting serve a spingere l’utente a compiere un’azione (es. cliccare un bottone)?",
           "options": [
-            "class",
-            "id",
-            "name",
-            "unique"
+            "Debugging",
+            "Wireframing",
+            "Call to Action (CTA)",
+            "Encryption"
           ],
-          "correctAnswer": 1,
-          "explanation": "L'attributo id viene utilizzato per specificare un identificatore unico in HTML.",
-          "category": "HTML"
+          "correctAnswer": 2,
+          "explanation": "La Call to Action (CTA) è una tecnica di copywriting utilizzata per spingere l'utente a compiere un'azione.",
+          "category": "Copywriting"
         }
       ],
       "rewards": {

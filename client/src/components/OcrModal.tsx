@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
-import useOCR from "@/hooks/use-ocr";
+import React, { useEffect, useRef, useState } from 'react';
+import useOCR from '@/hooks/use-ocr';
 import UiDialog from '@/components/UiDialog';
 
 type OCRResult = {
@@ -28,11 +28,12 @@ const OcrModal: React.FC<Props> = ({
   failedAttempts = 0,
 }) => {
   const { run, ocrProgress, ocrResult, setOcrResult } = useOCR();
-  const [state, setState] = useState<"running" | "failed" | "success" | "idle">(
-    "running"
+  const [state, setState] = useState<'running' | 'failed' | 'success' | 'idle'>(
+    'running'
   );
   const [ocrUnavailable, setOcrUnavailable] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [showDebugInfo, setShowDebugInfo] = useState(false);
   const titleId = useRef(`ocr-modal-title-${Date.now()}`);
   const descId = useRef(`ocr-modal-desc-${Date.now()}`);
   const retryButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -40,7 +41,7 @@ const OcrModal: React.FC<Props> = ({
 
   // Reusable OCR runner so Retry can re-run analysis without closing modal
   const runAnalysis = async () => {
-    setState("running");
+    setState('running');
     setMessage(null);
     setOcrResult(null);
     try {
@@ -48,43 +49,105 @@ const OcrModal: React.FC<Props> = ({
       // Log detailed OCR data for debugging; do not show it in the UI
       try {
         // eslint-disable-next-line no-console
-        console.log('OCR result details:', {
+        console.log('🔍 OCR MODAL DEBUG - Full OCR Result:', {
           detectedTags: res.detectedTags,
           tagConfidences: res.tagConfidences,
           confidence: res.confidence,
+          detected: res.detected,
           textPreview: (res.text || '').slice(0, 300),
+          textLength: (res.text || '').length,
+          requiredTags: requiredTags,
+          confidenceThreshold: confidenceThreshold,
         });
       } catch (e) {}
 
       // Prefer per-tag confidences when available
       let verified = false;
+      console.log('🔍 OCR MODAL DEBUG - Starting verification process...');
+
       if (res.tagConfidences && Object.keys(res.tagConfidences).length > 0) {
+        console.log(
+          '🔍 OCR MODAL DEBUG - Using per-tag confidences for verification'
+        );
+        console.log(
+          '🔍 OCR MODAL DEBUG - Tag confidences:',
+          res.tagConfidences
+        );
+        console.log(
+          '🔍 OCR MODAL DEBUG - Confidence threshold:',
+          confidenceThreshold
+        );
+
         // success if any required tag has confidence >= threshold
-        verified = Object.values(res.tagConfidences).some((c) => typeof c === 'number' && c >= confidenceThreshold);
+        const tagVerifications = Object.entries(res.tagConfidences).map(
+          ([tag, conf]) => ({
+            tag,
+            confidence: conf,
+            passes: typeof conf === 'number' && conf >= confidenceThreshold,
+          })
+        );
+
+        console.log(
+          '🔍 OCR MODAL DEBUG - Tag verifications:',
+          tagVerifications
+        );
+        verified = Object.values(res.tagConfidences).some(
+          (c) => typeof c === 'number' && c >= confidenceThreshold
+        );
+        console.log(
+          '🔍 OCR MODAL DEBUG - Per-tag verification result:',
+          verified
+        );
       } else {
+        console.log(
+          '🔍 OCR MODAL DEBUG - Using fallback verification (no per-tag confidences)'
+        );
         // fallback: if worker didn't provide per-tag confidences, use detectedTags + overall confidence
-        const normalizedDetected = (res.detectedTags || []).map((t: string) => t.toLowerCase());
-        const normalizedRequired = (requiredTags || []).map((t: string) => t.toLowerCase());
-        const matched = normalizedRequired.some((r: string) => normalizedDetected.includes(r));
+        const normalizedDetected = (res.detectedTags || []).map((t: string) =>
+          t.toLowerCase()
+        );
+        const normalizedRequired = (requiredTags || []).map((t: string) =>
+          t.toLowerCase()
+        );
+
+        console.log(
+          '🔍 OCR MODAL DEBUG - Normalized detected tags:',
+          normalizedDetected
+        );
+        console.log(
+          '🔍 OCR MODAL DEBUG - Normalized required tags:',
+          normalizedRequired
+        );
+
+        const matched = normalizedRequired.some((r: string) =>
+          normalizedDetected.includes(r)
+        );
+        console.log('🔍 OCR MODAL DEBUG - Tag match found:', matched);
+        console.log('🔍 OCR MODAL DEBUG - Overall confidence:', res.confidence);
+
         verified = !!(matched && res.confidence >= confidenceThreshold);
+        console.log(
+          '🔍 OCR MODAL DEBUG - Fallback verification result:',
+          verified
+        );
       }
       if (verified) {
-        setState("success");
-        setMessage("Tag verificato con successo!");
+        setState('success');
+        setMessage('Tag verificato con successo!');
         setTimeout(async () => {
           await onVerified(res, false);
         }, 800);
       } else {
-        setState("failed");
+        setState('failed');
         setOcrUnavailable(false);
-        setMessage("Tag non rilevato o confidenza insufficiente.");
+        setMessage('Tag non rilevato o confidenza insufficiente.');
         try {
           onAttempt?.();
         } catch (e) {}
       }
     } catch (err) {
       // OCR library failed to load or execute. Do not fabricate results.
-      setState("failed");
+      setState('failed');
       setOcrUnavailable(true);
       setMessage(
         "Non è stato possibile completare la verifica automaticamente. Usa 'Verifica manuale' per confermare la Story."
@@ -106,7 +169,7 @@ const OcrModal: React.FC<Props> = ({
 
   // Move focus to first actionable button (Retry) when verification failed
   useEffect(() => {
-    if (state === "failed") {
+    if (state === 'failed') {
       // small timeout to ensure rendering
       setTimeout(() => {
         try {
@@ -130,13 +193,16 @@ const OcrModal: React.FC<Props> = ({
     >
       <div id={descId.current} className="mb-3">
         <p className="text-xs">
-          Sto cercando uno dei tag <strong>{requiredTags.join(', ')}</strong> nella Story
-          caricata.
+          Sto cercando uno dei tag <strong>{requiredTags.join(', ')}</strong>{' '}
+          nella Story caricata.
         </p>
       </div>
 
       <div className="mb-3">
-  <div className="w-full rounded h-3 overflow-hidden" style={{ background: 'var(--ldc-primary-dark)' }}>
+        <div
+          className="w-full rounded h-3 overflow-hidden"
+          style={{ background: 'var(--ldc-primary-dark)' }}
+        >
           <div
             className="bg-green-500 h-3 transition-all"
             style={{ width: `${ocrProgress}%` }}
@@ -150,16 +216,74 @@ const OcrModal: React.FC<Props> = ({
         </div>
       </div>
 
-      {state === "running" && (
+      {state === 'running' && (
         <div className="mb-3 text-xs">Analisi in corso... attendi.</div>
       )}
 
-  {/* Do not display tag/confidence details in the UI; log them for debugging */}
+      {/* Debug Information Toggle */}
+      {(state === 'failed' || state === 'success') && ocrResult && (
+        <div className="mb-3">
+          <button
+            type="button"
+            onClick={() => setShowDebugInfo(!showDebugInfo)}
+            className="text-xs underline cursor-pointer hover:opacity-75"
+          >
+            {showDebugInfo ? 'Nascondi' : 'Mostra'} info debug
+          </button>
+        </div>
+      )}
+
+      {/* Debug Information Panel */}
+      {showDebugInfo && ocrResult && (
+        <div className="nes-container is-dark mb-3 p-2">
+          <div className="text-xs">
+            <h4 className="font-bold mb-2">Debug Info OCR:</h4>
+
+            <div className="mb-2">
+              <strong>Tag rilevati:</strong>{' '}
+              {ocrResult.detectedTags?.length
+                ? ocrResult.detectedTags.join(', ')
+                : 'Nessuno'}
+            </div>
+
+            <div className="mb-2">
+              <strong>Confidenza generale:</strong> {ocrResult.confidence}%
+            </div>
+
+            {ocrResult.tagConfidences && (
+              <div className="mb-2">
+                <strong>Confidenza per tag:</strong>
+                <ul className="ml-2 mt-1">
+                  {Object.entries(ocrResult.tagConfidences).map(
+                    ([tag, conf]) => (
+                      <li key={tag}>
+                        {tag}: {conf !== null ? `${conf}%` : 'Non trovato'}
+                      </li>
+                    )
+                  )}
+                </ul>
+              </div>
+            )}
+
+            {ocrResult.text && (
+              <details className="mt-2">
+                <summary className="cursor-pointer">
+                  Testo estratto ({ocrResult.text.length} caratteri)
+                </summary>
+                <div className="mt-1 p-2 bg-black bg-opacity-30 rounded text-xs font-mono whitespace-pre-wrap max-h-32 overflow-y-auto">
+                  {ocrResult.text.slice(0, 500)}
+                  {ocrResult.text.length > 500 ? '...' : ''}
+                </div>
+              </details>
+            )}
+          </div>
+        </div>
+      )}
 
       {message && (
         <div
           className={`nes-container ${
-            state === "success" ? "is-success" : "is-error"
+            state === 'success' ? 'is-success' : 'is-error'
           } mb-3 p-2`}
           role="status"
           aria-live="polite"
@@ -169,7 +293,7 @@ const OcrModal: React.FC<Props> = ({
       )}
 
       <div className="flex justify-end gap-2">
-        {state === "failed" && (
+        {state === 'failed' && (
           <>
             <button
               ref={retryButtonRef}
@@ -188,9 +312,9 @@ const OcrModal: React.FC<Props> = ({
                 onClick={async () => {
                   // manual verification: notify parent with forced=true and close modal
                   if (ocrResult) {
-                    setMessage("Verifica manuale completata.");
+                    setMessage('Verifica manuale completata.');
                   } else {
-                    setMessage("Verifica manuale eseguita.");
+                    setMessage('Verifica manuale eseguita.');
                   }
 
                   await onVerified(

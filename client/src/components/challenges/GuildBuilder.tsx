@@ -15,7 +15,7 @@ import DavidAvatar from '@assets/avatars/male_developer.png';
 import EveAvatar from '@assets/avatars/female_manager.png';
 import FrankAvatar from '@assets/avatars/male_scientist.png';
 import GraceAvatar from '@assets/avatars/female_developer.png';
-import HenryAvatar from '@assets/avatars/male_designer.png';
+import HenryAvatar from '@assets/avatars/male_manager.png';
 
 // Load configuration for guild-builder from game-data.json
 const guildBuilderConfig = Array.isArray((gameData as any).challenges)
