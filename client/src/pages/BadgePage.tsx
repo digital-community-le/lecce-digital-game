@@ -159,7 +159,7 @@ const BadgePage: React.FC = () => {
     >
       <div className="container mx-auto max-w-2xl text-center">
         {/* Badge Display */}
-        {badgeInfo ? (
+        {badgeInfo && badgeInfo.owned ? (
           <div className="nes-container is-rounded is-success mx-4 md:mx-8 bg-white">
             <div className="flex flex-col items-center text-center">
               <p className="mb-3">Hai ottenuto un nuovo badge!</p>
@@ -175,26 +175,14 @@ const BadgePage: React.FC = () => {
                 className="font-retro text-lg mb-3"
                 style={{ color: 'var(--ldc-success)' }}
               >
-                Badge COMMUNITY ottenuto!
+                Badge <span className="uppercase">{badgeInfo.name}</span>{' '}
+                ottenuto!
               </h2>
-              <p
-                className="font-retro text-sm mb-2"
-                style={{ color: 'var(--ldc-on-background)' }}
-              >
-                {badgeInfo.name}
-              </p>
               <p
                 className="text-sm opacity-75 mb-4"
                 style={{ color: 'var(--ldc-on-background)' }}
               >
                 {badgeInfo.description}
-              </p>
-              <p
-                className="text-xs opacity-50"
-                style={{ color: 'var(--ldc-on-background)' }}
-              >
-                Ottenuto:{' '}
-                {new Date(badgeInfo.owned).toLocaleDateString('it-IT')}
               </p>
             </div>
           </div>

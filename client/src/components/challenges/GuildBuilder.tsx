@@ -481,12 +481,6 @@ const GuildBuilder: React.FC = () => {
                 <span>Tentativi totali:</span>
                 <span>{guildState.attempts}</span>
               </div>
-              <div className="flex justify-between">
-                <span>Punteggio finale:</span>
-                <span className="font-retro text-green-600">
-                  {guildState.score || currentScore}/{maxScore}
-                </span>
-              </div>
             </div>
           </div>
         </ChallengeCompleted>
@@ -505,31 +499,6 @@ const GuildBuilder: React.FC = () => {
           <p className="text-sm mb-4" style={{ color: '#856404' }}>
             {currentSuggestion}
           </p>
-
-          {/* Score feedback */}
-          {pointsLost > 0 && (
-            <div
-              className="nes-container is-light p-3 mb-4"
-              style={{
-                backgroundColor: '#fff3cd',
-                border: '2px solid #ffc107',
-              }}
-            >
-              <div className="text-sm text-center" style={{ color: '#856404' }}>
-                <div className="mb-1">
-                  <span className="font-retro text-red-600">
-                    -{pointsLost} punti
-                  </span>
-                </div>
-                <div>
-                  Punti rimanenti:{' '}
-                  <span className="font-retro">
-                    {currentScore - pointsLost}/{maxScore}
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
 
           <div className="text-center space-x-3">
             <button

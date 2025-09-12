@@ -57,7 +57,9 @@ describe('BadgePage', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('Badge COMMUNITY ottenuto!')).toBeInTheDocument();
+      // Check for the complete badge heading text using regex to handle the mixed content
+      expect(screen.getByText(/Badge.*ottenuto!/i)).toBeInTheDocument();
+      // The badge name is rendered as-is in the span, not transformed to uppercase
       expect(screen.getByText(mockBadge.name)).toBeInTheDocument();
       expect(screen.getByText(mockBadge.description)).toBeInTheDocument();
       expect(screen.getByAltText(mockBadge.name)).toBeInTheDocument();

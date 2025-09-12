@@ -176,7 +176,7 @@ const DebugDungeon: React.FC = () => {
       } else {
         updateChallengeProgress('debug-dungeon', finalScore, false);
         showToast(
-          `Punteggio insufficiente. Serve almeno ${PASS_THRESHOLD}%`,
+          `Serve più preparazione per superare il dungeon. Riprova!`,
           'warning'
         );
       }
@@ -282,7 +282,7 @@ const DebugDungeon: React.FC = () => {
         gemTitle="La Gemma del Sapere"
         gemIcon={wisdomGem}
         description="Nel Debug Dungeon, ogni risposta corretta illumina il sentiero verso la conoscenza. Supera il quiz per conquistare la Gemma del Sapere."
-        tip={`Rispondi a ${QUESTIONS_COUNT} domande. Indovinane almeno il ${PASS_THRESHOLD}% per superare il dungeon.`}
+        tip={`Rispondi a ${QUESTIONS_COUNT} domande con saggezza per superare il dungeon.`}
         progress={quizState.score}
         total={QUESTIONS_COUNT}
         progressLabel="Progresso"
@@ -306,24 +306,8 @@ const DebugDungeon: React.FC = () => {
                 <p className="text-sm mb-3">
                   {passed
                     ? 'Hai dimostrato le tue competenze! La Gemma del Sapere è tua.'
-                    : `Hai bisogno di più preparazione. Serve almeno ${PASS_THRESHOLD}% per superare il dungeon.`}
+                    : 'Hai bisogno di più preparazione per superare il dungeon.'}
                 </p>
-                <div className="nes-container is-light p-3">
-                  <div className="text-sm">
-                    <div className="flex justify-between">
-                      <span>Punteggio:</span>
-                      <span className="font-retro">
-                        {quizState.score}/{QUESTIONS_COUNT}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Percentuale:</span>
-                      <span className="font-retro">
-                        {percentage.toFixed(1)}%
-                      </span>
-                    </div>
-                  </div>
-                </div>
               </div>
 
               <button
@@ -345,7 +329,7 @@ const DebugDungeon: React.FC = () => {
       gemTitle="La Gemma del Sapere"
       gemIcon={wisdomGem}
       description="Nel Debug Dungeon, ogni risposta corretta illumina il sentiero verso la conoscenza. Supera il quiz per conquistare la Gemma del Sapere."
-      tip={`Rispondi a ${QUESTIONS_COUNT} domande. Serve almeno ${PASS_THRESHOLD}% per superare il dungeon.`}
+      tip={`Rispondi a ${QUESTIONS_COUNT} domande con saggezza per superare il dungeon.`}
       progress={quizState.currentQuestionIndex + (showExplanation ? 1 : 0)}
       total={QUESTIONS_COUNT}
       progressLabel="Progresso"

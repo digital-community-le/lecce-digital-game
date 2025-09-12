@@ -144,7 +144,7 @@ const RetroPuzzle: React.FC = () => {
 
       setPuzzleState(updatedState);
       gameStorage.savePuzzleState(gameState.currentUser.userId, updatedState);
-      showToast(`Sbagliato — riprova (−${PENALTY} punti)`, 'error');
+      showToast(`Sbagliato — riprova!`, 'error');
     }
 
     setSelectedTerm(null);
@@ -206,7 +206,7 @@ const RetroPuzzle: React.FC = () => {
       gemTitle="La Gemma della Conoscenza"
       gemIcon={memoryGem}
       description="Nel puzzle antico, ogni connessione rivela un frammento di saggezza. Abbina i termini alle loro categorie per raccogliere la Gemma della Conoscenza."
-      tip={`Tocca un termine a sinistra, poi tocca la categoria corrispondente a destra. Ogni errore riduce il punteggio di ${PENALTY} punti.`}
+      tip={`Tocca un termine a sinistra, poi tocca la categoria corrispondente a destra.`}
       progress={PAIRS_COUNT - puzzleState.remaining}
       total={PAIRS_COUNT}
       progressLabel="Progresso"
@@ -321,10 +321,6 @@ const RetroPuzzle: React.FC = () => {
           >
             <div className="nes-container is-light p-3 mb-3">
               <div className="text-sm">
-                <div className="flex justify-between">
-                  <span>Punteggio finale:</span>
-                  <span className="font-retro">{puzzleState.score} pts</span>
-                </div>
                 <div className="flex justify-between">
                   <span>Tentativi totali:</span>
                   <span>{puzzleState.attempts}</span>
