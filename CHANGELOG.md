@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.11.0](https://github.com/digital-community-le/lecce-digital-game/compare/v1.10.0...v1.11.0) (2025-09-12)
+
+
+### Features
+
+* **ui:** aggiungi footer versione nella modale statistiche ([f4e93c2](https://github.com/digital-community-le/lecce-digital-game/commit/f4e93c25df750044d1d30ed83415fe760c37d23f))
+
 ## [1.10.0](https://github.com/digital-community-le/lecce-digital-game/compare/v1.9.2...v1.10.0) (2025-09-12)
 
 
