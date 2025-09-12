@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.8.2](https://github.com/digital-community-le/lecce-digital-game/compare/v1.8.1...v1.8.2) (2025-09-12)
+
+
+### Bug Fixes
+
+* **api:** update gameCompletionSecret in game data configuration ([a896ba0](https://github.com/digital-community-le/lecce-digital-game/commit/a896ba06dc0e70f0d4fd8fa54d4ef5795e54b5e9))
+* **test:** correct BadgePage test assertion for fragmented text content ([77d5005](https://github.com/digital-community-le/lecce-digital-game/commit/77d5005d39ee34c5c5b9b49c9fa42edcfd7d7bb6))
+
 ## [1.8.1](https://github.com/digital-community-le/lecce-digital-game/compare/v1.8.0...v1.8.1) (2025-09-11)
 
 
