@@ -28,6 +28,13 @@ vi.mock('@/hooks/use-game-store', () => ({
   }),
 }));
 
+// Mock del gameStorage
+vi.mock('@/lib/storage', () => ({
+  gameStorage: {
+    getLastProfile: vi.fn(() => ({ userId: 'test-user-123' })),
+  },
+}));
+
 const mockBadge = {
   id: 1,
   name: 'Sigillo di Lecce - Master Quest',
@@ -158,8 +165,10 @@ describe('BadgePage', () => {
     });
 
     await waitFor(() => {
-      // Check for the complete badge heading text using regex to handle the mixed content
-      expect(screen.getByText(/Badge.*ottenuto!/i)).toBeInTheDocument();
+      // Check for the updated badge message text
+      expect(
+        screen.getByText('Hai ottenuto un nuovo badge!')
+      ).toBeInTheDocument();
       // The badge name is rendered as-is in the span, not transformed to uppercase
       expect(screen.getByText(mockBadge.name)).toBeInTheDocument();
       expect(screen.getByText(mockBadge.description)).toBeInTheDocument();
@@ -292,6 +301,80 @@ describe('BadgePage', () => {
         screen.getByText("Errore nell'attivazione del badge")
       ).toBeInTheDocument();
       expect(screen.getByText(/Problema di connessione/)).toBeInTheDocument();
+    });
+  });
+
+  describe('debug logging functionality', () => {
+    it('should call getLastProfile and log debug information during load', async () => {
+      // Import the mock to check calls
+      const { gameStorage } = await import('@/lib/storage');
+
+      (getDevFestBadge as any).mockReturnValue(mockBadge);
+
+      // Mock console.log to verify debug output
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+      render(
+        <Router>
+          <BadgePage />
+        </Router>
+      );
+
+      await waitFor(() => {
+        expect(
+          screen.getByText('Hai ottenuto un nuovo badge!')
+        ).toBeInTheDocument();
+      });
+
+      // Verify debug logging calls
+      expect(gameStorage.getLastProfile).toHaveBeenCalled();
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('🔍 DEBUG: Starting BadgePage load process...')
+      );
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('🧪 DEBUG: Current user ID:'),
+        'test-user-123'
+      );
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('✅ Badge found in localStorage:'),
+        mockBadge
+      );
+
+      consoleSpy.mockRestore();
+    });
+
+    it('should log localStorage raw data when badge is found', async () => {
+      (getDevFestBadge as any).mockReturnValue(mockBadge);
+
+      // Mock localStorage.getItem to return some test data
+      const localStorageSpy = vi
+        .spyOn(Storage.prototype, 'getItem')
+        .mockReturnValue(JSON.stringify({ badge: mockBadge }));
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+      render(
+        <Router>
+          <BadgePage />
+        </Router>
+      );
+
+      await waitFor(() => {
+        expect(
+          screen.getByText('Hai ottenuto un nuovo badge!')
+        ).toBeInTheDocument();
+      });
+
+      // Verify localStorage access for debug
+      expect(localStorageSpy).toHaveBeenCalledWith(
+        'ldc:progress:test-user-123'
+      );
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('🧪 DEBUG: Raw localStorage data:'),
+        JSON.stringify({ badge: mockBadge })
+      );
+
+      localStorageSpy.mockRestore();
+      consoleSpy.mockRestore();
     });
   });
 });

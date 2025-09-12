@@ -200,11 +200,10 @@ const BadgePage: React.FC = () => {
                 />
               </div>
               <h2
-                className="font-retro text-lg mb-3"
+                className="font-retro text-lg mb-3 uppercase"
                 style={{ color: 'var(--ldc-success)' }}
               >
-                Badge <span className="uppercase">{badgeInfo.name}</span>{' '}
-                ottenuto!
+                {badgeInfo.name}
               </h2>
               <p
                 className="text-sm opacity-75 mb-4"
@@ -297,7 +296,7 @@ const BadgePage: React.FC = () => {
         )}
 
         {/* Return to DevFest Button - Only show when badge is successfully obtained */}
-        {badgeInfo && (
+        {badgeInfo && badgeInfo.owned && (
           <div className="mt-8">
             <p className="nes-balloon from-left text-gray-500">
               Torna all'app DevFest Lecce e continua l'Avventura!
