@@ -29,7 +29,7 @@ describe('DevFest Badge Persistence Integration Tests', () => {
     name: "Sigillo di Lecce - Master Quest",
     description: "Badge ottenuto completando la Quest Digitale di Lecce al DevFest 2025",
     picture: "https://api.devfest.gdglecce.it/assets/badges/lecce-quest-master.png",
-    owned: "2025-09-08T12:00:00.000Z"
+    owned: true
   };
 
   beforeEach(() => {

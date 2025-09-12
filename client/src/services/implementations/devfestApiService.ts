@@ -37,7 +37,7 @@ export class DevFestApiService implements IDevFestApiService {
         name: "Sigillo di Lecce - Master Quest",
         description: "Badge ottenuto completando la Quest Digitale di Lecce al DevFest 2025",
         picture: "https://api.devfest.gdglecce.it/assets/badges/lecce-quest-master.png",
-        owned: new Date().toISOString()
+        owned: true
       };
 
       console.log('🧪 TEST MODE - DevFest API simulation completed');

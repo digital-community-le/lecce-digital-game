@@ -59,7 +59,7 @@ describe('DevFestApiService', () => {
         name: "Sigillo di Lecce - Master Quest",
         description: "Badge ottenuto completando la Quest Digitale di Lecce al DevFest 2025",
         picture: "https://api.devfest.gdglecce.it/assets/badges/lecce-quest-master.png",
-        owned: expect.any(String)
+        owned: true
       });
       expect(mockHttpClient.post).not.toHaveBeenCalled();
       expect(mockAuthService.getCurrentJwtToken).not.toHaveBeenCalled();
@@ -73,7 +73,7 @@ describe('DevFestApiService', () => {
         name: "Production Badge",
         description: "Real badge from API",
         picture: "https://api.devfest.gdglecce.it/assets/badges/real-badge.png",
-        owned: new Date().toISOString()
+        owned: true
       };
 
       vi.mocked(mockTestModeChecker.isTestMode).mockReturnValue(false);
@@ -100,7 +100,7 @@ describe('DevFestApiService', () => {
         name: "No Auth Badge",
         description: "Badge without auth header",
         picture: "https://api.devfest.gdglecce.it/assets/badges/no-auth.png",
-        owned: new Date().toISOString()
+        owned: true
       };
 
       vi.mocked(mockTestModeChecker.isTestMode).mockReturnValue(false);
@@ -127,7 +127,7 @@ describe('DevFestApiService', () => {
         name: "Empty Token Badge",
         description: "Badge with empty token",
         picture: "https://api.devfest.gdglecce.it/assets/badges/empty-token.png",
-        owned: new Date().toISOString()
+        owned: true
       };
 
       vi.mocked(mockTestModeChecker.isTestMode).mockReturnValue(false);
@@ -167,7 +167,7 @@ describe('DevFestApiService', () => {
         name: "JWT Badge",
         description: "Badge with valid JWT",
         picture: "https://api.devfest.gdglecce.it/assets/badges/jwt-badge.png",
-        owned: new Date().toISOString()
+        owned: true
       };
 
       vi.mocked(mockTestModeChecker.isTestMode).mockReturnValue(false);
@@ -194,7 +194,7 @@ describe('DevFestApiService', () => {
         name: "Test Badge",
         description: "Test description",
         picture: "test-picture.png",
-        owned: new Date().toISOString()
+        owned: true
       };
 
       vi.mocked(mockTestModeChecker.isTestMode).mockReturnValue(true);
@@ -249,7 +249,7 @@ describe('DevFestApiService', () => {
         name: "Test",
         description: "Test",
         picture: "test.png",
-        owned: new Date().toISOString()
+        owned: true
       });
 
       // Act

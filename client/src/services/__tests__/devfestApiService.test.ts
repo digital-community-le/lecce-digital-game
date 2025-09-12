@@ -55,7 +55,7 @@ describe('DevFestApiService', () => {
         name: "Test Badge",
         description: "Test Description",
         picture: "https://example.com/badge.png",
-        owned: new Date().toISOString()
+        owned: true
       };
       vi.mocked(mockHttpClient.post).mockResolvedValue(expectedResponse);
 
@@ -81,7 +81,7 @@ describe('DevFestApiService', () => {
         name: "No Auth Badge",
         description: "Badge without authorization",
         picture: "https://example.com/badge.png",
-        owned: new Date().toISOString()
+        owned: true
       };
       vi.mocked(mockHttpClient.post).mockResolvedValue(expectedResponse);
 
@@ -107,7 +107,7 @@ describe('DevFestApiService', () => {
         name: "Empty Token Badge",
         description: "Badge with empty token",
         picture: "https://example.com/badge.png",
-        owned: new Date().toISOString()
+        owned: true
       };
       vi.mocked(mockHttpClient.post).mockResolvedValue(expectedResponse);
 
@@ -134,7 +134,7 @@ describe('DevFestApiService', () => {
         name: "Custom Token Badge",
         description: "Badge with custom token",
         picture: "https://example.com/badge.png",
-        owned: new Date().toISOString()
+        owned: true
       };
       vi.mocked(mockHttpClient.post).mockResolvedValue(expectedResponse);
 
@@ -166,7 +166,7 @@ describe('DevFestApiService', () => {
         name: "Sigillo di Lecce - Master Quest",
         description: "Badge ottenuto completando la Quest Digitale di Lecce al DevFest 2025",
         picture: "https://api.devfest.gdglecce.it/assets/badges/lecce-quest-master.png",
-        owned: expect.any(String)
+        owned: true
       });
     });
   });
@@ -204,7 +204,7 @@ describe('DevFestApiService', () => {
         name: "Test Badge",
         description: "Test Description",
         picture: "https://example.com/badge.png",
-        owned: new Date().toISOString()
+        owned: true
       };
       vi.mocked(mockHttpClient.post).mockResolvedValue(expectedBadge);
 
@@ -227,7 +227,7 @@ describe('DevFestApiService', () => {
         name: "Config Test Badge",
         description: "Badge from config test",
         picture: "https://example.com/config-badge.png",
-        owned: new Date().toISOString()
+        owned: true
       };
       vi.mocked(mockHttpClient.post).mockResolvedValue(mockResponse);
 
@@ -249,7 +249,7 @@ describe('DevFestApiService', () => {
         name: "Secret Test Badge",
         description: "Badge from secret test",
         picture: "https://example.com/secret-badge.png",
-        owned: new Date().toISOString()
+        owned: true
       };
       vi.mocked(mockHttpClient.post).mockResolvedValue(mockResponse);
 

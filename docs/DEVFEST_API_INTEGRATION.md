@@ -37,7 +37,7 @@ La configurazione dell'API DevFest è definita in `game-data.json`:
   "name": "Sigillo di Lecce - Master Quest",
   "description": "Badge ottenuto completando la Quest Digitale di Lecce al DevFest 2025",
   "picture": "https://api.devfest.gdglecce.it/assets/badges/lecce-quest-master.png",
-  "owned": "2025-09-03T10:30:00.000Z"
+  "owned": true
 }
 ```
 
@@ -66,7 +66,7 @@ Con `?test=1`:
 La pagina `GameComplete.tsx` mostra:
 
 1. **Animazione Sigillo**: Animazione del sigillo completato
-2. **Titolo e Descrizione**: Testi di completamento  
+2. **Titolo e Descrizione**: Testi di completamento
 3. **Badge DevFest**: Visualizzazione del badge ottenuto dall'API (se disponibile)
 4. **Pulsante Statistiche**: Navigazione alle statistiche finali
 
@@ -79,11 +79,13 @@ La pagina `GameComplete.tsx` mostra:
 ## Log Console
 
 In modalità test vengono mostrati:
+
 - URL chiamato
 - Payload inviato
 - Response mock ricevuta
 
 In produzione:
+
 - Conferma chiamata API
 - Risultato badge ricevuto
 - Eventuali errori

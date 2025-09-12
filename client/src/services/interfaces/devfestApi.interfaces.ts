@@ -33,7 +33,7 @@ export interface DevFestBadgeResponse {
   name: string;
   description: string;
   picture: string;
-  owned: string;
+  owned: boolean;
 }
 
 /**
