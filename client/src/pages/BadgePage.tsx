@@ -5,6 +5,7 @@ import {
   isDevFestSubmissionSuccessful,
   getDevFestSubmissionStatus,
 } from '@/services/completionService';
+import { gameStorage } from '@/lib/storage';
 
 const BadgePage: React.FC = () => {
   const [badgeInfo, setBadgeInfo] = useState<any>(null);
@@ -79,12 +80,28 @@ const BadgePage: React.FC = () => {
 
   useEffect(() => {
     const loadBadge = async () => {
-      console.log('🔍 Checking localStorage for existing badge...');
+      console.log('🔍 DEBUG: Starting BadgePage load process...');
+
+      // DEBUG: Check current user
+      const lastProfile = gameStorage.getLastProfile();
+      const currentUser = lastProfile?.userId || 'anonymous';
+      console.log('🧪 DEBUG: Current user ID:', currentUser);
+
+      // DEBUG: Check raw localStorage data
+      const rawProgress = localStorage.getItem(`ldc:progress:${currentUser}`);
+      console.log('🧪 DEBUG: Raw localStorage data:', rawProgress);
 
       // STEP 1: First check localStorage for existing badge
       const existingBadge = getDevFestBadge();
+      console.log('🧪 DEBUG: getDevFestBadge() returned:', existingBadge);
+
       if (existingBadge) {
         console.log('✅ Badge found in localStorage:', existingBadge);
+        console.log(
+          '🧪 DEBUG: Badge.owned value:',
+          existingBadge.owned,
+          typeof existingBadge.owned
+        );
         setBadgeInfo(existingBadge);
         setLoading(false);
         return;

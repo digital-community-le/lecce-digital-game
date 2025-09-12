@@ -24,13 +24,19 @@ Object.defineProperty(window, 'localStorage', {
 
 describe('DevFest Badge Persistence Integration Tests', () => {
   const testUserId = 'test-user-123';
-  const mockBadge = {
-    id: 1,
-    name: "Sigillo di Lecce - Master Quest",
-    description: "Badge ottenuto completando la Quest Digitale di Lecce al DevFest 2025",
-    picture: "https://api.devfest.gdglecce.it/assets/badges/lecce-quest-master.png",
-    owned: true
-  };
+  const mockBadgeArray = [
+    {
+      id: 21,
+      name: "Community",
+      description: "Completa le attività Community, in collaborazione con Lecce Digital Community",
+      picture: "https://storage.googleapis.com/devfest-lecce-media/badges/community.png",
+      points: 30,
+      owned: true,
+      category: null
+    }
+  ];
+
+  const mockBadge = mockBadgeArray[0]; // For backward compatibility in tests
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -59,7 +65,7 @@ describe('DevFest Badge Persistence Integration Tests', () => {
       devfestApiSubmission: {
         success: true,
         submittedAt: '2025-09-08T12:30:00Z',
-        badge: mockBadge,
+        badge: mockBadgeArray,
       }
     };
 
@@ -78,7 +84,7 @@ describe('DevFest Badge Persistence Integration Tests', () => {
     expect(submissionStatus).toEqual({
       success: true,
       submittedAt: '2025-09-08T12:30:00Z',
-      badge: mockBadge,
+      badge: mockBadgeArray,
     });
   });
 
@@ -156,7 +162,7 @@ describe('DevFest Badge Persistence Integration Tests', () => {
       devfestApiSubmission: {
         success: true,
         submittedAt: '2025-09-08T12:30:00Z',
-        badge: mockBadge,
+        badge: mockBadgeArray,
       }
     };
 
@@ -188,7 +194,7 @@ describe('DevFest Badge Persistence Integration Tests', () => {
 
     const status1 = getDevFestSubmissionStatus(user1Id);
     expect(status1?.success).toBe(true);
-    expect(status1?.badge).toEqual(mockBadge);
+    expect(status1?.badge).toEqual(mockBadgeArray);
 
     const status2 = getDevFestSubmissionStatus(user2Id);
     expect(status2?.success).toBe(false);

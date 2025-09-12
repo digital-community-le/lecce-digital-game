@@ -48,7 +48,7 @@ export interface DevFestBadgeRequest {
  */
 export interface GameCompletionResult {
   success: boolean;
-  badge?: DevFestBadgeResponse;
+  badge?: DevFestBadgeResponse | DevFestBadgeResponse[]; // API can return single badge or array
   error?: string;
 }
 

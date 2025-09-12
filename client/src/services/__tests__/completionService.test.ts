@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { submitGameCompletion } from '../completionService';
+import { submitGameCompletion, getDevFestBadge } from '../completionService';
 import { gameStorage } from '../../lib/storage';
 import { handleGameCompletion } from '../devfestApiServiceFactory';
 
@@ -10,15 +10,17 @@ vi.mock('@/lib/storage');
 const mockHandleGameCompletion = vi.mocked(handleGameCompletion);
 const mockGameStorage = vi.mocked(gameStorage);
 
+// Global test data
+const mockUserId = 'test-user-123';
+const mockBadge = {
+  id: 1,
+  name: "Sigillo di Lecce - Master Quest",
+  description: "Badge ottenuto completando la Quest Digitale di Lecce al DevFest 2025",
+  picture: "https://api.devfest.gdglecce.it/assets/badges/lecce-quest-master.png",
+  owned: true
+};
+
 describe('completionService - DevFest API Persistence', () => {
-  const mockUserId = 'test-user-123';
-  const mockBadge = {
-    id: 1,
-    name: "Sigillo di Lecce - Master Quest",
-    description: "Badge ottenuto completando la Quest Digitale di Lecce al DevFest 2025",
-    picture: "https://api.devfest.gdglecce.it/assets/badges/lecce-quest-master.png",
-    owned: new Date().toISOString()
-  };
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -217,5 +219,98 @@ describe('completionService - DevFest API Persistence', () => {
     // Verify that API was NOT called
     expect(mockHandleGameCompletion).not.toHaveBeenCalled();
     expect(mockGameStorage.saveProgress).not.toHaveBeenCalled();
+  });
+});
+
+describe('getDevFestBadge', () => {
+  it('should return single badge from successful devfestApiSubmission', () => {
+    // Arrange
+    const mockProgress = {
+      userId: mockUserId,
+      currentChallengeIndex: 4,
+      completedChallenges: ['networking-forest', 'retro-puzzle', 'debug-dungeon', 'social-arena'],
+      totalScore: 1000,
+      startedAt: '2025-09-08T10:00:00Z',
+      lastUpdated: '2025-09-08T12:00:00Z',
+      gameCompleted: true,
+      devfestApiSubmission: {
+        success: true,
+        submittedAt: '2025-09-08T11:30:00Z',
+        badge: mockBadge,
+      }
+    };
+
+    mockGameStorage.getProgress.mockReturnValue(mockProgress);
+
+    // Act
+    const result = getDevFestBadge();
+
+    // Assert
+    expect(result).toEqual(mockBadge);
+  });
+
+  it('should handle badge stored as array and return first element', () => {
+    // Arrange
+    const mockBadgeArray = [mockBadge];
+    const mockProgress = {
+      userId: mockUserId,
+      currentChallengeIndex: 4,
+      completedChallenges: ['networking-forest', 'retro-puzzle', 'debug-dungeon', 'social-arena'],
+      totalScore: 1000,
+      startedAt: '2025-09-08T10:00:00Z',
+      lastUpdated: '2025-09-08T12:00:00Z',
+      gameCompleted: true,
+      devfestApiSubmission: {
+        success: true,
+        submittedAt: '2025-09-08T11:30:00Z',
+        badge: mockBadgeArray,
+      }
+    };
+
+    mockGameStorage.getProgress.mockReturnValue(mockProgress);
+
+    // Act
+    const result = getDevFestBadge();
+
+    // Assert
+    expect(result).toEqual(mockBadge);
+    expect(result).not.toEqual(mockBadgeArray);
+  });
+
+  it('should return null if no successful devfestApiSubmission exists', () => {
+    // Arrange
+    const mockProgress = {
+      userId: mockUserId,
+      currentChallengeIndex: 4,
+      completedChallenges: ['networking-forest', 'retro-puzzle', 'debug-dungeon', 'social-arena'],
+      totalScore: 1000,
+      startedAt: '2025-09-08T10:00:00Z',
+      lastUpdated: '2025-09-08T12:00:00Z',
+      gameCompleted: true,
+      devfestApiSubmission: {
+        success: false,
+        submittedAt: '2025-09-08T11:30:00Z',
+        error: 'API Error',
+      }
+    };
+
+    mockGameStorage.getProgress.mockReturnValue(mockProgress);
+
+    // Act
+    const result = getDevFestBadge();
+
+    // Assert
+    expect(result).toBeNull();
+  });
+
+  it('should return null if no game progress exists', () => {
+    // Arrange
+    mockGameStorage.getProgress.mockReturnValue(null);
+
+    // Act
+    const result = getDevFestBadge();
+
+    // Assert
+    expect(result).toBeNull();
   });
 });

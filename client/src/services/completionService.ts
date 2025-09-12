@@ -169,7 +169,14 @@ export function getDevFestBadge(userId?: string): any | null {
     return null;
   }
 
-  return progress.devfestApiSubmission.badge || null;
+  const badge = progress.devfestApiSubmission.badge;
+
+  // Handle case where badge is an array (API returns array) or single object
+  if (Array.isArray(badge) && badge.length > 0) {
+    return badge[0]; // Return first badge from array
+  }
+
+  return badge || null;
 }
 
 /**

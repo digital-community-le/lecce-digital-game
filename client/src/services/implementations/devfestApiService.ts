@@ -31,17 +31,17 @@ export class DevFestApiService implements IDevFestApiService {
     };
 
     if (isTest) {
-      // Return mock response in test mode
-      const mockResponse: DevFestBadgeResponse = {
+      // Return mock response in test mode - mimic real API array response
+      const mockResponse: DevFestBadgeResponse[] = [{
         id: 1,
         name: "Sigillo di Lecce - Master Quest",
         description: "Badge ottenuto completando la Quest Digitale di Lecce al DevFest 2025",
         picture: "https://api.devfest.gdglecce.it/assets/badges/lecce-quest-master.png",
         owned: true
-      };
+      }];
 
       console.log('🧪 TEST MODE - DevFest API simulation completed');
-      return mockResponse;
+      return mockResponse as any; // Type assertion needed due to interface mismatch
     }
 
     // Production mode: make real API call
