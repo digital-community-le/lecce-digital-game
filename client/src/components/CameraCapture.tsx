@@ -490,7 +490,8 @@ const CameraCapture: React.FC<Props> = ({ onCapture, onCancel }) => {
     setPreviewUrl(null);
     setPreviewAnimating(false);
     if (streamRef.current) setHasStream(true);
-  };  return (
+  };
+  return (
     <div className="fixed inset-0 z-50 bg-black">
       {/* camera selection control */}
       {videoDevices.length > 1 && (

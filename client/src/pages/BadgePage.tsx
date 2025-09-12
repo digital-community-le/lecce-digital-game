@@ -79,42 +79,53 @@ const BadgePage: React.FC = () => {
 
   useEffect(() => {
     const loadBadge = async () => {
-      // Check if we already have a successful DevFest badge
+      console.log('🔍 Checking localStorage for existing badge...');
+
+      // STEP 1: First check localStorage for existing badge
       const existingBadge = getDevFestBadge();
       if (existingBadge) {
-        console.log('🏆 DevFest badge already obtained:', existingBadge);
+        console.log('✅ Badge found in localStorage:', existingBadge);
         setBadgeInfo(existingBadge);
         setLoading(false);
         return;
       }
 
+      console.log('❌ No badge found in localStorage');
+
       // Check if there's a previous failed submission with detailed error info
       const submissionStatus = getDevFestSubmissionStatus();
       if (submissionStatus && !submissionStatus.success) {
-        console.log('❌ Previous submission failed:', submissionStatus.error);
+        console.log(
+          '⚠️ Previous submission failed, showing cached error:',
+          submissionStatus.error
+        );
         setError(submissionStatus.error || 'Previous submission failed');
         setLoading(false);
         return;
       }
 
-      // If not, try to submit and get the badge
-      if (!isDevFestSubmissionSuccessful()) {
-        try {
-          console.log('🚀 Submitting game completion to DevFest API...');
-          const result = await submitGameCompletion();
+      // STEP 2: No badge in localStorage, make POST API call
+      console.log(
+        '🚀 No badge in localStorage, making POST request to DevFest API...'
+      );
+      try {
+        const result = await submitGameCompletion();
 
-          if (result.success && result.badge) {
-            console.log('🏆 DevFest badge received:', result.badge);
-            setBadgeInfo(result.badge);
-          } else {
-            console.error('❌ Game completion failed:', result.error);
-            setError(result.error || 'Game completion failed');
-          }
-        } catch (e) {
-          console.warn('💥 Game completion submission error:', e);
-          setError(e instanceof Error ? e.message : 'Submission error');
+        if (result.success && result.badge) {
+          console.log(
+            '🏆 POST successful! Badge received and saved to localStorage:',
+            result.badge
+          );
+          setBadgeInfo(result.badge);
+        } else {
+          console.error('❌ POST failed:', result.error);
+          setError(result.error || 'Game completion failed');
         }
+      } catch (e) {
+        console.warn('💥 POST request error:', e);
+        setError(e instanceof Error ? e.message : 'Submission error');
       }
+
       setLoading(false);
     };
 

@@ -45,6 +45,107 @@ describe('BadgePage', () => {
     (getDevFestSubmissionStatus as any).mockReturnValue(null);
   });
 
+  describe('localStorage-first approach', () => {
+    it('should display cached badge immediately when found in localStorage', async () => {
+      // Arrange: Mock localStorage has badge
+      (getDevFestBadge as any).mockReturnValue(mockBadge);
+
+      // Act
+      render(
+        <Router>
+          <BadgePage />
+        </Router>
+      );
+
+      // Assert: Should show badge immediately without loading
+      await waitFor(() => {
+        expect(
+          screen.getByText('Hai ottenuto un nuovo badge!')
+        ).toBeInTheDocument();
+        expect(
+          screen.getByAltText('Sigillo di Lecce - Master Quest')
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText('Sigillo di Lecce - Master Quest')
+        ).toBeInTheDocument();
+      });
+
+      // Should NOT call API since badge is already in localStorage
+      expect(submitGameCompletion).not.toHaveBeenCalled();
+      expect(getDevFestBadge).toHaveBeenCalledTimes(1);
+    });
+
+    it('should call API only when badge is not in localStorage', async () => {
+      // Arrange: No badge in localStorage
+      (getDevFestBadge as any).mockReturnValue(null);
+      (getDevFestSubmissionStatus as any).mockReturnValue(null);
+      (isDevFestSubmissionSuccessful as any).mockReturnValue(false);
+      (submitGameCompletion as any).mockResolvedValue({
+        success: true,
+        badge: mockBadge,
+      });
+
+      // Act
+      render(
+        <Router>
+          <BadgePage />
+        </Router>
+      );
+
+      // Assert: Should show loading first
+      expect(screen.getByText(/Caricamento badge.../)).toBeInTheDocument();
+
+      // Wait for API call and badge display
+      await waitFor(() => {
+        expect(
+          screen.getByText('Hai ottenuto un nuovo badge!')
+        ).toBeInTheDocument();
+        expect(
+          screen.getByAltText('Sigillo di Lecce - Master Quest')
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText('Sigillo di Lecce - Master Quest')
+        ).toBeInTheDocument();
+      });
+
+      // Should call API since no badge in localStorage
+      expect(submitGameCompletion).toHaveBeenCalledTimes(1);
+      expect(getDevFestBadge).toHaveBeenCalledTimes(1);
+    });
+
+    it('should show cached error and allow retry when previous submission failed', async () => {
+      // Arrange: Previous submission failed
+      (getDevFestBadge as any).mockReturnValue(null);
+      (getDevFestSubmissionStatus as any).mockReturnValue({
+        success: false,
+        submittedAt: '2025-09-08T12:30:00Z',
+        error: 'Network timeout',
+      });
+      (isDevFestSubmissionSuccessful as any).mockReturnValue(false);
+
+      // Act
+      render(
+        <Router>
+          <BadgePage />
+        </Router>
+      );
+
+      // Assert: Should show error immediately without loading
+      await waitFor(() => {
+        expect(
+          screen.getByText(/Errore nell'attivazione del badge/)
+        ).toBeInTheDocument();
+        expect(screen.getByText(/Network timeout/)).toBeInTheDocument();
+        expect(
+          screen.getByRole('button', { name: /Riprova/ })
+        ).toBeInTheDocument();
+      });
+
+      // Should NOT call API initially since we have cached error
+      expect(submitGameCompletion).not.toHaveBeenCalled();
+    });
+  });
+
   it('should display the badge when available', async () => {
     (getDevFestBadge as any).mockReturnValue(mockBadge);
 
