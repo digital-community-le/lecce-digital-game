@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.9.0](https://github.com/digital-community-le/lecce-digital-game/compare/v1.8.2...v1.9.0) (2025-09-12)
+
+
+### Features
+
+* **badge-page:** optimize localStorage-first badge loading ([216a17a](https://github.com/digital-community-le/lecce-digital-game/commit/216a17ab1c0d86faa9227a1b8eae658e3bfd6d93))
+* **camera:** nascondi tool emoji nella schermata di conferma ([bc88bc6](https://github.com/digital-community-le/lecce-digital-game/commit/bc88bc673cb64389e6f25ec5eb05234f7cf68e98))
+
 ## [1.8.2](https://github.com/digital-community-le/lecce-digital-game/compare/v1.8.1...v1.8.2) (2025-09-12)
 
 
