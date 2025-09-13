@@ -17,7 +17,7 @@ interface GameLayoutProps {
 
 /**
  * Layout generale dell'applicazione
- * 
+ *
  * Fornisce la struttura base con:
  * - Header comune con logo, tema e profilo
  * - Container principale per il contenuto
@@ -26,18 +26,20 @@ interface GameLayoutProps {
 const GameLayout: React.FC<GameLayoutProps> = ({
   children,
   darkMode = false,
-  className = ''
+  className = '',
 }) => {
   const { gameState, toasts, removeToast } = useGameStore();
 
   useEffect(() => {
-        // Set theme class on document
-        document.documentElement.className = `ldc-theme--${gameState.theme}`;
-        localStorage.setItem('ldc:theme', gameState.theme);
-      }, [gameState.theme]);
+    // Set theme class on document
+    document.documentElement.className = `ldc-theme--${gameState.theme}`;
+    localStorage.setItem('ldc:theme', gameState.theme);
+  }, [gameState.theme]);
 
   return (
-    <div className={`min-h-screen ${darkMode ? 'bg-gray-900' : 'bg-background'} text-foreground ${className}`}>
+    <div
+      className={`min-h-svh ${darkMode ? 'bg-gray-900' : 'bg-background'} text-foreground ${className}`}
+    >
       <Header />
 
       {/* Container principale */}
@@ -52,22 +54,25 @@ const GameLayout: React.FC<GameLayoutProps> = ({
       <CompletionModal />
       <EpilogueModal />
       <StatisticsModal />
-      
+
       {/* Toast notifications */}
       {toasts.map((toast) => (
         <div
           key={toast.id}
           className={`toast nes-container is-rounded p-3 ${
-            toast.type === 'success' ? 'is-success' :
-            toast.type === 'error' ? 'is-error' :
-            toast.type === 'warning' ? 'is-warning' :
-            'is-light'
+            toast.type === 'success'
+              ? 'is-success'
+              : toast.type === 'error'
+                ? 'is-error'
+                : toast.type === 'warning'
+                  ? 'is-warning'
+                  : 'is-light'
           }`}
           data-testid={`toast-${toast.type}`}
         >
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium">{toast.message}</p>
-            <button 
+            <button
               className="ml-4 text-lg leading-none nes-btn"
               onClick={() => removeToast(toast.id)}
               aria-label="Chiudi notifica"
