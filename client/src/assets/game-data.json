@@ -31,7 +31,7 @@
         "type": "compose_team",
         "requirement": {
           "id": "req-social-boost",
-          "text": "Migliora la visibilità sui social con una squadra che copra strategia + creatività + produzione",
+          "text": "Migliora la visibilità sui social con una squadra che copra strategia, creatività e produzione",
           "roles": [
             "Social Media Wizard",
             "Marketing Expert",
