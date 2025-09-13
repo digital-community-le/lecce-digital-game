@@ -90,23 +90,36 @@ self.addEventListener('message', async (ev: MessageEvent) => {
       };
 
       // Preprocess the image for better OCR accuracy
+      console.log('🔍 OCR WORKER DEBUG - Starting image preprocessing...');
       const processedFile = await preprocessImage(file);
+      console.log('🔍 OCR WORKER DEBUG - Image preprocessing completed');
 
       // use tesseract.recognize for a minimal dependency surface in the worker
+      console.log('🔍 OCR WORKER DEBUG - Loading Tesseract.js...');
       const tesseract = await import('tesseract.js');
+      console.log('🔍 OCR WORKER DEBUG - Tesseract.js loaded successfully');
+
       // prefer tesseract.recognize if available, otherwise fallback to createWorker flow
       let data: any = null;
       if (typeof (tesseract as any).recognize === 'function') {
+        console.log('🔍 OCR WORKER DEBUG - Using tesseract.recognize method...');
         const res = await (tesseract as any).recognize(processedFile, 'eng', { logger });
         data = res && res.data ? res.data : res;
+        console.log('🔍 OCR WORKER DEBUG - tesseract.recognize completed');
       } else {
+        console.log('🔍 OCR WORKER DEBUG - Using createWorker method...');
         const { createWorker } = tesseract as any;
         const w: any = createWorker();
+        console.log('🔍 OCR WORKER DEBUG - Worker created, loading...');
         await w.load();
+        console.log('🔍 OCR WORKER DEBUG - Loading language...');
         await w.loadLanguage('eng');
+        console.log('🔍 OCR WORKER DEBUG - Initializing...');
         await w.initialize('eng');
+        console.log('🔍 OCR WORKER DEBUG - Running recognition...');
         const res = await w.recognize(processedFile, { logger });
         data = res && res.data ? res.data : res;
+        console.log('🔍 OCR WORKER DEBUG - Recognition completed, terminating worker...');
         try { await w.terminate(); } catch { }
       }
 
@@ -241,6 +254,14 @@ self.addEventListener('message', async (ev: MessageEvent) => {
       return;
     }
   } catch (err) {
+    console.error('🔍 OCR WORKER ERROR - Unhandled error in worker:', err);
+    console.error('🔍 OCR WORKER ERROR - Error details:', {
+      message: err instanceof Error ? err.message : String(err),
+      stack: err instanceof Error ? err.stack : undefined,
+      type: typeof err,
+      messageType: type,
+      messageId: id
+    });
     (self as any).postMessage({ type: 'error', id, success: false, error: String(err) });
   }
 });

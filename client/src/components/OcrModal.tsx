@@ -41,11 +41,28 @@ const OcrModal: React.FC<Props> = ({
 
   // Reusable OCR runner so Retry can re-run analysis without closing modal
   const runAnalysis = async () => {
+    console.log('🔍 OCR MODAL DEBUG - Starting OCR analysis...');
+    console.log('🔍 OCR MODAL DEBUG - File info:', {
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      lastModified: file.lastModified,
+    });
+    console.log('🔍 OCR MODAL DEBUG - Required tags:', requiredTags);
+    console.log(
+      '🔍 OCR MODAL DEBUG - Confidence threshold:',
+      confidenceThreshold
+    );
+
     setState('running');
     setMessage(null);
     setOcrResult(null);
     try {
+      console.log('🔍 OCR MODAL DEBUG - Calling OCR run function...');
       const res = await run(file, requiredTags);
+      console.log(
+        '🔍 OCR MODAL DEBUG - OCR run completed, processing results...'
+      );
       // Log detailed OCR data for debugging; do not show it in the UI
       try {
         // eslint-disable-next-line no-console
@@ -147,6 +164,15 @@ const OcrModal: React.FC<Props> = ({
       }
     } catch (err) {
       // OCR library failed to load or execute. Do not fabricate results.
+      console.error('🔍 OCR MODAL ERROR - OCR execution failed:', err);
+      console.error('🔍 OCR MODAL ERROR - Error details:', {
+        message: err instanceof Error ? err.message : String(err),
+        stack: err instanceof Error ? err.stack : undefined,
+        type: typeof err,
+        fileSize: file.size,
+        fileType: file.type,
+        fileName: file.name,
+      });
       setState('failed');
       setOcrUnavailable(true);
       setMessage(
