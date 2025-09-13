@@ -38,11 +38,14 @@ const StatisticsModal: React.FC = () => {
     <UiDialog
       open={isOpen}
       onClose={() => closeModal('statistics')}
-      title="Statistiche"
+      title=""
       className=""
     >
       <div data-testid="modal-statistics">
         <div className="mt-0 mb-4">
+          <div className="text-center mb-4">
+            <h2 className="">Gemme raccolte</h2>
+          </div>
           <div className="space-y-2">
             {gameState.challenges.map((ch) => {
               const src = gemMap[ch.id] || '';
@@ -67,21 +70,6 @@ const StatisticsModal: React.FC = () => {
                 </div>
               );
             })}
-          </div>
-        </div>
-
-        <div className="nes-container is-light p-3 mb-4">
-          <div className="text-sm">
-            <div className="flex justify-between">
-              <span>Raccolte:</span>
-              <span className="font-retro" data-testid="stats-completed">
-                {challengesCompleted}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span>Punteggio totale:</span>
-              <span data-testid="stats-score">{totalScore} pts</span>
-            </div>
           </div>
         </div>
 
