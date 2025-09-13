@@ -34,6 +34,8 @@ const OcrModal: React.FC<Props> = ({
   const [ocrUnavailable, setOcrUnavailable] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [showDebugInfo, setShowDebugInfo] = useState(false);
+  const [debugClickCount, setDebugClickCount] = useState(0);
+  const [showCacheBust, setShowCacheBust] = useState(false);
   const titleId = useRef(`ocr-modal-title-${Date.now()}`);
   const descId = useRef(`ocr-modal-desc-${Date.now()}`);
   const retryButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -226,8 +228,16 @@ const OcrModal: React.FC<Props> = ({
 
       <div className="mb-3">
         <div
-          className="w-full rounded h-3 overflow-hidden"
+          className="w-full rounded h-3 overflow-hidden cursor-pointer"
           style={{ background: 'var(--ldc-primary-dark)' }}
+          onClick={() => {
+            const newCount = debugClickCount + 1;
+            setDebugClickCount(newCount);
+            if (newCount >= 5) {
+              setShowCacheBust(true);
+              setShowDebugInfo(true);
+            }
+          }}
         >
           <div
             className="bg-green-500 h-3 transition-all"
@@ -357,6 +367,35 @@ const OcrModal: React.FC<Props> = ({
               </button>
             )}
           </>
+        )}
+
+        {showCacheBust && (
+          <button
+            className="nes-btn is-error text-xs"
+            onClick={() => {
+              console.log('🔄 CACHE BUST - Forcing hard refresh...');
+              if ('serviceWorker' in navigator) {
+                navigator.serviceWorker
+                  .getRegistrations()
+                  .then((registrations) => {
+                    registrations.forEach((registration) => {
+                      console.log('🔄 Unregistering service worker...');
+                      registration.unregister();
+                    });
+                    // Force hard refresh
+                    setTimeout(() => {
+                      window.location.reload();
+                    }, 100);
+                  });
+              } else {
+                // Fallback for browsers without service worker
+                window.location.reload();
+              }
+            }}
+            title="Forza aggiornamento cache (5 click per abilitare)"
+          >
+            🔄
+          </button>
         )}
       </div>
     </UiDialog>

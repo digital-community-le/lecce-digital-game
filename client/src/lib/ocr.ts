@@ -4,7 +4,12 @@ function getWorker(): Promise<Worker> {
   if (!workerPromise) {
     workerPromise = new Promise((resolve, reject) => {
       try {
-        const w = new Worker(new URL('./ocr.worker.ts', import.meta.url), { type: 'module' });
+        // Add cache busting timestamp to force worker reload
+        const workerUrl = new URL('./ocr.worker.ts', import.meta.url);
+        workerUrl.searchParams.set('t', Date.now().toString());
+        console.log('🔍 OCR DEBUG - Loading worker with cache bust:', workerUrl.href);
+
+        const w = new Worker(workerUrl, { type: 'module' });
         resolve(w);
       } catch (err) {
         reject(err);

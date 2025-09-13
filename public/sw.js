@@ -1,5 +1,5 @@
 // Auto-generated cache version - this will be replaced during build
-const CACHE_VERSION = '%%CACHE_VERSION%%';
+const CACHE_VERSION = '1757723511533';
 const CACHE_NAME = `ldc-game-${CACHE_VERSION}`;
 
 console.log(`SW: Cache version ${CACHE_VERSION}`);

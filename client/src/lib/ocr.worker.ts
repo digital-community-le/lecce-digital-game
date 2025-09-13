@@ -25,68 +25,72 @@ self.addEventListener('message', async (ev: MessageEvent) => {
 
       // Preprocess image for better OCR results
       const preprocessImage = async (file: File): Promise<File> => {
-        return new Promise((resolve) => {
+        try {
           const canvas = new OffscreenCanvas(1, 1);
           const ctx = canvas.getContext('2d');
           if (!ctx) {
-            resolve(file); // Fallback to original file
-            return;
+            console.log('🔍 OCR WORKER DEBUG - No canvas context, returning original file');
+            return file; // Fallback to original file
           }
 
-          const img = new Image();
-          img.onload = () => {
-            // Calculate optimal size (max 1024px on longest side)
-            const maxSize = 1024;
-            let { width, height } = img;
-            if (width > maxSize || height > maxSize) {
-              const ratio = Math.min(maxSize / width, maxSize / height);
-              width = Math.round(width * ratio);
-              height = Math.round(height * ratio);
-            }
+          // Use createImageBitmap which is available in web workers
+          const imageBitmap = await createImageBitmap(file);
 
-            canvas.width = width;
-            canvas.height = height;
+          // Calculate optimal size (max 1024px on longest side)
+          const maxSize = 1024;
+          let { width, height } = imageBitmap;
+          if (width > maxSize || height > maxSize) {
+            const ratio = Math.min(maxSize / width, maxSize / height);
+            width = Math.round(width * ratio);
+            height = Math.round(height * ratio);
+          }
 
-            // Apply preprocessing filters
-            ctx.drawImage(img, 0, 0, width, height);
+          console.log(`🔍 OCR WORKER DEBUG - Resizing image from ${imageBitmap.width}x${imageBitmap.height} to ${width}x${height}`);
 
-            // Enhance contrast and brightness for better OCR
-            const imageData = ctx.getImageData(0, 0, width, height);
-            const data = imageData.data;
+          canvas.width = width;
+          canvas.height = height;
 
-            for (let i = 0; i < data.length; i += 4) {
-              // Enhance contrast (increase difference from gray)
-              const r = data[i];
-              const g = data[i + 1];
-              const b = data[i + 2];
-              const gray = (r + g + b) / 3;
+          // Apply preprocessing filters using ImageBitmap
+          ctx.drawImage(imageBitmap, 0, 0, width, height);
 
-              // Increase contrast
-              const contrast = 1.5;
-              const brightness = 10;
+          // Enhance contrast and brightness for better OCR
+          const imageData = ctx.getImageData(0, 0, width, height);
+          const data = imageData.data;
 
-              data[i] = Math.min(255, Math.max(0, (r - gray) * contrast + gray + brightness));
-              data[i + 1] = Math.min(255, Math.max(0, (g - gray) * contrast + gray + brightness));
-              data[i + 2] = Math.min(255, Math.max(0, (b - gray) * contrast + gray + brightness));
-            }
+          for (let i = 0; i < data.length; i += 4) {
+            // Enhance contrast (increase difference from gray)
+            const r = data[i];
+            const g = data[i + 1];
+            const b = data[i + 2];
+            const gray = (r + g + b) / 3;
 
-            ctx.putImageData(imageData, 0, 0);
+            // Increase contrast
+            const contrast = 1.5;
+            const brightness = 10;
 
-            // Convert back to file
-            canvas.convertToBlob({ type: 'image/png', quality: 0.95 }).then((blob) => {
-              if (blob) {
-                const processedFile = new File([blob], file.name, { type: 'image/png' });
-                console.log(`🔍 OCR WORKER DEBUG - Image preprocessed: ${file.size} -> ${processedFile.size} bytes, ${img.width}x${img.height} -> ${width}x${height}`);
-                resolve(processedFile);
-              } else {
-                resolve(file);
-              }
-            }).catch(() => resolve(file));
-          };
+            data[i] = Math.min(255, Math.max(0, (r - gray) * contrast + gray + brightness));
+            data[i + 1] = Math.min(255, Math.max(0, (g - gray) * contrast + gray + brightness));
+            data[i + 2] = Math.min(255, Math.max(0, (b - gray) * contrast + gray + brightness));
+          }
 
-          img.onerror = () => resolve(file);
-          img.src = URL.createObjectURL(file);
-        });
+          ctx.putImageData(imageData, 0, 0);
+
+          // Convert back to file
+          const blob = await canvas.convertToBlob({ type: 'image/png', quality: 0.95 });
+          if (blob) {
+            const processedFile = new File([blob], file.name, { type: 'image/png' });
+            console.log(`🔍 OCR WORKER DEBUG - Image preprocessed: ${file.size} -> ${processedFile.size} bytes, ${imageBitmap.width}x${imageBitmap.height} -> ${width}x${height}`);
+            // Clean up ImageBitmap
+            imageBitmap.close();
+            return processedFile;
+          } else {
+            imageBitmap.close();
+            return file;
+          }
+        } catch (error) {
+          console.log('🔍 OCR WORKER ERROR - Preprocessing failed:', error);
+          return file; // Fallback to original file
+        }
       };
 
       // Preprocess the image for better OCR accuracy
