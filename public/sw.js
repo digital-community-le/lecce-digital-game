@@ -79,6 +79,13 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Skip worker files from caching to allow cache busting
+  if (request.url.includes('worker') || request.url.includes('.worker.')) {
+    console.log('SW: Bypassing cache for worker file:', request.url);
+    event.respondWith(fetch(request));
+    return;
+  }
+
   event.respondWith(
     caches.match(request)
       .then((cachedResponse) => {
@@ -123,18 +130,32 @@ self.addEventListener('activate', (event) => {
   console.log('SW: Activating new service worker');
 
   event.waitUntil(
-    caches.keys()
-      .then((cacheNames) => {
-        // Delete all caches that don't match current version
+    Promise.all([
+      // Delete old caches
+      caches.keys().then((cacheNames) => {
         const deletionPromises = cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME && cacheName.startsWith('ldc-game-')) {
             console.log('SW: Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         });
-
         return Promise.all(deletionPromises);
+      }),
+      // Clear any cached worker files to force fresh reload
+      caches.open(CACHE_NAME).then((cache) => {
+        return cache.keys().then((requests) => {
+          const workerDeletions = requests
+            .filter(req => req.url.includes('worker') || req.url.includes('.worker.'))
+            .map(req => {
+              console.log('SW: Clearing cached worker file:', req.url);
+              return cache.delete(req);
+            });
+          return Promise.all(workerDeletions);
+        });
       })
+    ]).then(() => {
+      console.log('SW: Cache cleanup completed');
+    })
       .then(() => {
         // Take control of all pages immediately
         console.log('SW: Taking control of all clients');
