@@ -258,12 +258,15 @@ const SocialArena: React.FC = () => {
             try {
               const blobId = await putBlob(selectedFile);
 
-              // Check if any tag meets the confidence threshold
+              // Check if ALL required tags meet the confidence threshold
               const tagVerified =
                 result?.tagConfidences &&
-                Object.values(result.tagConfidences).some(
-                  (conf) =>
-                    typeof conf === 'number' && conf >= confidenceThreshold
+                requiredTags.length > 0 &&
+                requiredTags.every(
+                  (tag) =>
+                    result.tagConfidences?.[tag] &&
+                    typeof result.tagConfidences[tag] === 'number' &&
+                    result.tagConfidences[tag] >= confidenceThreshold
                 );
 
               const proof: SocialProof = {

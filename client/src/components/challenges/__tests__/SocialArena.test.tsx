@@ -55,3 +55,43 @@ describe('SocialArena Component - Skip Button Removal', () => {
     });
   });
 });
+
+describe('SocialArena Component - All Required Tags Logic', () => {
+  it('should use .every() instead of .some() for tag verification', async () => {
+    // Read the SocialArena component source code
+    const componentPath = join(__dirname, '..', 'SocialArena.tsx');
+    const sourceCode = await readFile(componentPath, 'utf-8');
+
+    // Verify that the code uses .every() to check ALL tags instead of .some() for ANY tag
+    expect(sourceCode).toContain('requiredTags.every');
+    expect(sourceCode).not.toContain(
+      'Object.values(result.tagConfidences).some'
+    );
+  });
+
+  it('should check that all required tags meet the confidence threshold', async () => {
+    // Read the SocialArena component source code
+    const componentPath = join(__dirname, '..', 'SocialArena.tsx');
+    const sourceCode = await readFile(componentPath, 'utf-8');
+
+    // Verify the comment indicates checking ALL tags
+    expect(sourceCode).toContain(
+      'Check if ALL required tags meet the confidence threshold'
+    );
+
+    // Verify the logic checks all required tags
+    expect(sourceCode).toMatch(/requiredTags\.every\s*\(/);
+  });
+
+  it('should verify each tag meets the confidence threshold individually', async () => {
+    // Read the SocialArena component source code
+    const componentPath = join(__dirname, '..', 'SocialArena.tsx');
+    const sourceCode = await readFile(componentPath, 'utf-8');
+
+    // Verify that the logic checks each tag's confidence
+    expect(sourceCode).toContain('result.tagConfidences?.[tag]');
+    expect(sourceCode).toContain(
+      'result.tagConfidences[tag] >= confidenceThreshold'
+    );
+  });
+});
