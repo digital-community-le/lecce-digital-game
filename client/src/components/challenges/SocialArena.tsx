@@ -649,15 +649,25 @@ const SocialArena: React.FC = () => {
                     if (!gameState.currentUser.userId) return;
                     try {
                       const blobId = await putBlob(screenshotFile);
+                      // Check if any tag meets the confidence threshold
+                      const tagVerified =
+                        result?.tagConfidences &&
+                        Object.values(result.tagConfidences).some(
+                          (conf) =>
+                            typeof conf === 'number' &&
+                            conf >= confidenceThreshold
+                        );
+
                       const proof: SocialProof = {
                         opId: `proof_${Date.now()}`,
                         userId: gameState.currentUser.userId,
                         imageLocalUrl: blobId,
                         detectedTags: result?.detectedTags || [],
                         detected: !!result?.detected,
-                        // If user manually forces verification, treat as verified
+                        // Use per-tag confidence if available, otherwise fallback to general confidence
                         verified:
                           forced ||
+                          tagVerified ||
                           (!!result?.detected &&
                             result.confidence >= confidenceThreshold),
                         attempts: 1,
