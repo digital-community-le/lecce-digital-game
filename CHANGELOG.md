@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.12.0](https://github.com/digital-community-le/lecce-digital-game/compare/v1.11.0...v1.12.0) (2025-09-13)
+
+
+### Features
+
+* **social-arena:** simplify to direct upload + OCR verification ([a59c004](https://github.com/digital-community-le/lecce-digital-game/commit/a59c00493488e708a4d14dee2a205553d3e494ee))
+
+
+### Bug Fixes
+
+* **cache:** update asset references and improve cache consistency ([162ae30](https://github.com/digital-community-le/lecce-digital-game/commit/162ae307ed92e51425835bd8201718525b3bcb48))
+* **game-data:** correct text formatting in social visibility requirement ([8679194](https://github.com/digital-community-le/lecce-digital-game/commit/867919427f5dd4c019f6d3c11c6ca077311e1819))
+* **ocr:** aggiungi logging dettagliato per debug errori OCR ([79a38b9](https://github.com/digital-community-le/lecce-digital-game/commit/79a38b9efaab186959e19bcd86bbba7db072658a))
+* **ocr:** improve tag matching logic for regex-detected tags ([bb05b04](https://github.com/digital-community-le/lecce-digital-game/commit/bb05b04fcb859a241fc23139701dad6276870802))
+* **ocr:** resolve web worker Image constructor and mobile cache issues ([0d2b208](https://github.com/digital-community-le/lecce-digital-game/commit/0d2b20893db18457b505e0b1d79b277261fd9c5b))
+* **RetroPuzzle:** update tooltip text for clarity in user instructions ([dc777bf](https://github.com/digital-community-le/lecce-digital-game/commit/dc777bf02a3305ba5dd9cc2c27b3755ca9076172))
+* **social-arena:** require ALL tags instead of just one ([67866cf](https://github.com/digital-community-le/lecce-digital-game/commit/67866cf785cf3de54b67aeaea9eed86a15ed4a43))
+* **social-arena:** use per-tag confidence for challenge completion ([185ff0b](https://github.com/digital-community-le/lecce-digital-game/commit/185ff0b7b26c9e1ea45a126b7deb7a915fa01c1a))
+* **sw:** exclude worker files from service worker caching ([d1f1993](https://github.com/digital-community-le/lecce-digital-game/commit/d1f19939320c98a873142932430b415e78eaee71))
+
 ## [1.11.0](https://github.com/digital-community-le/lecce-digital-game/compare/v1.10.0...v1.11.0) (2025-09-12)
 
 
