@@ -1,17 +1,16 @@
+import OcrWorker from './ocr.worker.ts?worker';
+
 let workerPromise: Promise<Worker> | null = null;
 
 function getWorker(): Promise<Worker> {
   if (!workerPromise) {
     workerPromise = new Promise((resolve, reject) => {
       try {
-        // Add cache busting timestamp to force worker reload
-        const workerUrl = new URL('./ocr.worker.ts', import.meta.url);
-        workerUrl.searchParams.set('t', Date.now().toString());
-        console.log('🔍 OCR DEBUG - Loading worker with cache bust:', workerUrl.href);
-
-        const w = new Worker(workerUrl, { type: 'module' });
+        console.log('🔍 OCR DEBUG - Creating worker instance...');
+        const w = new OcrWorker();
         resolve(w);
       } catch (err) {
+        console.error('🔍 OCR DEBUG - Worker creation failed:', err);
         reject(err);
       }
     });

@@ -200,7 +200,21 @@ self.addEventListener('message', async (ev: MessageEvent) => {
         const fuzzyTag = fuzzyNormalize(tag);
         console.log(`🔍 OCR WORKER DEBUG - Processing tag: "${tag}" -> normalized: "${nTag}" -> fuzzy: "${fuzzyTag}"`);
 
-        // Multiple matching strategies
+        // First check if tag was found directly in regex results
+        const directMatch = uniqueTags.find(detectedTag => {
+          const nDetected = normalize(detectedTag);
+          return nDetected === nTag || nDetected.includes(fuzzyTag) || fuzzyTag.includes(nDetected);
+        });
+
+        if (directMatch) {
+          console.log(`🔍 OCR WORKER DEBUG - Direct tag match found: "${directMatch}" matches "${tag}"`);
+          tagConfidences[tag] = 85; // High confidence for direct regex match
+          anyDetected = true;
+          console.log(`🔍 OCR WORKER DEBUG - Tag "${tag}" FOUND via direct match with confidence: 85`);
+          continue;
+        }
+
+        // Fallback to word-level matching
         const exactMatches = normalizedWords.filter((w: any) => w.norm && w.norm === nTag);
         const containsMatches = normalizedWords.filter((w: any) => w.norm && w.norm.includes(nTag));
         const fuzzyMatches = normalizedWords.filter((w: any) => w.fuzzyNorm && w.fuzzyNorm.includes(fuzzyTag));
