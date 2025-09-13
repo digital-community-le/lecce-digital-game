@@ -206,7 +206,7 @@ const RetroPuzzle: React.FC = () => {
       gemTitle="La Gemma della Conoscenza"
       gemIcon={memoryGem}
       description="Nel puzzle antico, ogni connessione rivela un frammento di saggezza. Abbina i termini alle loro categorie per raccogliere la Gemma della Conoscenza."
-      tip={`Tocca un termine a sinistra, poi tocca la categoria corrispondente a destra.`}
+      tip={`Tocca un termine, poi tocca la categoria corrispondente in basso.`}
       progress={PAIRS_COUNT - puzzleState.remaining}
       total={PAIRS_COUNT}
       progressLabel="Progresso"
