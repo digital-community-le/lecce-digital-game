@@ -4,10 +4,10 @@
  */
 
 export const VERSION_INFO = {
-  version: '1.0.0',
-  buildTime: '2025-09-09T21:45:26.339Z',
-  gitCommit: '450259a2284b163634a1c1387230b3863fd3458d',
-  gitBranch: 'main'
+  version: '1.12.0',
+  buildTime: '2025-10-01T07:33:53.030Z',
+  gitCommit: 'b94aea0a49f05e58e647861eed049d3556a926c9',
+  gitBranch: 'copilot/fix-2753470a-f4b5-4990-b3fb-e1189314b2e0'
 } as const;
 
 export const APP_VERSION = VERSION_INFO.version;

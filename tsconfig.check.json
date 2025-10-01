@@ -20,6 +20,7 @@
     "build",
     "dist",
     "**/*.test.ts",
+    "**/*_backup.tsx",
     "vite.config.ts"
   ]
 }
