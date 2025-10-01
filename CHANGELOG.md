@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.12.1](https://github.com/digital-community-le/lecce-digital-game/compare/v1.12.0...v1.12.1) (2025-10-01)
+
+
+### Bug Fixes
+
+* **ci:** exclude backup files from TypeScript checking ([acd183f](https://github.com/digital-community-le/lecce-digital-game/commit/acd183f25cfc7f95978bd932745ebb9dc4ac73a8))
+* **ci:** exclude backup files from TypeScript checking to resolve scheduled test failures ([cb23ff2](https://github.com/digital-community-le/lecce-digital-game/commit/cb23ff2f7701ffe6d2bc783be6c2f503a4dcac73))
+
 ## [1.12.0](https://github.com/digital-community-le/lecce-digital-game/compare/v1.11.0...v1.12.0) (2025-09-13)
 
 
